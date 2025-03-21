@@ -1,5 +1,0 @@
-C:\APLIKASI SAYA\19maret\IUTVehicleManager\obj\Release\net6.0-windows\IUTVehicleManager.csproj.AssemblyReference.cache
-C:\APLIKASI SAYA\19maret\IUTVehicleManager\obj\Release\net6.0-windows\IUTVehicleManager.GeneratedMSBuildEditorConfig.editorconfig
-C:\APLIKASI SAYA\19maret\IUTVehicleManager\obj\Release\net6.0-windows\IUTVehicleManager.AssemblyInfoInputs.cache
-C:\APLIKASI SAYA\19maret\IUTVehicleManager\obj\Release\net6.0-windows\IUTVehicleManager.AssemblyInfo.cs
-C:\APLIKASI SAYA\19maret\IUTVehicleManager\obj\Release\net6.0-windows\IUTVehicleManager.csproj.CoreCompileInputs.cache

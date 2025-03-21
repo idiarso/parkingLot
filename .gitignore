@@ -1,0 +1,28 @@
+# Binary files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.sqlite
+
+# Build directories
+**/bin/
+**/obj/
+
+# Log files
+*.log
+
+# VS files
+.vs/
+*.user
+*.suo
+
+# Temporary files
+**/temp/
+**/tmp/
+
+# Package directories
+packages/
+
+# Config files that should be templated
+**/config/*.ini 

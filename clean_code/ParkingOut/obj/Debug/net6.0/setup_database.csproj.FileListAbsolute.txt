@@ -1,5 +1,0 @@
-D:\a\ParkingOut\obj\Debug\net6.0\setup_database.csproj.AssemblyReference.cache
-D:\a\ParkingOut\obj\Debug\net6.0\setup_database.GeneratedMSBuildEditorConfig.editorconfig
-D:\a\ParkingOut\obj\Debug\net6.0\setup_database.AssemblyInfoInputs.cache
-D:\a\ParkingOut\obj\Debug\net6.0\setup_database.AssemblyInfo.cs
-D:\a\ParkingOut\obj\Debug\net6.0\setup_database.csproj.CoreCompileInputs.cache

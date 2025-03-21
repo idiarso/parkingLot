@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<NetworkSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ServerIP>localhost</ServerIP>
-  <ServerPort>3306</ServerPort>
-  <DatabaseName>parkingdb</DatabaseName>
-  <Username>root</Username>
-  <Password>root</Password>
-</NetworkSettings>

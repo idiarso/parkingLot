@@ -115,121 +115,163 @@
 
 ## Konfigurasi Kamera
 
-### Jenis Kamera yang Didukung
-1. **Webcam Lokal**
-   - Kamera USB yang langsung terhubung ke PC
-   - Resolusi minimal 720p disarankan untuk hasil gambar yang baik
-   - Pastikan driver kamera terinstal dengan benar
+Sistem ini mendukung dua jenis kamera untuk pengambilan gambar kendaraan:
 
-2. **Kamera IP**
-   - Kamera yang terhubung melalui jaringan
-   - Mendukung protokol RTSP/HTTP
-   - Format URL: `rtsp://username:password@ip-address:port/path` atau `http://ip-address/video`
+### Webcam Lokal
 
-### Instalasi Kamera
-1. **Webcam Lokal**
-   - Pasang webcam pada port USB
-   - Tunggu hingga driver terinstal secara otomatis
-   - Verifikasi kamera terdeteksi di Device Manager Windows
+1. **Persyaratan Hardware**
+   - Webcam USB standar yang kompatibel dengan DirectShow
+   - Resolusi minimal 640x480 (rekomendasi: 1280x720)
+   - Pastikan webcam terpasang dengan mantap dan terarah ke area kendaraan
 
-2. **Kamera IP**
-   - Pasang kamera IP pada jaringan lokal
-   - Atur alamat IP statis atau DHCP reservation
-   - Pastikan PC dapat mengakses kamera melalui browser
+2. **Instalasi Driver**
+   - Pasang webcam ke port USB pada komputer
+   - Instal driver yang disertakan atau biarkan Windows menginstal driver secara otomatis
+   - Pastikan webcam muncul di Device Manager (tekan Win+X, pilih Device Manager)
+   - Verifikasi webcam berfungsi dengan aplikasi Camera bawaan Windows
 
-### Konfigurasi di Aplikasi
-1. Buka file konfigurasi di `D:\21maret\clean_code\ParkingIN\App.config`
-2. Atur parameter kamera sesuai dengan jenis yang digunakan:
-   ```xml
-   <!-- Untuk webcam lokal -->
-   <add key="CameraType" value="Webcam" />
-   <add key="WebcamIndex" value="0" /> <!-- 0 untuk webcam pertama -->
-   
-   <!-- Untuk kamera IP -->
-   <add key="CameraType" value="IPCamera" />
-   <add key="IPCameraUrl" value="rtsp://admin:admin@192.168.1.100:554/stream1" />
-   ```
-3. Atur parameter kualitas gambar:
-   ```xml
-   <add key="ImageResolution" value="1280x720" /> <!-- resolusi gambar -->
-   <add key="ImageQuality" value="90" /> <!-- kualitas JPG 0-100 -->
-   <add key="CaptureTimeout" value="3000" /> <!-- timeout dalam milidetik -->
-   ```
+3. **Konfigurasi Sistem**
+   - Edit file `D:\21maret\clean_code\ParkingIN\config\camera.ini`
+   - Ubah `Type=Webcam`
+   - Sesuaikan `Device_Index` jika Anda memiliki beberapa webcam (0 = kamera pertama)
+   - Sesuaikan `Resolution` sesuai kemampuan webcam
 
-### Pengujian Kamera
-1. Jalankan aplikasi ParkingIN
-2. Buka menu `Pengaturan` > `Kamera`
-3. Klik tombol `Test Capture` untuk memastikan kamera berfungsi
-4. Gambar hasil capture seharusnya ditampilkan di layar preview
+4. **Testing**
+   - Jalankan `test_hardware.bat` dan pilih opsi "Test Camera"
+   - Verifikasi bahwa webcam terdeteksi dan dapat mengambil gambar
+   - Cek hasil gambar di folder `test_images`
 
-### Fungsi Otomatis
-Kamera akan secara otomatis mengambil gambar kendaraan saat:
-1. Sensor mendeteksi kehadiran kendaraan
-2. Push button ditekan oleh petugas atau pengemudi
-3. Gambar disimpan dengan ID yang sama dengan ID barcode tiket
+### IP Camera
 
-## Konfigurasi Gate Barrier (Portal)
+1. **Persyaratan Hardware**
+   - IP Camera dengan dukungan RTSP atau HTTP snapshot
+   - Alamat IP statis atau DHCP reservation pada jaringan lokal
+   - PoE (Power over Ethernet) atau adaptor daya terpisah
+   - Kabel jaringan yang terhubung ke jaringan yang sama dengan PC
 
-### Koneksi Hardware
-1. Hubungkan sistem gate barrier ke MCU ATMEL
-2. Konfigurasikan pin output pada MCU untuk mengirim sinyal ke gate barrier:
-   - Gate Entry: Pin D5
-   - Gate Exit: Pin D6
+2. **Instalasi Kamera**
+   - Pasang kamera pada posisi yang tepat untuk memotret kendaraan
+   - Hubungkan kamera ke jaringan 
+   - Konfigurasi alamat IP kamera melalui software bawaannya
+   - Pastikan kamera dapat diakses melalui browser dengan alamat IP nya
 
-### Pengaturan Software
-1. Buka file konfigurasi di `D:\21maret\clean_code\ParkingOUT\App.config`
-2. Atur parameter gate control:
-   ```xml
-   <add key="EnableGateControl" value="true" />
-   <add key="GateOpenDuration" value="5000" /> <!-- durasi dalam milidetik -->
-   <add key="RequirePaymentConfirmation" value="true" /> <!-- true jika perlu konfirmasi pembayaran -->
-   ```
+3. **Konfigurasi Sistem**
+   - Edit file `D:\21maret\clean_code\ParkingIN\config\camera.ini`
+   - Ubah `Type=IP`
+   - Sesuaikan `IP`, `Username`, `Password`, dan `Port` sesuai konfigurasi kamera
+   - Sesuaikan `Resolution` jika kamera mendukung pengaturan resolusi via URL
 
-### Flow Proses Keluar dengan Gate Control
-1. Petugas memindai barcode tiket
-2. Sistem menampilkan data parkir dan foto kendaraan saat masuk
-3. Petugas memverifikasi kendaraan dengan foto
-4. Setelah pembayaran (jika ada), petugas menekan tombol "Buka Gate"
-5. Sistem mengirim sinyal ke MCU untuk membuka portal
-6. Portal terbuka selama durasi yang ditentukan
-7. Kendaraan keluar dan proses selesai
+4. **Testing**
+   - Jalankan `test_hardware.bat` dan pilih opsi "Test Camera"
+   - Verifikasi bahwa sistem dapat menghubungi IP kamera
+   - Verifikasi bahwa snapshot dapat diambil
+
+## Konfigurasi Gate Barrier
+
+Sistem ini terintegrasi dengan gate barrier (portal) menggunakan kontroler mikro ATMEL melalui port serial RS232.
+
+1. **Perangkat yang Dibutuhkan**
+   - Gate barrier dengan kontroler mikro ATMEL
+   - Kabel RS232 (DB9) atau converter USB-to-RS232
+   - Driver USB-to-Serial jika menggunakan converter
+
+2. **Instalasi Hardware**
+   - Hubungkan gate barrier controller ke PC menggunakan kabel serial
+   - Jika menggunakan converter USB, instal driver yang sesuai
+   - Catat nomor port COM yang digunakan (cek di Device Manager)
+
+3. **Konfigurasi Sistem**
+   - Edit file `D:\21maret\clean_code\ParkingIN\config\gate.ini`
+   - Sesuaikan `COM_Port` dengan port yang digunakan (misal: COM3)
+   - Pastikan `Baud_Rate`, `Data_Bits`, `Stop_Bits`, dan `Parity` sesuai dengan spesifikasi kontroler
+   - Sesuaikan command di bagian `[Commands]` jika berbeda dengan default kontroler
+
+4. **Pengujian Sambungan**
+   - Jalankan `test_hardware.bat` dan pilih opsi "Test Serial Port / Gate"
+   - Verifikasi bahwa sistem dapat berkomunikasi dengan kontroler
+   - Uji perintah buka dan tutup gate jika aman untuk dilakukan
+
+5. **Konfigurasi Safety**
+   - Pastikan sensor keselamatan terpasang dan terkonfigurasi
+   - Atur `Enable_Sensors=true` di bagian `[Safety]`
+   - Aktifkan `Prevent_Close_When_Occupied=true` untuk mencegah portal menutup saat kendaraan terdeteksi
+
+## Konfigurasi Printer Thermal
+
+Sistem ini menggunakan printer thermal untuk mencetak tiket masuk dan struk keluar.
+
+1. **Persyaratan Hardware**
+   - Printer thermal 58mm atau 80mm (Rekomendasi: EPSON TM-T82X, EPSON TM-T20, atau setara)
+   - Kabel USB atau Serial untuk koneksi
+   - Catu daya printer
+
+2. **Instalasi Driver**
+   - Unduh dan instal driver printer dari situs resmi produsen
+   - Pastikan printer muncul di Windows sebagai printer terinstall
+   - Cetak test page dari Windows untuk memastikan printer berfungsi
+
+3. **Konfigurasi Sistem**
+   - Edit file `D:\21maret\clean_code\ParkingIN\config\printer.ini`
+   - Sesuaikan `Name` dengan nama printer yang terinstall
+   - Sesuaikan `Paper_Width` dengan lebar kertas yang digunakan (80 atau 58)
+   - Konfigurasikan header dan footer tiket sesuai kebutuhan
+   - Sesuaikan format tiket di bagian `[TicketFormat]`
+
+4. **Pengujian Printer**
+   - Jalankan `test_hardware.bat` dan pilih opsi "Test Thermal Printer"
+   - Verifikasi bahwa printer terdeteksi
+   - Cetak test page untuk memastikan printer berfungsi dengan baik
+
+## Konfigurasi Barcode Scanner
+
+Sistem menggunakan barcode scanner untuk memindai tiket pada proses keluar.
+
+1. **Persyaratan Hardware**
+   - Barcode scanner USB yang mendukung QR code dan Code128 (jika menggunakan barcode linear)
+   - Scanner harus dikonfigurasi untuk menambahkan Enter (CR) setelah pembacaan
+
+2. **Instalasi Scanner**
+   - Hubungkan scanner ke port USB PC
+   - Scanner biasanya terdeteksi sebagai keyboard device dan tidak memerlukan driver khusus
+   - Jika diperlukan, konfigurasi scanner menggunakan manual bawaan untuk menambahkan Enter setelah scan
+
+3. **Pengujian Scanner**
+   - Jalankan `test_hardware.bat` dan pilih opsi "Test Barcode Scanner"
+   - Pindai barcode untuk memverifikasi pembacaan
+
+## Pengujian Integrasi Hardware
+
+Setelah semua hardware terkonfigurasi, jalankan pengujian integrasi untuk memastikan semua komponen berfungsi bersama.
+
+1. Jalankan `test_hardware.bat` dan pilih opsi "Test All Hardware"
+2. Ikuti instruksi untuk menguji semua komponen
+3. Verifikasi bahwa:
+   - Kamera dapat mengambil gambar
+   - Gate barrier dapat menerima dan merespons perintah
+   - Printer dapat mencetak tiket
+   - Barcode scanner dapat membaca barcode
 
 ## Pemecahan Masalah
 
-### Masalah Printer
-| Masalah | Solusi |
-|---------|--------|
-| Printer tidak merespons | 1. Periksa koneksi USB<br>2. Pastikan printer menyala<br>3. Periksa driver di Device Manager<br>4. Restart spooler printer dengan perintah: `net stop spooler && net start spooler` |
-| Kualitas cetak buruk | 1. Periksa kualitas kertas thermal<br>2. Bersihkan print head<br>3. Sesuaikan pengaturan heat/density |
-| Printer mencetak karakter tidak jelas | Pastikan encoding diatur dengan benar di kode program |
+### Masalah Kamera
+- **Webcam tidak terdeteksi**: Pastikan driver terinstall dengan benar dan webcam muncul di Device Manager
+- **IP Camera tidak dapat diakses**: Verifikasi alamat IP, port, dan kredensial. Pastikan kamera berada di jaringan yang sama
+- **Gambar tidak tersimpan**: Periksa folder penyimpanan dan pastikan aplikasi memiliki izin tulis
 
-### Masalah Komunikasi Serial
-| Masalah | Solusi |
-|---------|--------|
-| "Port tidak ditemukan" | 1. Periksa nomor COM di Device Manager<br>2. Sesuaikan pengaturan di App.config<br>3. Coba port COM yang berbeda |
-| Data tidak diterima | 1. Periksa konfigurasi baudrate, parity, dll<br>2. Pastikan kabel DB9 terhubung dengan benar<br>3. Periksa apakah MCU aktif dan berfungsi |
-| Data corrupt/tidak lengkap | Periksa timing komunikasi dan buffer length di kode program |
+### Masalah Gate Barrier
+- **Port COM tidak terdeteksi**: Periksa koneksi kabel dan driver USB-to-Serial jika digunakan
+- **Tidak ada respons dari kontroler**: Verifikasi baudrate dan parameter komunikasi lainnya
+- **Gate tidak merespons perintah**: Periksa koneksi antara kontroler dan motor gate
+
+### Masalah Printer
+- **Printer tidak terdeteksi**: Periksa driver dan koneksi USB/Serial
+- **Kertas tidak keluar**: Pastikan printer memiliki kertas dan tidak terjadi paper jam
+- **Hasil cetak tidak jelas**: Periksa kualitas kertas thermal dan pengaturan densitas printer
 
 ### Masalah Barcode Scanner
-| Masalah | Solusi |
-|---------|--------|
-| Scanner tidak mendeteksi barcode | 1. Pastikan jenis barcode didukung<br>2. Sesuaikan jarak scan<br>3. Periksa kualitas cetak barcode |
-| Data barcode tidak sesuai | Pastikan format data barcode sesuai dengan yang diharapkan aplikasi |
-
-### Masalah Kamera
-| Masalah | Solusi |
-|---------|--------|
-| Kamera tidak terdeteksi | 1. Periksa koneksi kamera<br>2. Pastikan driver kamera terinstal<br>3. Coba kamera lain |
-| Gambar tidak jelas | 1. Periksa resolusi dan kualitas gambar<br>2. Sesuaikan pengaturan kamera<br>3. Coba kamera lain |
-
-### Log dan Diagnostik
-Semua kesalahan komunikasi perangkat dicatat dalam file log yang dapat ditemukan di:
-- `D:\21maret\clean_code\ParkingIN\logs\hardware_YYYYMMDD.log`
-
-Untuk diagnosis lebih lanjut, aktifkan mode debugging hardware di `App.config`:
-```xml
-<add key="HardwareDebugMode" value="true" />
-```
+- **Scanner tidak membaca**: Periksa apakah barcode jelas dan tidak rusak
+- **Scan tidak masuk ke aplikasi**: Pastikan scanner dikonfigurasi untuk menambahkan Enter setelah scan
+- **Scan terbaca sebagai karakter salah**: Sesuaikan keyboard layout pada scanner
 
 ## Informasi Kontak Support
 Untuk bantuan teknis, hubungi:
