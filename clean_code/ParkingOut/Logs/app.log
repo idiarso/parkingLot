@@ -1,0 +1,295 @@
+[2025-03-19 01:13:38] [INFO] Application starting...
+[2025-03-19 01:13:38] [INFO] Application started
+[2025-03-19 01:13:39] [WARNING] Error executing schema command: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:13:39] [INFO] Schema loaded from SQL file
+[2025-03-19 01:14:16] [INFO] Attempting login for username: admin
+[2025-03-19 01:14:16] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:14:16] [INFO] Executing query: SELECT id, username, nama, role FROM t_user WHERE username = @username AND password = @password
+[2025-03-19 01:14:16] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:14:16] [ERROR] Authentication error: Table 'parking_system.t_user' doesn't exist
+[2025-03-19 01:14:16] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbCommand.System.Data.IDbCommand.ExecuteReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 539
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 572
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 623
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 745
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:27:07] [INFO] Attempting login for username: admin
+[2025-03-19 01:27:07] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:27:07] [INFO] Executing query: SELECT id, username, nama, role FROM t_user WHERE username = @username AND password = @password
+[2025-03-19 01:27:07] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:27:07] [ERROR] Authentication error: Table 'parking_system.t_user' doesn't exist
+[2025-03-19 01:27:07] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbCommand.System.Data.IDbCommand.ExecuteReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 539
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 572
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 623
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 745
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:27:15] [INFO] Application shutdown
+[2025-03-19 01:45:12] [INFO] Application starting...
+[2025-03-19 01:45:12] [INFO] Application started
+[2025-03-19 01:45:12] [WARNING] Error executing schema command: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:45:12] [INFO] Schema loaded from SQL file
+[2025-03-19 01:45:24] [INFO] Attempting login for username: admin
+[2025-03-19 01:45:24] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:45:24] [INFO] Executing query: SELECT id, username, nama, role FROM t_user WHERE username = @username AND password = @password
+[2025-03-19 01:45:24] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:45:24] [ERROR] Authentication error: Table 'parking_system.t_user' doesn't exist
+[2025-03-19 01:45:24] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 539
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 572
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 623
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 745
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:49:50] [INFO] Attempting login for username: admin
+[2025-03-19 01:49:50] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:49:50] [INFO] Executing query: SELECT id, username, nama, role FROM t_user WHERE username = @username AND password = @password
+[2025-03-19 01:49:50] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:49:50] [ERROR] Authentication error: Table 'parking_system.t_user' doesn't exist
+[2025-03-19 01:49:50] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 539
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 572
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 623
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 745
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:49:59] [INFO] Attempting login for username: admin
+[2025-03-19 01:49:59] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:49:59] [INFO] Executing query: SELECT id, username, nama, role FROM t_user WHERE username = @username AND password = @password
+[2025-03-19 01:49:59] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:49:59] [ERROR] Authentication error: Table 'parking_system.t_user' doesn't exist
+[2025-03-19 01:49:59] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 539
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 572
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 623
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 745
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:50:05] [INFO] Application shutdown
+[2025-03-19 01:52:47] [INFO] Application starting...
+[2025-03-19 01:52:47] [INFO] Application started
+[2025-03-19 01:52:47] [WARNING] Error executing schema command: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:52:47] [INFO] Schema loaded from SQL file
+[2025-03-19 01:52:59] [INFO] Attempting login for username: admin
+[2025-03-19 01:52:59] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:52:59] [INFO] Executing query: SELECT id, username, nama_lengkap as nama, role FROM users WHERE username = @username AND password = @password
+[2025-03-19 01:52:59] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:52:59] [ERROR] Authentication error: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:52:59] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 544
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 577
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 628
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 750
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:53:08] [INFO] Attempting login for username: admin
+[2025-03-19 01:53:08] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:53:08] [INFO] Executing query: SELECT id, username, nama_lengkap as nama, role FROM users WHERE username = @username AND password = @password
+[2025-03-19 01:53:08] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:53:08] [ERROR] Authentication error: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:53:08] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 544
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 577
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 628
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 750
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:55:06] [INFO] Application starting...
+[2025-03-19 01:55:06] [INFO] Application started
+[2025-03-19 01:55:07] [WARNING] Error executing schema command: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:55:07] [INFO] Schema loaded from SQL file
+[2025-03-19 01:55:19] [INFO] Attempting login for username: admin
+[2025-03-19 01:55:19] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:55:19] [INFO] Executing query: SELECT id, username, nama_lengkap as nama, role FROM users WHERE username = @username AND password = @password
+[2025-03-19 01:55:19] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:55:19] [ERROR] Authentication error: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:55:19] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 544
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 577
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 628
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 750
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:55:24] [INFO] Application shutdown
+[2025-03-19 01:55:35] [INFO] Attempting login for username: admin
+[2025-03-19 01:55:35] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:55:35] [INFO] Executing query: SELECT id, username, nama_lengkap as nama, role FROM users WHERE username = @username AND password = @password
+[2025-03-19 01:55:35] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:55:35] [ERROR] Authentication error: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:55:35] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 544
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 577
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 628
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 750
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:55:38] [INFO] Application shutdown
+[2025-03-19 01:57:29] [INFO] Application starting...
+[2025-03-19 01:57:29] [INFO] Application started
+[2025-03-19 01:57:29] [WARNING] Error executing schema command: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:57:29] [INFO] Schema loaded from SQL file
+[2025-03-19 01:57:39] [INFO] Attempting login for username: admin
+[2025-03-19 01:57:39] [INFO] Current connection string: Server=localhost;Database=parking_system;Uid=root;Pwd=********;Port=3306;CharSet=utf8mb4;AllowUserVariables=True;AllowPublicKeyRetrieval=True;SslMode=none;
+[2025-03-19 01:57:39] [INFO] Executing query: SELECT id, username, nama_lengkap as nama, role FROM users WHERE username = @username AND password = @password
+[2025-03-19 01:57:39] [INFO] Parameters: username=admin, password=admin123
+[2025-03-19 01:57:39] [ERROR] Authentication error: Unknown column 'nama_lengkap' in 'field list'
+[2025-03-19 01:57:39] [ERROR] Stack trace:    at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.GetResultAsync(Int32 affectedRow, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.GetResultAsync(Int32 statementId, Int32 affectedRows, Int64 insertedId, Boolean execAsync)
+   at MySql.Data.MySqlClient.Driver.NextResultAsync(Int32 statementId, Boolean force, Boolean execAsync)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlDataReader.NextResultAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable[] dataTables, Int32 startRecord, Int32 maxRecords, IDbCommand command, CommandBehavior behavior)
+   at System.Data.Common.DbDataAdapter.Fill(DataTable dataTable)
+   at SimpleParkingAdmin.Database.ExecuteQuery(String sql) in D:\a\ParkingOut\Utils\Database.cs:line 544
+   at SimpleParkingAdmin.Database.ExecuteQueryWithWhere(String sql, String whereClause) in D:\a\ParkingOut\Utils\Database.cs:line 577
+   at SimpleParkingAdmin.Database.ExecuteQueryWithParams(String sql, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 628
+   at SimpleParkingAdmin.Database.GetData(String sqlQuery, Dictionary`2 parameters) in D:\a\ParkingOut\Utils\Database.cs:line 750
+   at SimpleParkingAdmin.LoginForm.AuthenticateUser(String username, String password) in D:\a\ParkingOut\LoginForm.cs:line 524
+[2025-03-19 01:59:44] [INFO] Application shutdown
+[2025-03-19 02:04:26] [INFO] Application starting...
+[2025-03-19 02:04:26] [INFO] Application started
+[2025-03-19 02:04:27] [INFO] Schema loaded from SQL file
+[2025-03-19 02:04:38] [INFO] Attempting login for username: admin
+[2025-03-19 02:04:39] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:05:57] [INFO] Application shutdown
+[2025-03-19 02:06:15] [INFO] Application starting...
+[2025-03-19 02:06:15] [INFO] Application started
+[2025-03-19 02:06:15] [INFO] Schema loaded from SQL file
+[2025-03-19 02:06:27] [INFO] Attempting login for username: admin
+[2025-03-19 02:06:27] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:06:33] [INFO] Attempting login for username: admin
+[2025-03-19 02:06:33] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:06:40] [INFO] Attempting login for username: admin
+[2025-03-19 02:06:40] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:06:45] [INFO] Attempting login for username: admin
+[2025-03-19 02:06:45] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:06:53] [INFO] Attempting login for username: admin
+[2025-03-19 02:06:53] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:09:57] [INFO] Application shutdown
+[2025-03-19 02:11:38] [INFO] Application starting...
+[2025-03-19 02:11:38] [INFO] Application started
+[2025-03-19 02:11:38] [INFO] Schema loaded from SQL file
+[2025-03-19 02:11:55] [INFO] Attempting login for username: admin
+[2025-03-19 02:11:55] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:16:25] [INFO] Attempting login for username: admin
+[2025-03-19 02:16:25] [ERROR] Database setup failed: Unknown column 'nama' in 'field list'
+[2025-03-19 02:16:28] [INFO] Application shutdown

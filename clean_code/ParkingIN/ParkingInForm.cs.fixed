@@ -1,0 +1,32 @@
+                        switch (key)
+                        {
+                            case "Name":
+                                // Periksa apakah printer tersedia 
+                                if (PrinterSettings.InstalledPrinters.Count > 0)
+                                {
+                                    foreach (string printer in PrinterSettings.InstalledPrinters)
+                                    {
+                                        if (printer == value)
+                                        {
+                                            printerName = value;
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                            case "Paper_Width":
+                                int.TryParse(value, out paperWidth);
+                                break;
+                            case "Show_Logo":
+                                bool.TryParse(value, out showLogo);
+                                break;
+                            case "QR_Code":
+                                bool.TryParse(value, out showQrCode);
+                                break;
+                            case "Header":
+                                headerText = value;
+                                break;
+                            case "Footer":
+                                footerText = value;
+                                break;
+                        } 

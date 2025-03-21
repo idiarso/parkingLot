@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring - ParkingIN</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-color: #34495e;
+            --light-color: #ecf0f1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--danger-color);
+        }
+        
+        .status-dot.connected {
+            background-color: var(--success-color);
+        }
+        
+        .status-text {
+            font-size: 0.9rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            height: 100%;
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .badge.success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .badge.warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .badge.danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        /* Responsive grid layout */
+        .stats {
+            grid-column: span 3;
+        }
+        
+        .activity-log {
+            grid-column: span 9;
+        }
+        
+        .device-status,
+        .connections {
+            grid-column: span 6;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            background-color: var(--light-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--dark-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        tr:hover {
+            background-color: rgba(0,0,0,0.01);
+        }
+        
+        .log-container {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #2c3e50;
+            border-radius: 4px;
+            padding: 0.5rem;
+            color: #ecf0f1;
+            font-family: monospace;
+            margin-top: 1rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .log-entry.entry {
+            color: #2ecc71;
+        }
+        
+        .log-entry.exit {
+            color: #e74c3c;
+        }
+        
+        .log-entry.system {
+            color: #3498db;
+        }
+        
+        .log-entry.error {
+            color: #e74c3c;
+        }
+        
+        .timestamp {
+            color: #bdc3c7;
+            margin-right: 0.5rem;
+        }
+        
+        .connection-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .connection-icon {
+            font-size: 2rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .connection-info {
+            flex: 1;
+        }
+        
+        .connection-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .connection-details {
+            font-size: 0.8rem;
+            color: #777;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            color: #777;
+            font-size: 0.8rem;
+        }
+        
+        .button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        .button.small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .connection-error {
+            text-align: center;
+            padding: 2rem;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: 8px;
+            margin: 2rem auto;
+            max-width: 500px;
+        }
+        
+        .error-icon {
+            font-size: 3rem;
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+        }
+        
+        .error-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--danger-color);
+        }
+        
+        .error-message {
+            margin-bottom: 1.5rem;
+            color: #555;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .stats, .activity-log {
+                grid-column: span 12;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .device-status, .connections {
+                grid-column: span 12;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background-color: white;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .toast.error {
+            border-left-color: var(--danger-color);
+        }
+        
+        .toast.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .toast.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .toast-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .toast-title {
+            font-weight: bold;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        
+        .toast-body {
+            font-size: 0.9rem;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .slide-out {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">ParkingIN Dashboard</div>
+                <div class="status-indicator">
+                    <div id="connection-dot" class="status-dot"></div>
+                    <div id="connection-status" class="status-text">Disconnected</div>
+                    <button id="reconnect-button" class="button small" style="margin-left: 10px;">Reconnect</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="connection-error-container" style="display: none;" class="connection-error">
+            <div class="error-icon">⚠️</div>
+            <div class="error-title">Connection Error</div>
+            <div id="error-message" class="error-message">Unable to connect to the ParkingIN server.</div>
+            <button id="retry-connection" class="button">Retry Connection</button>
+        </div>
+        
+        <div id="dashboard-container" class="dashboard">
+            <div class="stats card">
+                <div class="card-title">Parking Statistics</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div id="vehicles-inside" class="stat-value">--</div>
+                        <div class="stat-label">Vehicles Inside</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="today-entries" class="stat-value">--</div>
+                        <div class="stat-label">Today's Entries</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="active-connections" class="stat-value">--</div>
+                        <div class="stat-label">Active Connections</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="server-time" class="stat-value">--:--</div>
+                        <div class="stat-label">Server Time</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="activity-log card">
+                <div class="card-title">
+                    Activity Log
+                    <button id="clear-log" class="button small">Clear</button>
+                </div>
+                <div id="log-container" class="log-container"></div>
+            </div>
+            
+            <div class="device-status card">
+                <div class="card-title">Device Status</div>
+                <table id="device-table">
+                    <thead>
+                        <tr>
+                            <th>Device</th>
+                            <th>Status</th>
+                            <th>Last Update</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-status-body">
+                        <tr>
+                            <td colspan="3" style="text-align: center;">Loading device status...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="connections card">
+                <div class="card-title">System Connections</div>
+                <div class="connection-card">
+                    <div class="connection-icon">💾</div>
+                    <div class="connection-info">
+                        <div class="connection-title">Database Connection</div>
+                        <div id="db-status" class="connection-details">Checking connection...</div>
+                    </div>
+                    <div id="db-status-badge" class="badge">...</div>
+                </div>
+                
+                <div class="connection-card">
+                    <div class="connection-icon">🖥️</div>
+                    <div class="connection-info">
+                        <div class="connection-title">Server Status</div>
+                        <div id="server-status-details" class="connection-details">Checking server status...</div>
+                    </div>
+                    <div id="server-status-badge" class="badge">...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="container">
+            &copy; 2023 ParkingIN System. All rights reserved. <span id="connection-id"></span>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="toast-container"></div>
+    
+    <script>
+        // WebSocket Connection Configuration
+        const DEFAULT_WS_URL = 'ws://localhost:8181';
+        let socket = null;
+        let connectionAttempts = 0;
+        let reconnectInterval = 2000; // Start with 2 seconds
+        let maxReconnectInterval = 30000; // Max 30 seconds
+        let reconnectTimer = null;
+        let connectionId = null;
+        let isConnected = false;
+        
+        // Store for activity logs
+        const activityLog = [];
+        const MAX_LOG_ENTRIES = 100;
+        
+        // DOM Elements
+        const connectionDot = document.getElementById('connection-dot');
+        const connectionStatus = document.getElementById('connection-status');
+        const reconnectButton = document.getElementById('reconnect-button');
+        const retryConnectionButton = document.getElementById('retry-connection');
+        const connectionErrorContainer = document.getElementById('connection-error-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const errorMessageElement = document.getElementById('error-message');
+        const vehiclesInsideElement = document.getElementById('vehicles-inside');
+        const todayEntriesElement = document.getElementById('today-entries');
+        const activeConnectionsElement = document.getElementById('active-connections');
+        const serverTimeElement = document.getElementById('server-time');
+        const deviceStatusBody = document.getElementById('device-status-body');
+        const dbStatus = document.getElementById('db-status');
+        const dbStatusBadge = document.getElementById('db-status-badge');
+        const serverStatusDetails = document.getElementById('server-status-details');
+        const serverStatusBadge = document.getElementById('server-status-badge');
+        const logContainer = document.getElementById('log-container');
+        const clearLogButton = document.getElementById('clear-log');
+        const connectionIdElement = document.getElementById('connection-id');
+        
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            initialize();
+            
+            // Event listeners
+            reconnectButton.addEventListener('click', handleReconnectClick);
+            retryConnectionButton.addEventListener('click', handleReconnectClick);
+            clearLogButton.addEventListener('click', clearActivityLog);
+        });
+        
+        function initialize() {
+            // Try to get WebSocket URL from localStorage or use default
+            let wsUrl = localStorage.getItem('parkingInWsUrl') || DEFAULT_WS_URL;
+            
+            // Check if URL has a websocket parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('websocket')) {
+                wsUrl = urlParams.get('websocket');
+                localStorage.setItem('parkingInWsUrl', wsUrl);
+            }
+            
+            // Initialize the WebSocket connection
+            connectWebSocket(wsUrl);
+            
+            // Add a custom URL input option
+            createWebSocketUrlInput(wsUrl);
+        }
+        
+        function createWebSocketUrlInput(currentUrl) {
+            const footer = document.querySelector('.footer .container');
+            const urlInput = document.createElement('div');
+            urlInput.style.marginTop = '10px';
+            urlInput.innerHTML = `
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                    <input id="ws-url-input" type="text" value="${currentUrl}" style="padding: 5px; width: 250px;" placeholder="WebSocket URL (e.g., ws://localhost:8181)">
+                    <button id="ws-url-save" class="button small">Save & Connect</button>
+                </div>
+            `;
+            footer.appendChild(urlInput);
+            
+            document.getElementById('ws-url-save').addEventListener('click', () => {
+                const newUrl = document.getElementById('ws-url-input').value.trim();
+                if (newUrl && newUrl !== currentUrl) {
+                    localStorage.setItem('parkingInWsUrl', newUrl);
+                    showToast('WebSocket URL updated', 'Reconnecting to new WebSocket server...', 'info');
+                    
+                    // Disconnect current socket if it exists
+                    if (socket) {
+                        socket.close();
+                    }
+                    
+                    // Connect to the new URL
+                    setTimeout(() => {
+                        connectWebSocket(newUrl);
+                    }, 500);
+                }
+            });
+        }
+        
+        function connectWebSocket(url) {
+            // Clear any existing reconnect timer
+            clearTimeout(reconnectTimer);
+            
+            try {
+                // Close existing socket if it exists
+                if (socket) {
+                    socket.close();
+                }
+                
+                // Update UI to show connecting state
+                updateConnectionStatus('connecting');
+                
+                // Create a new WebSocket connection
+                socket = new WebSocket(url);
+                
+                // Set up event handlers
+                socket.onopen = handleSocketOpen;
+                socket.onmessage = handleSocketMessage;
+                socket.onclose = handleSocketClose;
+                socket.onerror = handleSocketError;
+                
+                // Log connection attempt
+                console.log(`Attempting to connect to WebSocket server at ${url}`);
+                addToActivityLog('system', `Connecting to server at ${url}...`);
+            } catch (error) {
+                console.error('Error connecting to WebSocket:', error);
+                handleConnectionFailure('Failed to create WebSocket connection: ' + error.message);
+            }
+        }
+        
+        function handleSocketOpen(event) {
+            // Connection successful
+            connectionAttempts = 0;
+            reconnectInterval = 2000; // Reset reconnect interval
+            isConnected = true;
+            
+            // Update UI to show connected state
+            updateConnectionStatus('connected');
+            
+            // Hide error container if it was visible
+            connectionErrorContainer.style.display = 'none';
+            dashboardContainer.style.display = 'grid';
+            
+            // Log connection success
+            console.log('Connected to WebSocket server');
+            addToActivityLog('system', 'Connected to server successfully!');
+            
+            // Request initial status update
+            requestStatusUpdate();
+        }
+        
+        function handleSocketMessage(event) {
+            try {
+                const message = JSON.parse(event.data);
+                processMessage(message);
+            } catch (error) {
+                console.error('Error parsing message:', error, event.data);
+                addToActivityLog('error', `Error parsing server message: ${error.message}`);
+            }
+        }
+        
+        function handleSocketClose(event) {
+            isConnected = false;
+            
+            // Update UI to show disconnected state
+            updateConnectionStatus('disconnected');
+            
+            // Log closure reason
+            let reason = 'Connection closed';
+            if (event.reason) {
+                reason += `: ${event.reason}`;
+            }
+            
+            if (event.wasClean) {
+                console.log(`WebSocket closed cleanly, code=${event.code}, reason=${event.reason}`);
+                addToActivityLog('system', `${reason} (clean disconnect)`);
+            } else {
+                console.error('WebSocket connection died');
+                addToActivityLog('error', `${reason} (connection died)`);
+                handleConnectionFailure('Connection to server was lost');
+            }
+            
+            // Attempt to reconnect
+            scheduleReconnect();
+        }
+        
+        function handleSocketError(event) {
+            console.error('WebSocket error:', event);
+            addToActivityLog('error', 'WebSocket connection error');
+        }
+        
+        function handleConnectionFailure(message) {
+            // Update UI for failed connection
+            updateConnectionStatus('error');
+            
+            // Show error container and hide dashboard
+            connectionErrorContainer.style.display = 'block';
+            dashboardContainer.style.display = 'none';
+            errorMessageElement.textContent = message;
+            
+            // Schedule reconnect attempt
+            scheduleReconnect();
+        }
+        
+        function scheduleReconnect() {
+            // Clear any existing reconnect timer
+            clearTimeout(reconnectTimer);
+            
+            // Increase connection attempts counter
+            connectionAttempts++;
+            
+            // Use exponential backoff with a maximum interval
+            const delay = Math.min(reconnectInterval * Math.pow(1.5, connectionAttempts - 1), maxReconnectInterval);
+            
+            console.log(`Scheduling reconnect attempt in ${delay}ms`);
+            addToActivityLog('system', `Reconnecting in ${Math.round(delay / 1000)} seconds...`);
+            
+            // Schedule reconnect
+            reconnectTimer = setTimeout(() => {
+                if (!isConnected) {
+                    console.log('Attempting to reconnect...');
+                    const wsUrl = localStorage.getItem('parkingInWsUrl') || DEFAULT_WS_URL;
+                    connectWebSocket(wsUrl);
+                }
+            }, delay);
+            
+            // Update reconnect button with countdown
+            updateReconnectCountdown(Math.round(delay / 1000));
+        }
+        
+        function updateReconnectCountdown(seconds) {
+            reconnectButton.disabled = true;
+            retryConnectionButton.disabled = true;
+            
+            const updateText = (remaining) => {
+                reconnectButton.textContent = `Reconnect (${remaining}s)`;
+                retryConnectionButton.textContent = `Retry Connection (${remaining}s)`;
+                
+                if (remaining > 0) {
+                    setTimeout(() => updateText(remaining - 1), 1000);
+                } else {
+                    reconnectButton.textContent = 'Reconnect';
+                    retryConnectionButton.textContent = 'Retry Connection';
+                    reconnectButton.disabled = false;
+                    retryConnectionButton.disabled = false;
+                }
+            };
+            
+            updateText(seconds);
+        }
+        
+        function handleReconnectClick() {
+            // Clear any existing reconnect timer
+            clearTimeout(reconnectTimer);
+            
+            console.log('Manual reconnection triggered');
+            addToActivityLog('system', 'Manual reconnection triggered by user');
+            
+            // Reset connection attempts and try to reconnect immediately
+            connectionAttempts = 0;
+            reconnectInterval = 2000;
+            
+            const wsUrl = localStorage.getItem('parkingInWsUrl') || DEFAULT_WS_URL;
+            connectWebSocket(wsUrl);
+        }
+        
+        function updateConnectionStatus(status) {
+            switch (status) {
+                case 'connected':
+                    connectionDot.classList.add('connected');
+                    connectionStatus.textContent = 'Connected';
+                    break;
+                case 'disconnected':
+                    connectionDot.classList.remove('connected');
+                    connectionStatus.textContent = 'Disconnected';
+                    break;
+                case 'connecting':
+                    connectionDot.classList.remove('connected');
+                    connectionStatus.textContent = 'Connecting...';
+                    break;
+                case 'error':
+                    connectionDot.classList.remove('connected');
+                    connectionStatus.textContent = 'Connection Error';
+                    break;
+                default:
+                    connectionDot.classList.remove('connected');
+                    connectionStatus.textContent = 'Unknown Status';
+            }
+        }
+        
+        function processMessage(message) {
+            console.log('Received message:', message);
+            
+            if (!message || !message.type) {
+                console.warn('Received message without type');
+                return;
+            }
+            
+            switch (message.type) {
+                case 'welcome':
+                    handleWelcomeMessage(message);
+                    break;
+                case 'system_status':
+                    handleSystemStatusMessage(message);
+                    break;
+                case 'vehicle_entry':
+                    handleVehicleEntryMessage(message);
+                    break;
+                case 'heartbeat':
+                    handleHeartbeatMessage(message);
+                    break;
+                case 'error':
+                    handleErrorMessage(message);
+                    break;
+                case 'server_shutdown':
+                    handleServerShutdownMessage(message);
+                    break;
+                default:
+                    console.warn(`Unknown message type: ${message.type}`);
+                    addToActivityLog('system', `Received unknown message type: ${message.type}`);
+            }
+        }
+        
+        function handleWelcomeMessage(message) {
+            connectionId = message.connectionId;
+            
+            // Show connection ID in footer
+            if (connectionId) {
+                connectionIdElement.textContent = `Connection ID: ${connectionId}`;
+            }
+            
+            addToActivityLog('system', `${message.message} (Server time: ${message.serverTime})`);
+            showToast('Connected', 'Successfully connected to ParkingIN server', 'success');
+        }
+        
+        function handleSystemStatusMessage(message) {
+            // Update statistics
+            if (message.statistics) {
+                vehiclesInsideElement.textContent = message.statistics.vehicles_inside >= 0 ? 
+                    message.statistics.vehicles_inside : '--';
+                
+                todayEntriesElement.textContent = message.statistics.today_entries >= 0 ? 
+                    message.statistics.today_entries : '--';
+                
+                activeConnectionsElement.textContent = message.statistics.active_connections || '--';
+            }
+            
+            // Update server time
+            if (message.status && message.status.time) {
+                const serverTime = new Date(message.status.time);
+                serverTimeElement.textContent = serverTime.toLocaleTimeString();
+            }
+            
+            // Update database connection status
+            if (message.status && message.status.db_connection) {
+                dbStatus.textContent = `Status: ${message.status.db_connection}`;
+                dbStatusBadge.textContent = message.status.db_connection;
+                
+                if (message.status.db_connection === 'connected') {
+                    dbStatusBadge.className = 'badge success';
+                    dbStatus.textContent = 'Connected and operational';
+                } else {
+                    dbStatusBadge.className = 'badge danger';
+                    dbStatus.textContent = 'Database connection issue detected';
+                }
+            }
+            
+            // Update server status
+            if (message.status) {
+                serverStatusDetails.textContent = `Last update: ${message.status.time}`;
+                serverStatusBadge.textContent = message.status.server;
+                
+                if (message.status.server === 'online') {
+                    serverStatusBadge.className = 'badge success';
+                } else {
+                    serverStatusBadge.className = 'badge danger';
+                }
+            }
+            
+            // Update device status table
+            if (message.status && message.status.devices) {
+                updateDevicesTable(message.status.devices);
+            }
+            
+            // Check for error message
+            if (message.error) {
+                addToActivityLog('error', `Status error: ${message.error}`);
+            }
+        }
+        
+        function handleVehicleEntryMessage(message) {
+            // Display vehicle entry notification
+            const entryMsg = `New vehicle entry: ${message.licensePlate} at ${message.entryTime}`;
+            addToActivityLog('entry', entryMsg);
+            
+            // Show toast notification
+            showToast('New Vehicle', `${message.licensePlate} entered the parking`, 'info');
+            
+            // Request an updated status
+            requestStatusUpdate();
+        }
+        
+        function handleHeartbeatMessage(message) {
+            console.log('Heartbeat received:', message.timestamp);
+            // We could update a "last heartbeat" indicator if needed
+        }
+        
+        function handleErrorMessage(message) {
+            console.error('Error from server:', message.message);
+            addToActivityLog('error', `Server error: ${message.message}`);
+            showToast('Error', message.message, 'error');
+        }
+        
+        function handleServerShutdownMessage(message) {
+            addToActivityLog('system', `Server shutdown: ${message.message}`);
+            showToast('Server Shutdown', 'The ParkingIN server is shutting down', 'warning');
+        }
+        
+        function updateDevicesTable(devices) {
+            if (!devices || !Array.isArray(devices) || devices.length === 0) {
+                deviceStatusBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No devices configured</td></tr>';
+                return;
+            }
+            
+            deviceStatusBody.innerHTML = '';
+            
+            devices.forEach(device => {
+                const row = document.createElement('tr');
+                
+                // Name cell
+                const nameCell = document.createElement('td');
+                nameCell.textContent = device.name;
+                row.appendChild(nameCell);
+                
+                // Status cell with badge
+                const statusCell = document.createElement('td');
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'badge';
+                statusBadge.textContent = device.status;
+                
+                if (device.status === 'connected' || device.status === 'configured') {
+                    statusBadge.classList.add('success');
+                } else if (device.status === 'not configured') {
+                    statusBadge.classList.add('warning');
+                } else {
+                    statusBadge.classList.add('danger');
+                }
+                
+                statusCell.appendChild(statusBadge);
+                row.appendChild(statusCell);
+                
+                // Last update cell
+                const updateCell = document.createElement('td');
+                updateCell.textContent = device.last_update || 'Unknown';
+                row.appendChild(updateCell);
+                
+                deviceStatusBody.appendChild(row);
+            });
+        }
+        
+        function requestStatusUpdate() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                try {
+                    socket.send(JSON.stringify({
+                        type: 'get_status'
+                    }));
+                } catch (error) {
+                    console.error('Error requesting status update:', error);
+                }
+            }
+        }
+        
+        function addToActivityLog(type, message) {
+            // Create log entry object
+            const entry = {
+                type,
+                message,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            
+            // Add to log array (maintain max size)
+            activityLog.unshift(entry);
+            if (activityLog.length > MAX_LOG_ENTRIES) {
+                activityLog.pop();
+            }
+            
+            // Update UI
+            updateLogDisplay();
+        }
+        
+        function updateLogDisplay() {
+            logContainer.innerHTML = '';
+            
+            activityLog.forEach(entry => {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${entry.type}`;
+                logEntry.innerHTML = `<span class="timestamp">[${entry.timestamp}]</span> ${entry.message}`;
+                logContainer.appendChild(logEntry);
+            });
+        }
+        
+        function clearActivityLog() {
+            activityLog.length = 0;
+            updateLogDisplay();
+            addToActivityLog('system', 'Activity log cleared');
+        }
+        
+        function showToast(title, message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <div class="toast-title">${title}</div>
+                    <button class="toast-close">&times;</button>
+                </div>
+                <div class="toast-body">${message}</div>
+            `;
+            
+            // Add to container
+            toastContainer.appendChild(toast);
+            
+            // Handle close button
+            const closeButton = toast.querySelector('.toast-close');
+            closeButton.addEventListener('click', () => {
+                toast.classList.add('slide-out');
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            });
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (toastContainer.contains(toast)) {
+                    toast.classList.add('slide-out');
+                    setTimeout(() => {
+                        if (toastContainer.contains(toast)) {
+                            toastContainer.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+        
+        // Reconnect if the page becomes visible after being hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && socket && socket.readyState !== WebSocket.OPEN) {
+                console.log('Page became visible, checking connection...');
+                const wsUrl = localStorage.getItem('parkingInWsUrl') || DEFAULT_WS_URL;
+                connectWebSocket(wsUrl);
+            }
+        });
+        
+        // Ping server periodically to check connection
+        setInterval(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                try {
+                    socket.send(JSON.stringify({
+                        type: 'ping',
+                        timestamp: new Date().toISOString()
+                    }));
+                } catch (error) {
+                    console.error('Error sending ping:', error);
+                }
+            }
+        }, 30000); // Every 30 seconds
+    </script>
+</body>
+</html> 

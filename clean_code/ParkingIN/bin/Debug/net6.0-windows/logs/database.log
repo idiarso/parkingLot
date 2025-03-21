@@ -1,0 +1,13 @@
+2025-03-21 23:38:37 - Database connection string initialized: Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;
+2025-03-21 23:38:38 - Database connection test successful
+2025-03-21 23:38:46 - Login failed for user admin
+2025-03-21 23:39:57 - User admin logged in successfully
+2025-03-21 23:39:57 - Query executed successfully: 
+                    INSERT INTO t_log (user_id, action, description, created_at)
+                    VALUES (@userId, @action, @description, @createdAt)
+2025-03-21 23:43:17 - Database connection string initialized: Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;
+2025-03-21 23:43:18 - Database connection test successful
+2025-03-21 23:43:27 - User admin logged in successfully
+2025-03-21 23:43:27 - Query executed successfully: 
+                    INSERT INTO t_log (user_id, action, description, created_at)
+                    VALUES (@userId, @action, @description, @createdAt)

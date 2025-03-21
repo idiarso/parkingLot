@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <connectionStrings>
+    <add name="ParkingDatabase" 
+         connectionString="Server=localhost;Database=parking_system;Uid=root;Pwd=root@rsi;CharSet=utf8mb4;" 
+         providerName="MySql.Data.MySqlClient" />
+  </connectionStrings>
+  <appSettings>
+    <add key="Language" value="id-ID" />
+    <add key="ApplicationTitle" value="Modern Parking System" />
+    <add key="LogFilePath" value="logs/log-.txt" />
+    <add key="LogLevel" value="Information" />
+    <add key="LogPath" value="Logs" />
+    <add key="ImagePath" value="Images" />
+    <add key="XamppPath" value="D:\XAMPP\mysql\bin" />
+    <add key="UseWebSocket" value="false" />
+    <add key="WebSocketUrl" value="ws://localhost:8181" />
+    <add key="ParkingServerPath" value="D:\a\ParkingServer" />
+  </appSettings>
+</configuration> 

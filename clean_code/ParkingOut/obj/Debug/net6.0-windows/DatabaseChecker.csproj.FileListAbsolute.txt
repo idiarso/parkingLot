@@ -1,0 +1,5 @@
+D:\a\ParkingOut\obj\Debug\net6.0-windows\DatabaseChecker.csproj.AssemblyReference.cache
+D:\a\ParkingOut\obj\Debug\net6.0-windows\DatabaseChecker.GeneratedMSBuildEditorConfig.editorconfig
+D:\a\ParkingOut\obj\Debug\net6.0-windows\DatabaseChecker.AssemblyInfoInputs.cache
+D:\a\ParkingOut\obj\Debug\net6.0-windows\DatabaseChecker.AssemblyInfo.cs
+D:\a\ParkingOut\obj\Debug\net6.0-windows\DatabaseChecker.csproj.CoreCompileInputs.cache

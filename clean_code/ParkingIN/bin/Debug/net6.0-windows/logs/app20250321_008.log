@@ -1,0 +1,54 @@
+2025-03-21 15:50:42.274 [INF] Logger initialized successfully
+2025-03-21 15:50:42.284 [INF] Testing database connection...
+2025-03-21 15:50:42.890 [ERR] Database connection failed: Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES)
+2025-03-21 15:50:42.890 [INF] Attempting to initialize database...
+2025-03-21 15:50:42.910 [ERR] Failed to initialize database: Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES)
+2025-03-21 16:34:12.768 [INF] Attempting to authenticate user: admin
+2025-03-21 16:34:12.769 [INF] Creating new database connection
+2025-03-21 16:34:12.784 [ERR] Database connection failed
+MySql.Data.MySqlClient.MySqlException (0x80004005): Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES)
+ ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Access denied for user 'root'@'localhost' (using password: YES)
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.Authentication.MySqlAuthenticationPlugin.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.Authentication.MySqlAuthenticationPlugin.AuthenticationFailed(MySqlException ex)
+   at MySql.Data.MySqlClient.Authentication.MySqlAuthenticationPlugin.ReadPacketAsync(Boolean execAsync)
+   at MySql.Data.MySqlClient.Authentication.MySqlAuthenticationPlugin.ContinueAuthenticationAsync(Boolean execAsync, Byte[] data)
+   at MySql.Data.MySqlClient.Authentication.MySqlAuthenticationPlugin.AuthenticateAsync(Boolean reset, Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.AuthenticateAsync(String authMethod, Boolean reset, Boolean execAsync)
+   at MySql.Data.MySqlClient.NativeDriver.OpenAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.NativeDriver.OpenAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.Driver.OpenAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.Driver.CreateAsync(MySqlConnectionStringBuilder settings, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.Driver.CreateAsync(MySqlConnectionStringBuilder settings, Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlPool.CreateNewPooledConnectionAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnectionAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriverAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlPool.GetConnectionAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlConnection.OpenAsync(Boolean execAsync, CancellationToken cancellationToken)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at ParkingIN.LoginForm.AuthenticateUser(String username, String password) in D:\20maret\ParkingIN\LoginForm.cs:line 436
+2025-03-21 16:34:12.786 [ERR] Authentication failed with exception
+System.Exception: Koneksi database gagal: Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES)
+   at ParkingIN.LoginForm.AuthenticateUser(String username, String password) in D:\20maret\ParkingIN\LoginForm.cs:line 439
+2025-03-21 16:34:12.787 [ERR] Error during login process
+System.AggregateException: One or more errors occurred. (Database error: Koneksi database gagal: Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES))
+ ---> System.Exception: Database error: Koneksi database gagal: Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES)
+ ---> System.Exception: Koneksi database gagal: Authentication to host 'localhost' for user 'root' using method 'caching_sha2_password' failed with message: Access denied for user 'root'@'localhost' (using password: YES)
+   at ParkingIN.LoginForm.AuthenticateUser(String username, String password) in D:\20maret\ParkingIN\LoginForm.cs:line 439
+   --- End of inner exception stack trace ---
+   at ParkingIN.LoginForm.AuthenticateUser(String username, String password) in D:\20maret\ParkingIN\LoginForm.cs:line 487
+   at ParkingIN.LoginForm.<BtnLogin_Click>b__26_0() in D:\20maret\ParkingIN\LoginForm.cs:line 361
+   at System.Threading.Tasks.Task`1.InnerInvoke()
+   at System.Threading.Tasks.Task.<>c.<.cctor>b__272_0(Object obj)
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+   --- End of inner exception stack trace ---
+   at System.Threading.Tasks.Task.ThrowIfExceptional(Boolean includeTaskCanceledExceptions)
+   at System.Threading.Tasks.Task`1.GetResultCore(Boolean waitCompletionNotification)
+   at System.Threading.Tasks.Task`1.get_Result()
+   at ParkingIN.LoginForm.BtnLogin_Click(Object sender, EventArgs e) in D:\20maret\ParkingIN\LoginForm.cs:line 366
+2025-03-21 23:38:37.700 +07:00 [INF] Application starting...
+2025-03-21 23:43:17.626 +07:00 [INF] Application starting...

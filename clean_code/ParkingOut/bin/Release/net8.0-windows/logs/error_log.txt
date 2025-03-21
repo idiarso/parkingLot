@@ -1,0 +1,60 @@
+[2025-03-19 03:21:58] ERROR:
+Error Message: Object reference not set to an instance of an object.
+
+Error Type: System.NullReferenceException
+
+Stack Trace:
+   at SimpleParkingAdmin.User.get_IsAdmin() in D:\a\ParkingOut\User.cs:line 21
+   at SimpleParkingAdmin.MainForm.ConfigureAccessLevels() in D:\a\ParkingOut\MainForm.cs:line 525
+   at SimpleParkingAdmin.MainForm..ctor(User currentUser) in D:\a\ParkingOut\MainForm.cs:line 76
+   at SimpleParkingAdmin.LoginForm.<>c__DisplayClass26_1.<btnLogin_Click>b__3() in D:\a\ParkingOut\LoginForm.cs:line 451
+   at System.Windows.Forms.Control.InvokeMarshaledCallbackHelper(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Windows.Forms.Control.InvokeMarshaledCallbacks()
+
+Date/Time: 2025-03-19 03:21:58
+
+
+--------------------------------------------------------------
+[2025-03-19 03:24:07] ERROR:
+Error Message: Object reference not set to an instance of an object.
+
+Error Type: System.NullReferenceException
+
+Stack Trace:
+   at SimpleParkingAdmin.User.get_IsAdmin() in D:\a\ParkingOut\User.cs:line 21
+   at SimpleParkingAdmin.MainForm.ConfigureAccessLevels() in D:\a\ParkingOut\MainForm.cs:line 525
+   at SimpleParkingAdmin.MainForm..ctor(User currentUser) in D:\a\ParkingOut\MainForm.cs:line 76
+   at SimpleParkingAdmin.LoginForm.<>c__DisplayClass26_1.<btnLogin_Click>b__3() in D:\a\ParkingOut\LoginForm.cs:line 451
+   at System.Windows.Forms.Control.InvokeMarshaledCallbackHelper(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Windows.Forms.Control.InvokeMarshaledCallbacks()
+
+Date/Time: 2025-03-19 03:24:07
+
+
+--------------------------------------------------------------
+[2025-03-19 03:29:05] ERROR:
+Error Message: Object reference not set to an instance of an object.
+
+Error Type: System.NullReferenceException
+
+Stack Trace:
+   at SimpleParkingAdmin.User.get_IsAdmin() in D:\a\ParkingOut\User.cs:line 21
+   at SimpleParkingAdmin.MainForm.ConfigureAccessLevels() in D:\a\ParkingOut\MainForm.cs:line 525
+   at SimpleParkingAdmin.MainForm..ctor(User currentUser) in D:\a\ParkingOut\MainForm.cs:line 76
+   at SimpleParkingAdmin.LoginForm.<>c__DisplayClass26_1.<btnLogin_Click>b__3() in D:\a\ParkingOut\LoginForm.cs:line 451
+   at System.Windows.Forms.Control.InvokeMarshaledCallbackHelper(Object obj)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+--- End of stack trace from previous location ---
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Windows.Forms.Control.InvokeMarshaledCallbacks()
+
+Date/Time: 2025-03-19 03:29:05
+
+
+--------------------------------------------------------------

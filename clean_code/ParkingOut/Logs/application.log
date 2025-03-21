@@ -1,0 +1,11 @@
+[2025-03-18 18:09:22] [INFO] Application starting...
+[2025-03-18 18:09:22] [INFO] Application started
+[2025-03-18 18:09:23] [INFO] Schema loaded from SQL file
+[2025-03-18 18:09:36] [INFO] Attempting login for username: admin
+[2025-03-18 18:09:36] [INFO] Current connection string: Server=localhost;Port=3306;Database=parkingdb;Uid=********;Pwd=********;AllowPublicKeyRetrieval=true;SslMode=none;DefaultAuthenticationPlugin=mysql_native_password;
+[2025-03-18 18:09:36] [INFO] Executing query: SELECT id, username, nama, role FROM t_user WHERE username = @username AND password = @password
+[2025-03-18 18:09:36] [INFO] Parameters: username=admin, password=admin123
+[2025-03-18 18:09:36] [INFO] Query executed. Results found: 1
+[2025-03-18 18:09:36] [INFO] User found. ID: 1, Username: admin, Role: ADMIN
+[2025-03-18 18:09:36] [ERROR] Database error in GetData: Table 'parkingdb.parking_transactions' doesn't exist
+[2025-03-18 18:09:55] [ERROR] Database error in GetData: Unknown column 'm.kode_member' in 'field list'

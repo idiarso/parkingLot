@@ -1,0 +1,8 @@
+================================
+      TEST PRINT TICKET        
+================================
+Printer: {PRINTER_NAME}
+Date: {CURRENT_DATE}
+Time: {CURRENT_TIME}
+Status: OK
+================================

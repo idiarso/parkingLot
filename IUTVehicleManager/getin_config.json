@@ -1,0 +1,33 @@
+{
+    "station_config": {
+        "station_type": "GET_IN",
+        "station_name": "Entry Point 1",
+        "location": "Main Gate"
+    },
+    "printer_settings": {
+        "default_com_port": "COM2",
+        "baud_rate": 9600,
+        "data_bits": 8,
+        "parity": "None",
+        "stop_bits": 1,
+        "print_options": {
+            "auto_cut": true,
+            "print_barcode": true,
+            "print_logo": false
+        }
+    },
+    "mcu_settings": {
+        "default_com_port": "COM1",
+        "baud_rate": 9600,
+        "data_bits": 8,
+        "parity": "None",
+        "stop_bits": 1,
+        "timeout_ms": 1000
+    },
+    "entry_settings": {
+        "default_priority": "Normal",
+        "default_vehicle_type": "Car",
+        "auto_print": true,
+        "save_log": true
+    }
+} 

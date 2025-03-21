@@ -1,0 +1,12 @@
+================================
+         TIKET PARKIR          
+================================
+No: {TICKET_NUMBER}
+Tanggal: {DATE}
+Waktu Masuk: {TIME}
+Jenis: {VEHICLE_TYPE}
+Plat: {PLATE_NUMBER}
+--------------------------------
+Simpan tiket ini dengan baik
+Hilang tiket dikenakan denda
+================================
