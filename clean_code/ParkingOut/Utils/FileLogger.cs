@@ -3,7 +3,7 @@ using System.IO;
 using Serilog;
 using Serilog.Events;
 
-namespace SimpleParkingAdmin.Utils
+namespace ParkingOut.Utils
 {
     public class FileLogger : IAppLogger
     {
@@ -19,6 +19,11 @@ namespace SimpleParkingAdmin.Utils
         }
 
         public void Information(string message)
+        {
+            _logger.Information(message);
+        }
+
+        public void Info(string message)
         {
             _logger.Information(message);
         }

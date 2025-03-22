@@ -1,10 +1,11 @@
 using System;
 
-namespace SimpleParkingAdmin.Utils
+namespace ParkingOut.Utils
 {
     public interface IAppLogger
     {
         void Information(string message);
+        void Info(string message);
         void Warning(string message);
         void Error(string message);
         void Error(string message, Exception ex);

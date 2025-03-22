@@ -1,0 +1,210 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ParkingOut.UI"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Colors -->
+    <Color x:Key="PrimaryColor">#0078D7</Color>
+    <Color x:Key="AccentColor">#0078D7</Color>
+    <Color x:Key="BackgroundDarkColor">#1E1E1E</Color>
+    <Color x:Key="BackgroundLightColor">#F5F5F5</Color>
+    <Color x:Key="TextDarkColor">#333333</Color>
+    <Color x:Key="TextLightColor">#FFFFFF</Color>
+    <Color x:Key="SidebarDarkColor">#272727</Color>
+    <Color x:Key="SidebarLightColor">#F0F0F0</Color>
+    <Color x:Key="SidebarBorderColor">#E0E0E0</Color>
+    <Color x:Key="MenuItemHoverColor">#0078D7</Color>
+    <Color x:Key="MenuItemActiveColor">#005A9E</Color>
+    
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="BackgroundDarkBrush" Color="{StaticResource BackgroundDarkColor}"/>
+    <SolidColorBrush x:Key="BackgroundLightBrush" Color="{StaticResource BackgroundLightColor}"/>
+    <SolidColorBrush x:Key="TextDarkBrush" Color="{StaticResource TextDarkColor}"/>
+    <SolidColorBrush x:Key="TextLightBrush" Color="{StaticResource TextLightColor}"/>
+    <SolidColorBrush x:Key="SidebarDarkBrush" Color="{StaticResource SidebarDarkColor}"/>
+    <SolidColorBrush x:Key="SidebarLightBrush" Color="{StaticResource SidebarLightColor}"/>
+    <SolidColorBrush x:Key="SidebarBorderBrush" Color="{StaticResource SidebarBorderColor}"/>
+    <SolidColorBrush x:Key="MenuItemHoverBrush" Color="{StaticResource MenuItemHoverColor}"/>
+    <SolidColorBrush x:Key="MenuItemActiveBrush" Color="{StaticResource MenuItemActiveColor}"/>
+    
+    <!-- Gradient Brushes -->
+    <LinearGradientBrush x:Key="SidebarGradientDark" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#2A2840" Offset="0.0" />
+        <GradientStop Color="#403E50" Offset="1.0" />
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="SidebarGradientLight" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FAFAFA" Offset="0"/>
+        <GradientStop Color="#F0F0F0" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <!-- Menu Item Style -->
+    <Style x:Key="MenuItemStyle" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Margin" Value="0,2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            CornerRadius="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Indicator for active item -->
+                            <Border x:Name="activeBorder" Width="4" HorizontalAlignment="Left" 
+                                    Background="{StaticResource AccentBrush}" Visibility="Collapsed"/>
+                            
+                            <!-- Icon -->
+                            <Path x:Name="icon" Fill="{TemplateBinding Foreground}" 
+                                  Width="20" Height="20" Stretch="Uniform" 
+                                  Data="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            
+                            <!-- Text -->
+                            <TextBlock x:Name="contentPresenter" Grid.Column="1" 
+                                       Text="{TemplateBinding Content}" 
+                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MenuItemHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MenuItemActiveBrush}"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MenuItemActiveBrush}"/>
+                            <Setter TargetName="activeBorder" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!-- Toggle Button Style -->
+    <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="30"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            CornerRadius="3">
+                        <Path x:Name="icon" Fill="{TemplateBinding Foreground}" 
+                              Width="16" Height="16" Stretch="Uniform" 
+                              Data="{StaticResource MenuIcon}"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MenuItemHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource MenuItemActiveBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="icon" Property="Data" Value="{StaticResource ChevronLeftIcon}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!-- Logo Style -->
+    <Style x:Key="LogoStyle" TargetType="{x:Type Image}">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Margin" Value="10,0,5,0"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- App Title Style -->
+    <Style x:Key="AppTitleStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Margin" Value="10,0,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- User Info Style -->
+    <Style x:Key="UserInfoStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Margin" Value="10,5"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- Logout Button Style -->
+    <Style x:Key="LogoutButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            CornerRadius="5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Icon -->
+                            <Path x:Name="icon" Fill="{TemplateBinding Foreground}" 
+                                  Width="16" Height="16" Stretch="Uniform" 
+                                  Data="{StaticResource LogoutIcon}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            
+                            <!-- Text -->
+                            <TextBlock Grid.Column="1" Text="{TemplateBinding Content}" 
+                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#E74C3C"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#C0392B"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!-- String Resources -->
+    <sys:String x:Key="MenuIcon">M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z</sys:String>
+    <sys:String x:Key="ChevronLeftIcon">M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z</sys:String>
+    <sys:String x:Key="ChevronRightIcon">M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z</sys:String>
+    <sys:String x:Key="LogoutIcon">M14.08,15.59L16.67,13H7V11H16.67L14.08,8.41L15.5,7L20.5,12L15.5,17L14.08,15.59M19,3A2,2 0 0,1 21,5V9.67L19,7.67V5H5V19H19V16.33L21,14.33V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5C3,3.89 3.89,3 5,3H19Z</sys:String>
+    
+</ResourceDictionary> 

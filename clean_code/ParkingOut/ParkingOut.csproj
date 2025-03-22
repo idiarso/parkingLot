@@ -6,12 +6,13 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <NoWarn>$(NoWarn);CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8622;CS8625;NU1701</NoWarn>
     <AssemblyName>ParkingOut</AssemblyName>
     <RootNamespace>ParkingOut</RootNamespace>
-    <StartupObject>SimpleParkingAdmin.Program</StartupObject>
+    <StartupObject>ParkingOut.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,16 +20,21 @@
     <PackageReference Include="AForge.Video" Version="2.2.5" />
     <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
     <PackageReference Include="ClosedXML" Version="0.102.2" />
-    <PackageReference Include="MySql.Data" Version="8.3.0" />
+    <PackageReference Include="Npgsql" Version="7.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="QRCoder" Version="1.4.3" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="NLog" Version="5.2.8" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
     <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
     <PackageReference Include="ZXing.Net" Version="0.16.8" />
+    <PackageReference Include="PDFsharp-MigraDoc" Version="6.0.0" />
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,9 +44,64 @@
     <None Update="Database\schema_mysql.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Database\schema_postgresql.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(ProjectDir)Resources\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Images\" />
+    <Folder Include="Resources\Icons\" />
+  </ItemGroup>
+
+  <!-- Exclude WinForms files from the build temporarily during WPF migration -->
+  <ItemGroup>
+    <Compile Remove="Forms\**\*.cs" />
+    <Compile Remove="Utils\GradientPanel.cs" />
+    <Compile Remove="Utils\ModernMenuButton.cs" />
+    <Compile Remove="Utils\ModernSidebar.cs" />
+    <Compile Remove="BackupRestoreForm.cs" />
+    <Compile Remove="BarrierIntegrationForm.cs" />
+    <Compile Remove="CombinedEntryExitForm.cs" />
+    <Compile Remove="Controls\**\*.cs" />
+    <Compile Remove="DashboardForm.cs" />
+    <Compile Remove="DashboardPanel.cs" />
+    <Compile Remove="DatabaseChecker.cs" />
+    <Compile Remove="EntryForm.cs" />
+    <Compile Remove="GeexDashboard.cs" />
+    <Compile Remove="LoginForm.cs" />
+    <Compile Remove="MainForm.cs" />
+    <Compile Remove="MemberManagementForm.cs" />
+    <Compile Remove="ModernDashboard.cs" />
+    <Compile Remove="NetworkSettingsForm.cs" />
+    <Compile Remove="NotificationForm.cs" />
+    <Compile Remove="ParkingCapacityForm.cs" />
+    <Compile Remove="PaymentForm.cs" />
+    <Compile Remove="ReportForm.cs" />
+    <Compile Remove="SettingsForm.cs" />
+    <Compile Remove="SettingsForm.Designer.cs" />
+    <Compile Remove="setup_database.cs" />
+    <Compile Remove="ShiftManagementForm.cs" />
+    <Compile Remove="TarifForm.cs" />
+    <Compile Remove="UserForm.cs" />
+    <Compile Remove="UserManagementForm.cs" />
+    <Compile Remove="UsersForm.cs" />
+    <Compile Remove="VehicleSearchForm.cs" />
   </ItemGroup>
 
 </Project> 

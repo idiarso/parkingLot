@@ -1,7 +1,7 @@
 using System;
-using SimpleParkingAdmin.Models;
+using ParkingOut.Models;
 
-namespace SimpleParkingAdmin.Utils
+namespace ParkingOut.Utils
 {
     public sealed class UserManager
     {

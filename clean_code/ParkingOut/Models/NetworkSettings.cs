@@ -1,135 +1,77 @@
 using System;
 using System.Data;
-using System.IO;
-using SimpleParkingAdmin.Utils;
+using System.Collections.Generic;
+using ParkingOut.Utils;
 
-namespace SimpleParkingAdmin.Models
+namespace ParkingOut.Models
 {
     public class NetworkSettings
     {
-        public string ServerIP { get; set; } = "localhost";
-        public string DatabaseName { get; set; } = "parking_system";
-        public string Username { get; set; } = "root";
-        public string Password { get; set; } = "root@rsi";
-        public int Port { get; set; } = 3306;
+        public bool UseWebSocket { get; set; }
+        public string WebSocketUrl { get; set; }
+        public string ServerAddress { get; set; }
+        public int Port { get; set; }
+        public string DatabaseName { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
         
-        public int ServerPort { get { return Port; } set { Port = value; } }
-        
-        /// <summary>
-        /// Creates a network settings object from database settings
-        /// </summary>
-        public static NetworkSettings FromDataTable(DataTable dataTable)
+        public NetworkSettings()
         {
-            NetworkSettings settings = new NetworkSettings();
+            // Default values
+            UseWebSocket = false;
+            WebSocketUrl = "ws://localhost:8181";
+            ServerAddress = "localhost";
+            Port = 5432;
+            DatabaseName = "parkirdb";
+            Username = "postgres";
+            Password = "root@rsi";
+        }
+        
+        public string GetConnectionString()
+        {
+            return $"Host={ServerAddress};Port={Port};Database={DatabaseName};Username={Username};Password={Password};";
+        }
+        
+        public static NetworkSettings FromDataTable(DataTable dt)
+        {
+            var settings = new NetworkSettings();
             
-            if (dataTable != null && dataTable.Rows.Count > 0)
+            if (dt == null || dt.Rows.Count == 0)
+                return settings;
+                
+            foreach (DataRow row in dt.Rows)
             {
-                // Check if this is a key-value settings table format
-                if (dataTable.Columns.Contains("setting_key") && dataTable.Columns.Contains("setting_value"))
+                string key = row["setting_key"].ToString();
+                string value = row["setting_value"].ToString();
+                
+                switch (key)
                 {
-                    foreach (DataRow row in dataTable.Rows)
-                    {
-                        string key = row["setting_key"].ToString();
-                        string value = row["setting_value"].ToString();
-                        
-                        switch (key)
-                        {
-                            case "network_server_ip":
-                                settings.ServerIP = value;
-                                break;
-                            case "network_database_name":
-                                settings.DatabaseName = value;
-                                break;
-                            case "network_username":
-                                settings.Username = value;
-                                break;
-                            case "network_password":
-                                settings.Password = value;
-                                break;
-                            case "network_port":
-                                if (int.TryParse(value, out int port))
-                                {
-                                    settings.Port = port;
-                                }
-                                break;
-                        }
-                    }
-                }
-                // Direct column mapping format
-                else
-                {
-                    var row = dataTable.Rows[0];
-                    
-                    if (dataTable.Columns.Contains("ServerIP"))
-                        settings.ServerIP = row["ServerIP"]?.ToString() ?? "localhost";
-                    else if (dataTable.Columns.Contains("server_ip"))
-                        settings.ServerIP = row["server_ip"]?.ToString() ?? "localhost";
-                        
-                    if (dataTable.Columns.Contains("DatabaseName"))
-                        settings.DatabaseName = row["DatabaseName"]?.ToString() ?? "parking_system";
-                    else if (dataTable.Columns.Contains("database_name"))
-                        settings.DatabaseName = row["database_name"]?.ToString() ?? "parking_system";
-                        
-                    if (dataTable.Columns.Contains("Username"))
-                        settings.Username = row["Username"]?.ToString() ?? "root";
-                    else if (dataTable.Columns.Contains("username"))
-                        settings.Username = row["username"]?.ToString() ?? "root";
-                        
-                    if (dataTable.Columns.Contains("Password"))
-                        settings.Password = row["Password"]?.ToString() ?? "";
-                    else if (dataTable.Columns.Contains("password"))
-                        settings.Password = row["password"]?.ToString() ?? "";
-                    
-                    int port = 3306;
-                    if (dataTable.Columns.Contains("ServerPort") && 
-                        int.TryParse(row["ServerPort"]?.ToString(), out port))
-                    {
-                        settings.Port = port;
-                    }
-                    else if (dataTable.Columns.Contains("server_port") && 
-                        int.TryParse(row["server_port"]?.ToString(), out port))
-                    {
-                        settings.Port = port;
-                    }
-                    else if (dataTable.Columns.Contains("Port") && 
-                        int.TryParse(row["Port"]?.ToString(), out port))
-                    {
-                        settings.Port = port;
-                    }
+                    case "network_use_websocket":
+                        settings.UseWebSocket = value == "1" || value.ToLower() == "true";
+                        break;
+                    case "network_websocket_url":
+                        settings.WebSocketUrl = value;
+                        break;
+                    case "network_server":
+                        settings.ServerAddress = value;
+                        break;
+                    case "network_port":
+                        if (int.TryParse(value, out int port))
+                            settings.Port = port;
+                        break;
+                    case "network_database":
+                        settings.DatabaseName = value;
+                        break;
+                    case "network_username":
+                        settings.Username = value;
+                        break;
+                    case "network_password":
+                        settings.Password = value;
+                        break;
                 }
             }
             
             return settings;
-        }
-        
-        /// <summary>
-        /// Get connection string from settings
-        /// </summary>
-        public string GetConnectionString()
-        {
-            return $"Server={ServerIP};Database={DatabaseName};Uid={Username};Pwd={Password};Port={Port};CharSet=utf8mb4;SslMode=none;";
-        }
-        
-        /// <summary>
-        /// Save settings to database
-        /// </summary>
-        public bool SaveToDatabase()
-        {
-            try
-            {
-                Database.SaveSettings("network_server_ip", ServerIP);
-                Database.SaveSettings("network_database_name", DatabaseName);
-                Database.SaveSettings("network_username", Username);
-                Database.SaveSettings("network_password", Password);
-                Database.SaveSettings("network_port", Port.ToString());
-                
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving network settings: {ex.Message}");
-                return false;
-            }
         }
     }
 } 

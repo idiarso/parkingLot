@@ -1,0 +1,126 @@
+<Page x:Class="ParkingOut.UI.VehicleExitPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Vehicle Exit">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Text="Vehicle Exit" FontSize="24" FontWeight="Bold" Margin="20,20,20,10"/>
+        
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Search Area -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+                <TextBox x:Name="txtSearch" Width="300" Height="30" Margin="0,0,10,0" 
+                         VerticalContentAlignment="Center" Padding="5,0"
+                         BorderThickness="1" BorderBrush="#DDD"/>
+                <Button x:Name="btnSearch" Content="Search" Width="100" Height="30" 
+                        Background="#0078D7" Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+            
+            <!-- Vehicle Information -->
+            <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <GroupBox Header="Vehicle Information" Grid.Column="0" Margin="0,0,10,0" Padding="10">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Ticket No:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="lblTicketNo" VerticalAlignment="Center"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Plate No:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="lblPlateNo" VerticalAlignment="Center"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Entry Time:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="lblEntryTime" VerticalAlignment="Center"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Vehicle Type:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="lblVehicleType" VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                
+                <GroupBox Header="Fee Information" Grid.Column="1" Margin="10,0,0,0" Padding="10">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Hours:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="lblHours" VerticalAlignment="Center"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Base Fee:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="lblBaseFee" VerticalAlignment="Center"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Additional:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="lblAdditional" VerticalAlignment="Center"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Total Fee:" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="lblTotalFee" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+            
+            <!-- Vehicle List -->
+            <DataGrid Grid.Row="2" x:Name="dgvVehicles" AutoGenerateColumns="False" IsReadOnly="True" 
+                      BorderThickness="1" BorderBrush="#DDD" Margin="0,0,0,20">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Ticket No" Binding="{Binding TicketNo}" Width="100"/>
+                    <DataGridTextColumn Header="Plate No" Binding="{Binding PlateNo}" Width="100"/>
+                    <DataGridTextColumn Header="Vehicle Type" Binding="{Binding VehicleType}" Width="100"/>
+                    <DataGridTextColumn Header="Entry Time" Binding="{Binding EntryTime}" Width="150"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="100"/>
+                    <DataGridTextColumn Header="Total Fee" Binding="{Binding TotalFee}" Width="100"/>
+                    <DataGridTemplateColumn Header="Actions" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Process" Background="#0078D7" Foreground="White" 
+                                        BorderThickness="0" Padding="5,2"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            
+            <!-- Actions -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="btnProcessExit" Content="Process Exit" Width="120" Height="35" 
+                        Background="#0078D7" Foreground="White" BorderThickness="0" Margin="0,0,10,0"/>
+                <Button x:Name="btnCancel" Content="Cancel" Width="100" Height="35" 
+                        Background="#999" Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page> 

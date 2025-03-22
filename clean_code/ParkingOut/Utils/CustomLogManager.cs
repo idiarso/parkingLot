@@ -1,6 +1,6 @@
 using System;
 
-namespace SimpleParkingAdmin.Utils
+namespace ParkingOut.Utils
 {
     public static class CustomLogManager
     {
