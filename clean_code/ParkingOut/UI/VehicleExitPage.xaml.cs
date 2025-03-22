@@ -18,7 +18,7 @@ namespace ParkingOut.UI
         public VehicleExitPage()
         {
             InitializeComponent();
-            _logger = new FileLogger();
+            _logger = new AppLogger(GetType().Name);
             _vehicles = new ObservableCollection<VehicleExitInfo>();
             dgvVehicles.ItemsSource = _vehicles;
             
@@ -42,6 +42,9 @@ namespace ParkingOut.UI
                 
                 // In a real implementation, this would query the database
                 string sql = "SELECT * FROM t_parkir WHERE waktu_keluar IS NULL";
+                
+                // Use the sql variable in a real implementation
+                // var data = Database.ExecuteQuery(sql);
                 
                 // Add some sample data for demonstration
                 _vehicles.Add(new VehicleExitInfo
@@ -90,8 +93,8 @@ namespace ParkingOut.UI
                 var filteredList = new ObservableCollection<VehicleExitInfo>();
                 foreach (var vehicle in _vehicles)
                 {
-                    if (vehicle.TicketNo.Contains(searchText) || 
-                        vehicle.PlateNo.Contains(searchText))
+                    if ((vehicle.TicketNo?.Contains(searchText) == true) || 
+                        (vehicle.PlateNo?.Contains(searchText) == true))
                     {
                         filteredList.Add(vehicle);
                     }
@@ -119,6 +122,11 @@ namespace ParkingOut.UI
                 }
                 
                 var selectedVehicle = dgvVehicles.SelectedItem as VehicleExitInfo;
+                if (selectedVehicle == null)
+                {
+                    System.Windows.MessageBox.Show("Invalid selection.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
                 _logger.Info($"Processing exit for ticket: {selectedVehicle.TicketNo}");
                 
                 // In a real implementation, this would update the database
@@ -146,11 +154,11 @@ namespace ParkingOut.UI
     // A simple class to represent vehicle exit information
     public class VehicleExitInfo
     {
-        public string TicketNo { get; set; }
-        public string PlateNo { get; set; }
-        public string VehicleType { get; set; }
+        public string? TicketNo { get; set; }
+        public string? PlateNo { get; set; }
+        public string? VehicleType { get; set; }
         public DateTime EntryTime { get; set; }
-        public string Duration { get; set; }
-        public string TotalFee { get; set; }
+        public string? Duration { get; set; }
+        public string? TotalFee { get; set; }
     }
 } 

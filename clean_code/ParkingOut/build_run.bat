@@ -16,14 +16,14 @@ if "%ERRORLEVEL%"=="0" (
 REM Build the project
 echo.
 echo Building ParkingOut...
-dotnet restore
+dotnet restore ParkingOut.csproj
 if %ERRORLEVEL% NEQ 0 (
     echo Error: Package restore failed
     pause
     exit /b 1
 )
 
-dotnet build --configuration Release
+dotnet build ParkingOut.csproj --configuration Release
 if %ERRORLEVEL% NEQ 0 (
     echo Error: Build failed
     pause

@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using System.Collections.Generic;
 using SimpleParkingAdmin.Utils;
 
@@ -12,9 +12,9 @@ namespace SimpleParkingAdmin.Forms
     {
         private readonly string backupDirectory;
         private string backupPath;
-        private string dbName = "parkingdb";
-        private string dbUser = "root";
-        private string dbPassword = "";
+        private string dbName = "parkirdb";
+        private string dbUser = "postgres";
+        private string dbPassword = "root@rsi";
         private string dbHost = "localhost";
         private readonly IAppLogger _logger;
         

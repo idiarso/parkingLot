@@ -16,6 +16,7 @@ namespace SimpleParkingAdmin
         private TextBox txtDatabaseName;
         private TextBox txtUsername;
         private TextBox txtPassword;
+        private ComboBox cmbDatabaseType;
         private Button btnSave;
         private Button btnCancel;
         private Button btnTest;
@@ -29,7 +30,7 @@ namespace SimpleParkingAdmin
         private void InitializeComponent()
         {
             this.Text = "Pengaturan Jaringan";
-            this.Size = new Size(450, 350);
+            this.Size = new Size(450, 400);
             this.StartPosition = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -63,6 +64,11 @@ namespace SimpleParkingAdmin
             lblPassword.Location = new Point(30, 190);
             lblPassword.AutoSize = true;
             
+            Label lblDatabaseType = new Label();
+            lblDatabaseType.Text = "Database Type:";
+            lblDatabaseType.Location = new Point(30, 230);
+            lblDatabaseType.AutoSize = true;
+            
             // Create textboxes
             txtServerIP = new TextBox();
             txtServerIP.Location = new Point(150, 27);
@@ -85,24 +91,31 @@ namespace SimpleParkingAdmin
             txtPassword.Size = new Size(250, 23);
             txtPassword.PasswordChar = '*';
             
+            cmbDatabaseType = new ComboBox();
+            cmbDatabaseType.Location = new Point(150, 227);
+            cmbDatabaseType.Size = new Size(250, 23);
+            cmbDatabaseType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbDatabaseType.Items.AddRange(new object[] { "PostgreSQL", "MySQL" });
+            cmbDatabaseType.SelectedIndexChanged += new EventHandler(cmbDatabaseType_SelectedIndexChanged);
+            
             // Create buttons
             btnTest = new Button();
             btnTest.Text = "Test Koneksi";
-            btnTest.Location = new Point(30, 240);
+            btnTest.Location = new Point(30, 280);
             btnTest.Size = new Size(110, 35);
             btnTest.Click += new EventHandler(btnTest_Click);
             ApplyModernButtonStyle(btnTest);
             
             btnSave = new Button();
             btnSave.Text = "Simpan";
-            btnSave.Location = new Point(230, 240);
+            btnSave.Location = new Point(230, 280);
             btnSave.Size = new Size(90, 35);
             btnSave.Click += new EventHandler(btnSave_Click);
             ApplyModernButtonStyle(btnSave);
             
             btnCancel = new Button();
             btnCancel.Text = "Batal";
-            btnCancel.Location = new Point(330, 240);
+            btnCancel.Location = new Point(330, 280);
             btnCancel.Size = new Size(90, 35);
             btnCancel.Click += new EventHandler(btnCancel_Click);
             ApplyModernButtonStyle(btnCancel);
@@ -113,14 +126,47 @@ namespace SimpleParkingAdmin
             this.Controls.Add(lblDatabaseName);
             this.Controls.Add(lblUsername);
             this.Controls.Add(lblPassword);
+            this.Controls.Add(lblDatabaseType);
             this.Controls.Add(txtServerIP);
             this.Controls.Add(txtServerPort);
             this.Controls.Add(txtDatabaseName);
             this.Controls.Add(txtUsername);
             this.Controls.Add(txtPassword);
+            this.Controls.Add(cmbDatabaseType);
             this.Controls.Add(btnTest);
             this.Controls.Add(btnSave);
             this.Controls.Add(btnCancel);
+        }
+
+        private void cmbDatabaseType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Update port based on database type selection
+            if (cmbDatabaseType.SelectedItem.ToString() == "PostgreSQL")
+            {
+                if (txtServerPort.Text == "3306") // MySQL default port
+                {
+                    txtServerPort.Text = "5432"; // PostgreSQL default port
+                }
+                
+                // Update default username if using default
+                if (txtUsername.Text == "root")
+                {
+                    txtUsername.Text = "postgres";
+                }
+            }
+            else if (cmbDatabaseType.SelectedItem.ToString() == "MySQL")
+            {
+                if (txtServerPort.Text == "5432") // PostgreSQL default port
+                {
+                    txtServerPort.Text = "3306"; // MySQL default port
+                }
+                
+                // Update default username if using default
+                if (txtUsername.Text == "postgres")
+                {
+                    txtUsername.Text = "root";
+                }
+            }
         }
 
         private void ApplyModernButtonStyle(Button button)
@@ -156,15 +202,23 @@ namespace SimpleParkingAdmin
                     txtDatabaseName.Text = settings.DatabaseName;
                     txtUsername.Text = settings.Username;
                     txtPassword.Text = settings.Password;
+                    
+                    // Select database type
+                    cmbDatabaseType.SelectedItem = settings.DatabaseType ?? "PostgreSQL";
+                    if (cmbDatabaseType.SelectedIndex == -1)
+                    {
+                        cmbDatabaseType.SelectedIndex = 0; // Default to PostgreSQL
+                    }
                 }
                 else
                 {
                     // Set default values if no settings found
                     txtServerIP.Text = "localhost";
-                    txtServerPort.Text = "3306";
-                    txtDatabaseName.Text = "parkingdb";
-                    txtUsername.Text = "root";
-                    txtPassword.Text = "";
+                    txtServerPort.Text = "5432";
+                    txtDatabaseName.Text = "parkirdb";
+                    txtUsername.Text = "postgres";
+                    txtPassword.Text = "root@rsi";
+                    cmbDatabaseType.SelectedIndex = 0; // PostgreSQL
                 }
             }
             catch (Exception ex)
@@ -214,7 +268,8 @@ namespace SimpleParkingAdmin
                 // Validate inputs
                 if (string.IsNullOrWhiteSpace(txtServerIP.Text) ||
                     string.IsNullOrWhiteSpace(txtServerPort.Text) ||
-                    string.IsNullOrWhiteSpace(txtDatabaseName.Text))
+                    string.IsNullOrWhiteSpace(txtDatabaseName.Text) ||
+                    cmbDatabaseType.SelectedItem == null)
                 {
                     MessageBox.Show("Semua field harus diisi!", "Validasi", 
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -228,7 +283,8 @@ namespace SimpleParkingAdmin
                     ServerPort = int.Parse(txtServerPort.Text.Trim()),
                     DatabaseName = txtDatabaseName.Text.Trim(),
                     Username = txtUsername.Text.Trim(),
-                    Password = txtPassword.Text
+                    Password = txtPassword.Text,
+                    DatabaseType = cmbDatabaseType.SelectedItem.ToString()
                 };
                 
                 SaveNetworkSettings(settings);
@@ -247,12 +303,6 @@ namespace SimpleParkingAdmin
         {
             DialogResult = DialogResult.Cancel;
             Close();
-        }
-        
-        private string BuildConnectionString()
-        {
-            return $"Server={txtServerIP.Text};Port={txtServerPort.Text};" +
-                   $"Database={txtDatabaseName.Text};Uid={txtUsername.Text};Pwd={txtPassword.Text};";
         }
         
         private NetworkSettingsDTO LoadNetworkSettings()
@@ -291,15 +341,29 @@ namespace SimpleParkingAdmin
                 serializer.Serialize(writer, settings);
             }
         }
+        
+        private string BuildConnectionString()
+        {
+            string databaseType = cmbDatabaseType.SelectedItem?.ToString() ?? "PostgreSQL";
+            if (databaseType == "PostgreSQL")
+            {
+                return $"Host={txtServerIP.Text};Port={txtServerPort.Text};Database={txtDatabaseName.Text};Username={txtUsername.Text};Password={txtPassword.Text};";
+            }
+            else
+            {
+                return $"Server={txtServerIP.Text};Port={txtServerPort.Text};Database={txtDatabaseName.Text};Uid={txtUsername.Text};Pwd={txtPassword.Text};CharSet=utf8mb4;SslMode=none;";
+            }
+        }
     }
 
     [Serializable]
     public class NetworkSettingsDTO
     {
-        public string ServerIP { get; set; }
-        public int ServerPort { get; set; }
-        public string DatabaseName { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string ServerIP { get; set; } = "localhost";
+        public int ServerPort { get; set; } = 5432;
+        public string DatabaseName { get; set; } = "parkirdb";
+        public string Username { get; set; } = "postgres";
+        public string Password { get; set; } = "root@rsi";
+        public string DatabaseType { get; set; } = "PostgreSQL";
     }
 } 

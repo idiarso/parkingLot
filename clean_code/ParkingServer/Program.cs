@@ -88,13 +88,65 @@ namespace ParkingServer
         {
             try
             {
-                string connectionString = "Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;";
-                using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
+                Console.WriteLine("Memeriksa instalasi PostgreSQL...");
+                // Coba deteksi apakah PostgreSQL terinstal
+                if (!IsPostgreSqlInstalled())
                 {
-                    Console.WriteLine("Testing database connection...");
-                    connection.Open();
-                    Console.WriteLine("Database connection successful.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("PostgreSQL tidak terdeteksi pada sistem ini.");
+                    Console.WriteLine("Pastikan PostgreSQL terinstal dan service sedang berjalan.");
+                    Console.ResetColor();
+                    
+                    LogError("PostgreSQL tidak terdeteksi pada sistem ini.");
+                    
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("WARNING: Server akan berjalan tanpa koneksi database.");
+                    Console.WriteLine("Beberapa fungsionalitas mungkin terbatas.");
+                    Console.ResetColor();
+                    return;
                 }
+                
+                string connectionString = "Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;";
+                
+                Console.WriteLine("Testing database connection...");
+                
+                // Coba koneksi ke database utama
+                if (TestDatabaseConnection(connectionString))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Koneksi ke database parkirdb berhasil.");
+                    Console.ResetColor();
+                    return;
+                }
+                
+                // Jika gagal, coba buat database
+                Console.WriteLine("Mencoba membuat database parkirdb...");
+                if (CreateParkirDatabase())
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Database parkirdb berhasil dibuat.");
+                    Console.ResetColor();
+                    
+                    // Test koneksi lagi
+                    if (TestDatabaseConnection(connectionString))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Koneksi ke database parkirdb berhasil setelah pembuatan.");
+                        Console.ResetColor();
+                        return;
+                    }
+                }
+                
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Gagal terhubung ke database parkirdb setelah pembuatan.");
+                Console.ResetColor();
+                
+                LogError("Gagal terhubung ke database parkirdb setelah pembuatan.");
+                
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("WARNING: Server akan berjalan tanpa koneksi database.");
+                Console.WriteLine("Beberapa fungsionalitas mungkin terbatas.");
+                Console.ResetColor();
             }
             catch (Exception ex)
             {
@@ -108,6 +160,105 @@ namespace ParkingServer
                 Console.WriteLine("WARNING: Server will start without database connection.");
                 Console.WriteLine("Some functionality may be limited.");
                 Console.ResetColor();
+            }
+        }
+        
+        private static bool IsPostgreSqlInstalled()
+        {
+            try
+            {
+                // Coba koneksi ke service PostgreSQL tanpa database
+                using (NpgsqlConnection connection = new NpgsqlConnection("Host=localhost;Port=5432;Username=postgres;Password=root@rsi;"))
+                {
+                    connection.Open();
+                    connection.Close();
+                    return true;
+                }
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                if (ex.Message.Contains("connection refused"))
+                {
+                    LogError("PostgreSQL service tidak berjalan. Pastikan PostgreSQL terinstal dan service aktif.");
+                    return false;
+                }
+                else if (ex.Message.Contains("password authentication"))
+                {
+                    // Jika mendapat error password, berarti server berjalan tetapi kredensial salah
+                    return true;
+                }
+                
+                LogError($"Error saat memeriksa instalasi PostgreSQL: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error saat memeriksa instalasi PostgreSQL: {ex.Message}");
+                return false;
+            }
+        }
+        
+        private static bool TestDatabaseConnection(string connectionString)
+        {
+            try
+            {
+                using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"Gagal terhubung ke database: {ex.Message}");
+                return false;
+            }
+        }
+        
+        private static bool CreateParkirDatabase()
+        {
+            try
+            {
+                // Gunakan koneksi ke database postgres default untuk membuat database parkirdb
+                string defaultConn = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=root@rsi;";
+                
+                using (NpgsqlConnection connection = new NpgsqlConnection(defaultConn))
+                {
+                    connection.Open();
+                    Console.WriteLine("Koneksi ke database default postgres berhasil.");
+                    
+                    // Cek apakah database parkirdb sudah ada
+                    using (NpgsqlCommand command = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname = 'parkirdb'", connection))
+                    {
+                        var result = command.ExecuteScalar();
+                        
+                        // Jika database belum ada, buat baru
+                        if (result == null || result == DBNull.Value)
+                        {
+                            Console.WriteLine("Database parkirdb belum ada, mencoba membuat...");
+                            using (NpgsqlCommand createCmd = new NpgsqlCommand("CREATE DATABASE parkirdb", connection))
+                            {
+                                createCmd.ExecuteNonQuery();
+                                Console.WriteLine("Database parkirdb berhasil dibuat.");
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Database parkirdb sudah ada.");
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Gagal membuat database: {ex.Message}");
+                Console.ResetColor();
+                
+                LogError($"Gagal membuat database: {ex.Message}");
+                return false;
             }
         }
         

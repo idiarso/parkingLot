@@ -5,6 +5,7 @@ using System.IO.Ports;
 using System.Threading.Tasks;
 using System.Configuration;
 using ParkingIN.Utils;
+using System.Linq;
 
 namespace ParkingIN
 {
@@ -16,6 +17,7 @@ namespace ParkingIN
         private NotifyIcon _trayIcon;
         private AppConfig _config;
         private Button _btnTestConnection;
+        private readonly ILogger _logger;
 
         public bool IsMinimized { get; private set; }
 
@@ -23,6 +25,7 @@ namespace ParkingIN
         {
             InitializeComponent();
             _stationName = ConfigurationManager.AppSettings["ApplicationTitle"] ?? "Modern Parking System";
+            _logger = LogManager.GetLogger();
             
             // Initialize configuration
             _config = new AppConfig();
@@ -37,8 +40,17 @@ namespace ParkingIN
             this.Size = new Size(400, 400);
             this.Text = $"ParkingIN - {_stationName}";
 
-            // Initialize ports
-            InitializePorts();
+            // Initialize ports safely
+            try 
+            {
+                InitializePorts();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error initializing ports: {ex.Message}");
+                MessageBox.Show("Error initializing ports. The application will continue but some features may not work.",
+                    "Port Initialization Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
 
             // Handle form closing
             this.FormClosing += (s, e) =>
@@ -106,16 +118,30 @@ namespace ParkingIN
         {
             try
             {
-                // Get port settings from configuration
+                // Get port settings from configuration and printer.ini
+                string printerIniPath = Path.Combine(Application.StartupPath, "config", "printer.ini");
                 string controllerPort = ConfigurationManager.AppSettings["ControllerPort"] ?? "COM1";
-                string printerPort = ConfigurationManager.AppSettings["PrinterPort"] ?? "COM2";
-                
-                try
+                string printerPort = "USB001"; // Default USB port
+
+                if (File.Exists(printerIniPath))
                 {
-                    int controllerBaudRate = int.Parse(ConfigurationManager.AppSettings["ControllerBaudRate"] ?? "9600");
-                    int printerBaudRate = int.Parse(ConfigurationManager.AppSettings["PrinterBaudRate"] ?? "9600");
-                    
-                    // Initialize controller port
+                    try
+                    {
+                        var printerConfig = new IniFile(printerIniPath);
+                        printerPort = printerConfig.Read("Port", "Printer") ?? printerPort;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warning($"Error reading printer.ini: {ex.Message}. Using default port {printerPort}");
+                    }
+                }
+
+                int controllerBaudRate = int.Parse(ConfigurationManager.AppSettings["ControllerBaudRate"] ?? "9600");
+                int printerBaudRate = int.Parse(ConfigurationManager.AppSettings["PrinterBaudRate"] ?? "9600");
+
+                // Initialize controller port if it exists
+                if (SerialPort.GetPortNames().Contains(controllerPort))
+                {
                     _controllerPort = new SerialPort
                     {
                         PortName = controllerPort,
@@ -127,8 +153,28 @@ namespace ParkingIN
                         WriteTimeout = 1000
                     };
                     _controllerPort.DataReceived += ControllerPort_DataReceived;
-    
-                    // Initialize printer port
+
+                    try
+                    {
+                        _controllerPort.Open();
+                        _logger.Information($"Controller port {controllerPort} opened successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error($"Error opening controller port {controllerPort}: {ex.Message}");
+                        MessageBox.Show($"Could not open controller port {controllerPort}. Some features may not work.",
+                            "Port Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                else
+                {
+                    _logger.Warning($"Controller port {controllerPort} not found");
+                }
+
+                // Initialize printer port if it exists
+                var availablePorts = SerialPort.GetPortNames().ToList();
+                if (availablePorts.Contains(printerPort) || printerPort.StartsWith("USB"))
+                {
                     _printerPort = new SerialPort
                     {
                         PortName = printerPort,
@@ -137,48 +183,22 @@ namespace ParkingIN
                         Parity = Parity.None,
                         StopBits = StopBits.One
                     };
-                }
-                catch (Exception configEx)
-                {
-                    // Log configuration error but continue
-                    LogHelper.LogError("MainForm.InitializePorts", configEx);
-                    MessageBox.Show($"Error in port configuration: {configEx.Message}\nThe application will continue but some features may not work.", 
-                        "Configuration Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
 
-                // Try to open ports in a safe way
-                try
-                {
-                    if (_controllerPort != null && System.IO.Ports.SerialPort.GetPortNames().Contains(_controllerPort.PortName))
-                    {
-                        _controllerPort.Open();
-                        Console.WriteLine($"Controller port {_controllerPort.PortName} opened successfully");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Controller port {_controllerPort?.PortName} not available");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Could not open controller port: {ex.Message}");
-                }
-
-                try
-                {
-                    if (_printerPort != null && System.IO.Ports.SerialPort.GetPortNames().Contains(_printerPort.PortName))
+                    try
                     {
                         _printerPort.Open();
-                        Console.WriteLine($"Printer port {_printerPort.PortName} opened successfully");
+                        _logger.Information($"Printer port {printerPort} opened successfully");
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Console.WriteLine($"Printer port {_printerPort?.PortName} not available");
+                        _logger.Error($"Error opening printer port {printerPort}: {ex.Message}");
+                        MessageBox.Show($"Could not open printer port {printerPort}. Printing may not work.",
+                            "Printer Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Could not open printer port: {ex.Message}");
+                    _logger.Warning($"Printer port {printerPort} not found");
                 }
 
                 // Add a dashboard panel to make the form look better
@@ -189,10 +209,33 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                LogHelper.LogError("MainForm.InitializePorts", ex);
-                MessageBox.Show($"Error initializing ports: {ex.Message}\nThe application will continue but some features may not work.", 
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _logger.Error($"Critical error in port initialization: {ex.Message}");
+                throw; // Re-throw to be caught by the caller
             }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            try
+            {
+                if (_controllerPort != null && _controllerPort.IsOpen)
+                {
+                    _controllerPort.Close();
+                    _controllerPort.Dispose();
+                }
+
+                if (_printerPort != null && _printerPort.IsOpen)
+                {
+                    _printerPort.Close();
+                    _printerPort.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error closing ports: {ex.Message}");
+            }
+
+            base.OnFormClosing(e);
         }
 
         private void CreateDashboard()

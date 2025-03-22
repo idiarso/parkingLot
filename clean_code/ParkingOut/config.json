@@ -1,3 +1,3 @@
 {
-    "ConnectionString": "Server=localhost;Port=3306;Database=parkingdb;Uid=root;Pwd=root@rsi;AllowPublicKeyRetrieval=true;SslMode=none;DefaultAuthenticationPlugin=mysql_native_password;"
+    "ConnectionString": "Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;"
 } 

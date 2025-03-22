@@ -119,7 +119,7 @@ goto :menu
     
     echo Building ParkingOut first...
     cd /d D:\21maret\clean_code\ParkingOut
-    dotnet build
+    dotnet build ParkingOut.csproj
     
     if %ERRORLEVEL% NEQ 0 (
         echo.
@@ -130,7 +130,7 @@ goto :menu
     
     echo.
     echo Build successful. Starting ParkingOut...
-    start cmd /k "cd /d D:\21maret\clean_code\ParkingOut && dotnet run"
+    start cmd /k "cd /d D:\21maret\clean_code\ParkingOut && dotnet run --project ParkingOut.csproj"
     
     echo ParkingOut started successfully.
     pause

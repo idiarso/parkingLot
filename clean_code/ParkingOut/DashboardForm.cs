@@ -278,27 +278,33 @@ namespace SimpleParkingAdmin
                 DateTime startDate = GetStartDate();
                 DateTime endDate = DateTime.Now;
 
+                _logger.Debug($"Refreshing dashboard: startDate={startDate}, endDate={endDate}");
+
                 string query = @"
                     SELECT 
                         COUNT(*) as total_vehicles,
-                        SUM(CASE WHEN waktu_keluar IS NULL THEN 1 ELSE 0 END) as active_vehicles,
-                        SUM(CASE WHEN waktu_keluar IS NOT NULL THEN 1 ELSE 0 END) as completed_vehicles,
+                        SUM(CASE WHEN ""waktu_keluar"" IS NULL THEN 1 ELSE 0 END) as active_vehicles,       
+                        SUM(CASE WHEN ""waktu_keluar"" IS NOT NULL THEN 1 ELSE 0 END) as completed_vehicles,
                         COALESCE(SUM(biaya), 0) as total_revenue,
                         COUNT(DISTINCT CASE WHEN nomor_kartu_member IS NOT NULL THEN nomor_kartu_member END) as member_visits
                     FROM t_parkir
                     WHERE waktu_masuk BETWEEN @startDate AND @endDate";
 
-                var parameters = new Dictionary<string, object>
+                _logger.Debug($"Executing dashboard summary query");
+
+                Dictionary<string, object> parameters = new Dictionary<string, object>
                 {
                     { "@startDate", startDate },
                     { "@endDate", endDate }
                 };
 
-                DataTable stats = Database.GetData(query, parameters);
+                DataTable data = Database.GetData(query, parameters);
                 
-                if (stats.Rows.Count > 0)
+                _logger.Debug($"Dashboard query executed, rows returned: {data.Rows.Count}");
+
+                if (data.Rows.Count > 0)
                 {
-                    DataRow row = stats.Rows[0];
+                    DataRow row = data.Rows[0];
                     
                     // Calculate trends (simplified for example)
                     string vehicleTrend = "+5% vs last period";
@@ -374,11 +380,11 @@ namespace SimpleParkingAdmin
             try
             {
                 string query = @"
-                    SELECT 
+                    SELECT
                         jenis_kendaraan,
                         COUNT(*) as count
                     FROM t_parkir
-                    WHERE waktu_keluar IS NULL
+                    WHERE ""waktu_keluar"" IS NULL
                     GROUP BY jenis_kendaraan";
 
                 DataTable occupancyData = Database.GetData(query);

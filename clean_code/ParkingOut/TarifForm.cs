@@ -476,37 +476,39 @@ namespace SimpleParkingAdmin
         {
             try
             {
-                // Make sure the table exists before trying to load data
-                EnsureTarifKhususTableExists();
-                
-                string query = "SELECT id, jenis_kendaraan, jenis_tarif, jam_mulai, jam_selesai, " +
-                    "hari, tarif_flat, deskripsi FROM tarif_khusus WHERE status = 1 ORDER BY jenis_kendaraan, jam_mulai";
-                
-                DataTable dt = Database.GetData(query);
+                // Use status = true for PostgreSQL boolean
+                string query = "SELECT id, jenis_kendaraan, jam_mulai, jam_selesai, " +
+                               "hari, tarif_flat, deskripsi FROM tarif_khusus WHERE status = true ORDER BY jenis_kendaraan, jam_mulai";
+                DataTable dt = Database.ExecuteQuery(query);
                 dgvSpecialRates.DataSource = dt;
                 
-                // Format columns
-                if (dgvSpecialRates.Columns.Count > 0)
-                {
+                // Format columns for better display
+                if (dgvSpecialRates.Columns.Contains("id"))
                     dgvSpecialRates.Columns["id"].Visible = false;
-                    dgvSpecialRates.Columns["jenis_kendaraan"].HeaderText = "Jenis Kendaraan";
-                    dgvSpecialRates.Columns["jenis_tarif"].HeaderText = "Jenis Tarif";
-                    dgvSpecialRates.Columns["jam_mulai"].HeaderText = "Jam Mulai";
-                    dgvSpecialRates.Columns["jam_selesai"].HeaderText = "Jam Selesai";
-                    dgvSpecialRates.Columns["hari"].HeaderText = "Hari";
-                    dgvSpecialRates.Columns["tarif_flat"].HeaderText = "Tarif (Rp)";
-                    dgvSpecialRates.Columns["deskripsi"].HeaderText = "Deskripsi";
                     
+                if (dgvSpecialRates.Columns.Contains("tarif_flat"))
+                {
+                    dgvSpecialRates.Columns["tarif_flat"].HeaderText = "Flat Rate";
                     dgvSpecialRates.Columns["tarif_flat"].DefaultCellStyle.Format = "N0";
+                    dgvSpecialRates.Columns["tarif_flat"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 }
+                
+                // Format other columns as needed
+                if (dgvSpecialRates.Columns.Contains("jenis_kendaraan"))
+                    dgvSpecialRates.Columns["jenis_kendaraan"].HeaderText = "Vehicle Type";
+                if (dgvSpecialRates.Columns.Contains("jam_mulai"))
+                    dgvSpecialRates.Columns["jam_mulai"].HeaderText = "Start Time";
+                if (dgvSpecialRates.Columns.Contains("jam_selesai"))
+                    dgvSpecialRates.Columns["jam_selesai"].HeaderText = "End Time";
+                if (dgvSpecialRates.Columns.Contains("hari"))
+                    dgvSpecialRates.Columns["hari"].HeaderText = "Day";
+                if (dgvSpecialRates.Columns.Contains("deskripsi"))
+                    dgvSpecialRates.Columns["deskripsi"].HeaderText = "Description";
             }
             catch (Exception ex)
             {
-                // We've already handled table creation in EnsureTarifKhususTableExists
-                // Just log the error if it's something else
                 Logger.Error(ex.Message);
-                MessageBox.Show($"Error saat memuat tarif khusus: {ex.Message}", 
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error loading special rates: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

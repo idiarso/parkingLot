@@ -303,23 +303,26 @@ namespace SimpleParkingAdmin
         {
             try
             {
-                string query = "SELECT DISTINCT jenis_kendaraan FROM t_tarif WHERE status = 1 ORDER BY jenis_kendaraan";
-                var types = Database.ExecuteQuery(query);
+                // PostgreSQL uses TRUE instead of integer 1
+                string query = "SELECT DISTINCT jenis_kendaraan FROM t_tarif WHERE status = true ORDER BY jenis_kendaraan";
+                DataTable dt = Database.ExecuteQuery(query);
                 cmbVehicleType.Items.Clear();
-                cmbVehicleType.Items.Add("-- Select Vehicle Type --");
                 
-                foreach (DataRow row in types.Rows)
+                foreach (DataRow row in dt.Rows)
                 {
                     cmbVehicleType.Items.Add(row["jenis_kendaraan"].ToString());
                 }
                 
-                cmbVehicleType.SelectedIndex = 0;
+                // Select first item if available
+                if (cmbVehicleType.Items.Count > 0)
+                {
+                    cmbVehicleType.SelectedIndex = 0;
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error loading vehicle types: {ex.Message}");
-                MessageBox.Show("Failed to load vehicle types.", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _logger.Error("Failed to load vehicle types", ex);
+                MessageBox.Show("Error loading vehicle types: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

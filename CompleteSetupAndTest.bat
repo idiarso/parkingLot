@@ -21,7 +21,7 @@ echo ===================================================
 
 :: Set variables
 set PGHOST=localhost
-set PGPORT=5432
+set PGPORT=5433
 set PGUSER=postgres
 set PGPASSWORD=root@rsi
 set PGDATABASE=parkirdb

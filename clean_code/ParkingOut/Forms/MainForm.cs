@@ -42,6 +42,23 @@ namespace SimpleParkingAdmin.Forms
             }
         }
 
+        private void OpenDashboard()
+        {
+            try
+            {
+                // Create and show the new dashboard with modern sidebar
+                DashboardForm dashboardForm = new DashboardForm(_currentUser);
+                dashboardForm.FormClosed += (s, args) => this.Show(); // Show login form again when dashboard is closed
+                dashboardForm.Show();
+                this.Hide();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to open dashboard", ex);
+                NotificationHelper.ShowError("Failed to open dashboard. Please check the logs for details.");
+            }
+        }
+
         #region Windows Form Designer generated code
         private void InitializeComponent()
         {

@@ -3,12 +3,14 @@
 ## Daftar Isi
 1. [Persyaratan Sistem](#persyaratan-sistem)
 2. [Instalasi Sistem](#instalasi-sistem)
-3. [Konfigurasi Printer Thermal](#konfigurasi-printer-thermal)
-4. [Konfigurasi Barcode Scanner](#konfigurasi-barcode-scanner)
-5. [Konfigurasi MCU ATMEL](#konfigurasi-mcu-atmel)
-6. [Konfigurasi Kamera](#konfigurasi-kamera)
-7. [Konfigurasi Gate Barrier (Portal)](#konfigurasi-gate-barrier-portal)
-8. [Pemecahan Masalah](#pemecahan-masalah)
+3. [Panduan Menjalankan Aplikasi](#panduan-menjalankan-aplikasi)
+4. [Konfigurasi Database](#konfigurasi-database)
+5. [Konfigurasi Printer Thermal](#konfigurasi-printer-thermal)
+6. [Konfigurasi Barcode Scanner](#konfigurasi-barcode-scanner)
+7. [Konfigurasi MCU ATMEL](#konfigurasi-mcu-atmel)
+8. [Konfigurasi Kamera](#konfigurasi-kamera)
+9. [Konfigurasi Gate Barrier (Portal)](#konfigurasi-gate-barrier-portal)
+10. [Pemecahan Masalah](#pemecahan-masalah)
 
 ## Persyaratan Sistem
 
@@ -29,15 +31,244 @@
 ### Perangkat Lunak
 - Windows 10/11 (64-bit)
 - .NET 6.0 Runtime
-- PostgreSQL 14 atau yang lebih baru
+- PostgreSQL 14 atau yang lebih baru (untuk database parkingdb)
 - Driver printer thermal
 
 ## Instalasi Sistem
 
-1. Instal semua perangkat lunak yang diperlukan
+1. Instal semua perangkat lunak yang diperlukan:
+   - Windows 10/11 (64-bit)
+   - [.NET 6.0 Runtime](https://dotnet.microsoft.com/download/dotnet/6.0)
+   - [PostgreSQL 14](https://www.postgresql.org/download/)
+   - Driver printer thermal
+
 2. Clone atau ekstrak kode sumber di folder D:\21maret
+
 3. Jalankan file `buildall.bat` untuk membangun semua aplikasi
 4. Pastikan semua aplikasi berhasil dibangun sebelum melanjutkan
+
+### Mengatasi Masalah "buildall.bat Force Close"
+
+Jika `buildall.bat` tiba-tiba menutup (force close) saat dijalankan, coba solusi berikut:
+
+1. **Jalankan sebagai Administrator**
+   - Klik kanan pada file `buildall.bat`
+   - Pilih "Run as Administrator"
+
+2. **Jalankan melalui Command Prompt**
+   - Buka Command Prompt sebagai Administrator
+   - Navigasi ke direktori: `cd /d D:\21maret`
+   - Jalankan: `buildall.bat > buildlog.txt 2>&1`
+   - Periksa file `buildlog.txt` untuk informasi error
+
+3. **Membangun Aplikasi Secara Manual**
+   Jika buildall.bat tetap bermasalah, Anda dapat membangun aplikasi secara manual:
+   
+   a. ParkingServer:
+   ```
+   cd /d D:\21maret\clean_code\ParkingServer
+   dotnet restore
+   dotnet build
+   ```
+
+   b. ParkingIN:
+   ```
+   cd /d D:\21maret\clean_code\ParkingIN
+   dotnet restore
+   dotnet build
+   ```
+
+   c. ParkingOut:
+   ```
+   cd /d D:\21maret\clean_code\ParkingOut
+   dotnet restore
+   dotnet build ParkingOut.csproj
+   ```
+
+4. **Verifikasi .NET SDK**
+   - Pastikan .NET SDK versi 6.0 terinstal
+   - Periksa dengan menjalankan: `dotnet --list-sdks`
+   - Jika belum terinstal, unduh dari [website resmi Microsoft](https://dotnet.microsoft.com/download/dotnet/6.0)
+
+5. **Periksa Akses Direktori**
+   - Pastikan user memiliki akses penuh (full access) ke direktori D:\21maret
+   - Klik kanan pada folder → Properties → Security → Edit → Add/Modify permissions
+
+## Panduan Menjalankan Aplikasi
+
+Sistem parkir terdiri dari beberapa komponen utama yang perlu dijalankan bersama. Berikut adalah panduan lengkap untuk menjalankan sistem:
+
+### Menggunakan Menu Launcher
+
+Cara termudah untuk menjalankan aplikasi adalah menggunakan menu launcher:
+
+1. Jalankan `run.bat` di folder utama (D:\21maret)
+2. Pilih opsi yang diinginkan dari menu:
+   - **[1] Run All Applications** - Menjalankan semua komponen (ParkingServer, ParkingIN, ParkingOut)
+   - **[2] Run ParkingServer Only** - Menjalankan hanya server database
+   - **[3] Run ParkingIN Only** - Menjalankan hanya aplikasi gate masuk
+   - **[4] Run ParkingOut Only** - Menjalankan hanya aplikasi gate keluar
+   - **[5] Check Application Status** - Memeriksa status semua komponen
+   - **[6] Check PostgreSQL Service** - Memeriksa koneksi database PostgreSQL
+   - **[7] Test Database Connection** - Menguji koneksi ke database parkingdb
+   - **[8] Restart All Services** - Restart semua komponen
+   - **[9] Exit** - Keluar dari launcher
+
+### Menjalankan Komponen Secara Manual
+
+#### ParkingServer
+ParkingServer adalah komponen backend yang mengelola database dan logika bisnis.
+
+1. Pastikan database PostgreSQL sudah berjalan dan database parkingdb telah dibuat
+2. Buka command prompt
+3. Masuk ke direktori aplikasi: `cd /d D:\21maret\clean_code\ParkingServer`
+4. Jalankan: `dotnet run`
+
+#### ParkingIN
+ParkingIN adalah aplikasi untuk mengelola pintu masuk parkir.
+
+1. Pastikan ParkingServer sudah berjalan dan terhubung ke database parkingdb
+2. Buka command prompt baru
+3. Masuk ke direktori aplikasi: `cd /d D:\21maret\clean_code\ParkingIN`
+4. Jalankan: `dotnet run`
+
+#### ParkingOut
+ParkingOut adalah aplikasi untuk mengelola pintu keluar dan pembayaran.
+
+1. Pastikan ParkingServer sudah berjalan dan terhubung ke database parkingdb
+2. Buka command prompt baru
+3. Masuk ke direktori aplikasi: `cd /d D:\21maret\clean_code\ParkingOut`
+4. Jalankan: `dotnet run --project ParkingOut.csproj`
+
+### Panduan Lengkap Build dan Run ParkingOut
+
+Berikut adalah langkah lengkap untuk membangun dan menjalankan aplikasi ParkingOut:
+
+#### Persiapan
+
+1. **Pastikan Prerequisites Terinstall**
+   - .NET 6.0 SDK terinstall - verifikasi dengan `dotnet --list-sdks`
+   - PostgreSQL berjalan dan database parkingdb sudah dibuat
+   - ParkingServer sudah berjalan (opsional, tergantung apakah Anda ingin menguji koneksi)
+
+2. **Persiapkan Environment**
+   - Buka Command Prompt sebagai Administrator
+   - Pastikan semua instance ParkingOut yang mungkin berjalan sudah ditutup
+
+#### Build ParkingOut
+
+1. **Navigasi ke Direktori ParkingOut**
+   ```
+   cd /d D:\21maret\clean_code\ParkingOut
+   ```
+
+2. **Clean Project (Opsional tapi Direkomendasikan)**
+   ```
+   dotnet clean ParkingOut.csproj
+   ```
+
+3. **Restore Packages**
+   ```
+   dotnet restore ParkingOut.csproj
+   ```
+   Tunggu hingga semua package berhasil didownload dan dipulihkan.
+
+4. **Build Project**
+   ```
+   dotnet build ParkingOut.csproj
+   ```
+   Pastikan build sukses tanpa error. Jika terdapat warning, umumnya masih bisa dilanjutkan.
+
+#### Run ParkingOut
+
+1. **Metode 1: Menggunakan dotnet run**
+   ```
+   dotnet run --project ParkingOut.csproj
+   ```
+   Ini akan membangun (jika diperlukan) dan menjalankan aplikasi dalam mode debug.
+
+2. **Metode 2: Menjalankan Executable Langsung**
+   ```
+   cd /d D:\21maret\clean_code\ParkingOut\bin\Debug\net6.0-windows
+   ParkingOut.exe
+   ```
+   Gunakan metode ini jika aplikasi sudah berhasil dibangun sebelumnya.
+
+3. **Metode 3: Menggunakan Visual Studio (jika terinstall)**
+   - Buka file `SimpleParkingAdmin.sln` dengan Visual Studio
+   - Set ParkingOut sebagai Startup Project
+   - Tekan F5 untuk menjalankan dalam mode debug
+
+#### Troubleshooting ParkingOut
+
+1. **Error "MSB1011: Multiple Projects"**
+   - Selalu gunakan flag `--project ParkingOut.csproj` saat menggunakan dotnet run/build
+
+2. **Error Koneksi Database**
+   - Verifikasi string koneksi di `App.config` sudah benar
+   - Pastikan PostgreSQL berjalan dengan `sc query postgresql-x64-14` (sesuaikan versinya)
+   - Pastikan database parkingdb sudah dibuat
+
+3. **Error "The application was unable to start correctly (0xc000007b)"**
+   - Ini biasanya berarti DLL yang dibutuhkan tidak dapat dimuat
+   - Pastikan .NET Runtime terinstall dengan benar
+   - Jalankan perintah `dotnet restore ParkingOut.csproj` untuk memastikan semua dependensi terunduh
+
+4. **UI Error atau Exception**
+   - Jalankan dengan mengikuti log error: `dotnet run --project ParkingOut.csproj > error-log.txt 2>&1`
+   - Periksa log untuk detail error
+
+5. **Aplikasi Tidak Merespons**
+   - Pastikan ParkingServer berjalan jika aplikasi memerlukan koneksi ke server
+   - Periksa penggunaan memory dan CPU sistem
+
+### Database
+
+#### PostgreSQL
+1. Pastikan PostgreSQL sudah terinstal dan berjalan
+2. Kredensial default: 
+   - Username: postgres
+   - Password: root@rsi
+   - Port: 5432
+   - Database: parkingdb
+3. Untuk menjalankan PostgreSQL secara manual, gunakan:
+   ```
+   cd /d D:\21maret\clean_code\ParkingIN\Database
+   call StartPostgreSQL.bat
+   ```
+
+## Konfigurasi Database
+
+### PostgreSQL
+
+1. **Instalasi PostgreSQL**
+   - Unduh PostgreSQL 14 atau yang lebih baru dari [website resmi](https://www.postgresql.org/download/)
+   - Instal dengan mengikuti panduan instalasi
+   - Saat diminta, atur password untuk user "postgres" menjadi "root@rsi"
+   - Pastikan service PostgreSQL berjalan di port default 5432
+
+2. **Inisialisasi Database**
+   - Jalankan script `D:\21maret\InitializeDatabase.bat` untuk membuat database dan tabel
+   - Script akan membuat database "parkingdb" dan semua tabel yang diperlukan
+
+3. **Konfigurasi Koneksi**
+   - Aplikasi menggunakan connection string yang terdapat di file konfigurasi masing-masing aplikasi
+   - ParkingServer: `D:\21maret\clean_code\ParkingServer\appsettings.json`
+   ```json
+   {
+     "ConnectionStrings": {
+       "DefaultConnection": "Host=localhost;Port=5432;Database=parkingdb;Username=postgres;Password=root@rsi;"
+     }
+   }
+   ```
+   - ParkingIN: `D:\21maret\clean_code\ParkingIN\App.config`
+   - ParkingOut: `D:\21maret\clean_code\ParkingOut\App.config`
+   - Contoh connection string PostgreSQL:
+   ```xml
+   <connectionStrings>
+     <add name="ParkingConnection" connectionString="Host=localhost;Port=5432;Database=parkingdb;Username=postgres;Password=root@rsi;" providerName="Npgsql" />
+   </connectionStrings>
+   ```
 
 ## Konfigurasi Printer Thermal
 
@@ -103,14 +334,14 @@
 1. Kendaraan terdeteksi oleh sensor
 2. Pengguna menekan push button
 3. MCU ATMEL mengirim sinyal "IN:<ID>" ke PC melalui port serial
-4. Aplikasi ParkingIN menerima sinyal dan memproses data
+4. Aplikasi ParkingIN menerima sinyal dan memproses data di database parkingdb
 5. Printer thermal mencetak tiket masuk dengan barcode
 
 #### Exit Process
 1. Kendaraan terdeteksi di pintu keluar
 2. Petugas memindai barcode di tiket
 3. MCU mengirim sinyal "OUT:<ID>" ke PC
-4. Aplikasi ParkingOUT memproses data dan memvalidasi
+4. Aplikasi ParkingOUT memproses data dan memvalidasi di database parkingdb
 5. Printer mencetak tiket keluar atau struk pembayaran
 
 ## Konfigurasi Kamera
@@ -250,8 +481,29 @@ Setelah semua hardware terkonfigurasi, jalankan pengujian integrasi untuk memast
    - Gate barrier dapat menerima dan merespons perintah
    - Printer dapat mencetak tiket
    - Barcode scanner dapat membaca barcode
+   - Semua komponen dapat berinteraksi dengan database parkingdb
 
 ## Pemecahan Masalah
+
+### Masalah Database
+
+#### PostgreSQL
+- **PostgreSQL service tidak berjalan**: Jalankan `services.msc` dan start service PostgreSQL
+- **Error koneksi**: Verifikasi username dan password di connection string
+- **Database tidak ditemukan**: Jalankan script inisialisasi database untuk membuat database parkingdb
+- **Error saat memulai service**: Periksa log PostgreSQL di Event Viewer atau di folder log PostgreSQL
+- **Data tidak konsisten**: Gunakan tool pgAdmin untuk memeriksa database parkingdb secara langsung
+
+### Masalah Aplikasi
+
+#### ParkingServer
+- **Tidak dapat memulai**: Pastikan tidak ada instance lain yang berjalan di port yang sama
+- **Error koneksi database**: Verifikasi connection string di appsettings.json merujuk ke database parkingdb
+
+#### ParkingOut
+- **Error build "MSB1011" (multiple projects)**: Gunakan perintah `dotnet build ParkingOut.csproj`
+- **Error restore package**: Pastikan internet aktif dan NuGet dikonfigurasi dengan benar
+- **Error koneksi ke server**: Pastikan ParkingServer berjalan dan terhubung ke database parkingdb
 
 ### Masalah Kamera
 - **Webcam tidak terdeteksi**: Pastikan driver terinstall dengan benar dan webcam muncul di Device Manager

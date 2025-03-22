@@ -21,12 +21,12 @@ namespace ParkingOut.UI
         /// <summary>
         /// Event that is raised when a menu item is clicked.
         /// </summary>
-        public event EventHandler<ParkingOut.UI.MenuItem> MenuItemClicked;
+        public event EventHandler<ParkingOut.UI.MenuItem>? MenuItemClicked;
 
         /// <summary>
         /// Event that is raised when the logout button is clicked.
         /// </summary>
-        public event EventHandler LogoutClicked;
+        public event EventHandler? LogoutClicked;
 
         #endregion
         
@@ -37,9 +37,9 @@ namespace ParkingOut.UI
         private bool _isCollapsed;
         private string _title = "ParkingOut";
         private string _userName = "Administrator";
-        private ImageSource _logoSource;
+        private ImageSource? _logoSource;
         private List<System.Windows.Controls.Button> _menuButtons = new List<System.Windows.Controls.Button>();
-        private ParkingOut.UI.MenuItem _activeMenuItem;
+        private ParkingOut.UI.MenuItem? _activeMenuItem;
 
         #endregion
 
@@ -97,7 +97,7 @@ namespace ParkingOut.UI
         /// <summary>
         /// Gets or sets the logo image source.
         /// </summary>
-        public ImageSource LogoSource
+        public ImageSource? LogoSource
         {
             get => _logoSource;
             set
@@ -113,7 +113,7 @@ namespace ParkingOut.UI
         /// <summary>
         /// Gets or sets the active menu item.
         /// </summary>
-        public ParkingOut.UI.MenuItem ActiveMenuItem
+        public ParkingOut.UI.MenuItem? ActiveMenuItem
         {
             get => _activeMenuItem;
             set

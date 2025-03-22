@@ -11,9 +11,9 @@ namespace ParkingOut.UI
     {
         #region Private Fields
 
-        private string _text;
-        private string _iconPath;
-        private string _tag;
+        private string? _text;
+        private string? _iconPath;
+        private string? _tag;
         private bool _isActive;
 
         #endregion
@@ -21,11 +21,11 @@ namespace ParkingOut.UI
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the text of the menu item.
+        /// Gets or sets the text displayed for the menu item.
         /// </summary>
         public string Text
         {
-            get => _text;
+            get { return _text ?? string.Empty; }
             set
             {
                 if (_text != value)
@@ -37,11 +37,11 @@ namespace ParkingOut.UI
         }
 
         /// <summary>
-        /// Gets or sets the icon path data for the menu item.
+        /// Gets or sets the icon path for the menu item.
         /// </summary>
         public string IconPath
         {
-            get => _iconPath;
+            get { return _iconPath ?? string.Empty; }
             set
             {
                 if (_iconPath != value)
@@ -53,11 +53,11 @@ namespace ParkingOut.UI
         }
 
         /// <summary>
-        /// Gets or sets the tag identifying the menu item.
+        /// Gets or sets the tag that identifies this menu item.
         /// </summary>
         public string Tag
         {
-            get => _tag;
+            get { return _tag ?? string.Empty; }
             set
             {
                 if (_tag != value)

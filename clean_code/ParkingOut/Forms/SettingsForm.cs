@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Windows.Forms;
 using SimpleParkingAdmin.Utils;
+using SimpleParkingAdmin.Models;
 using Serilog;
 
 namespace SimpleParkingAdmin.Forms
@@ -40,36 +41,21 @@ namespace SimpleParkingAdmin.Forms
         {
             try
             {
-                var settings = Database.LoadNetworkSettings();
-                foreach (DataRow row in settings.Rows)
-                {
-                    string key = row["setting_key"].ToString();
-                    string value = row["setting_value"].ToString();
-                    
-                    switch (key)
-                    {
-                        case "network_server":
-                            txtServer.Text = value;
-                            break;
-                        case "network_port":
-                            txtPort.Text = value;
-                            break;
-                        case "network_database":
-                            txtDatabase.Text = value;
-                            break;
-                        case "network_username":
-                            txtUsername.Text = value;
-                            break;
-                        case "network_password":
-                            txtPassword.Text = value;
-                            break;
-                    }
-                }
+                // Get settings as an object instead of DataTable
+                var settings = Database.LoadNetworkSettingsObject();
+                
+                txtServer.Text = settings.ServerIP;
+                txtPort.Text = settings.Port.ToString();
+                txtDatabase.Text = settings.DatabaseName;
+                txtUsername.Text = settings.Username;
+                txtPassword.Text = settings.Password;
+                
+                _logger.Debug("Network settings loaded successfully");
             }
             catch (Exception ex)
             {
                 _logger.Error("Failed to load settings", ex);
-                MessageBox.Show("Failed to load settings. Please check the logs for details.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error loading settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -77,24 +63,42 @@ namespace SimpleParkingAdmin.Forms
         {
             try
             {
-                string connectionString = $"Server={txtServer.Text};Port={txtPort.Text};Database={txtDatabase.Text};Uid={txtUsername.Text};Pwd={txtPassword.Text};";
-                Database.SetConnectionString(connectionString);
-                
-                if (Database.TestConnection())
+                // Create a temporary NetworkSettings object with the form values
+                var tempSettings = new NetworkSettings
                 {
-                    MessageBox.Show("Database connection test successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    ServerIP = txtServer.Text.Trim(),
+                    Port = int.Parse(txtPort.Text.Trim()),
+                    DatabaseName = txtDatabase.Text.Trim(),
+                    Username = txtUsername.Text.Trim(),
+                    Password = txtPassword.Text,
+                    DatabaseType = "PostgreSQL" // Default to PostgreSQL
+                };
+                
+                // Get the connection string
+                string connectionString = tempSettings.GetConnectionString();
+                
+                // Test the connection
+                string errorMessage;
+                bool success = Database.TestConnectionWithString(connectionString, out errorMessage);
+                
+                if (success)
+                {
+                    MessageBox.Show("Database connection test successful!", "Success", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return true;
                 }
                 else
                 {
-                    MessageBox.Show("Database connection test failed. Please check your settings.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Database connection test failed: {errorMessage}", 
+                        "Connection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
             }
             catch (Exception ex)
             {
                 _logger.Error("Database connection test failed", ex);
-                MessageBox.Show("Database connection test failed. Please check the logs for details.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Database connection test failed: {ex.Message}", 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -103,19 +107,40 @@ namespace SimpleParkingAdmin.Forms
         {
             try
             {
-                Database.SaveSettings("network_server", txtServer.Text);
-                Database.SaveSettings("network_port", txtPort.Text);
-                Database.SaveSettings("network_database", txtDatabase.Text);
-                Database.SaveSettings("network_username", txtUsername.Text);
-                Database.SaveSettings("network_password", txtPassword.Text);
+                // Create a NetworkSettings object and save it
+                var settings = new SimpleParkingAdmin.Models.NetworkSettings
+                {
+                    ServerIP = txtServer.Text.Trim(),
+                    Port = int.Parse(txtPort.Text.Trim()),
+                    DatabaseName = txtDatabase.Text.Trim(),
+                    Username = txtUsername.Text.Trim(),
+                    Password = txtPassword.Text,
+                    DatabaseType = "PostgreSQL" // Default to PostgreSQL
+                };
+
+                // Save to database
+                bool success = settings.SaveToDatabase();
                 
-                MessageBox.Show("Settings saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return true;
+                if (success)
+                {
+                    _logger.Information("Network settings saved successfully");
+                    MessageBox.Show("Settings saved successfully. You may need to restart the application for changes to take effect.", 
+                        "Settings Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    _logger.Warning("Failed to save network settings");
+                    MessageBox.Show("Failed to save settings. Please try again.", 
+                        "Save Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                
+                return success;
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to save settings", ex);
-                MessageBox.Show("Failed to save settings. Please check the logs for details.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _logger.Error("Error saving settings", ex);
+                MessageBox.Show($"Error saving settings: {ex.Message}", 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }

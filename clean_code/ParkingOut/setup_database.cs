@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SimpleParkingAdmin.Utils;
 using Serilog;
 using Serilog.Events;
@@ -25,27 +25,27 @@ namespace SimpleParkingAdmin
                 string server = Console.ReadLine();
                 if (string.IsNullOrEmpty(server)) server = "localhost";
                 
-                Console.Write("Port (default: 3306): ");
+                Console.Write("Port (default: 5432): ");
                 string portStr = Console.ReadLine();
-                int port = string.IsNullOrEmpty(portStr) ? 3306 : int.Parse(portStr);
+                int port = string.IsNullOrEmpty(portStr) ? 5432 : int.Parse(portStr);
                 
-                Console.Write("Database (default: parking_system): ");
+                Console.Write("Database (default: parkirdb): ");
                 string database = Console.ReadLine();
-                if (string.IsNullOrEmpty(database)) database = "parking_system";
+                if (string.IsNullOrEmpty(database)) database = "parkirdb";
                 
-                Console.Write("Username (default: root): ");
+                Console.Write("Username (default: postgres): ");
                 string username = Console.ReadLine();
-                if (string.IsNullOrEmpty(username)) username = "root";
+                if (string.IsNullOrEmpty(username)) username = "postgres";
                 
                 Console.Write("Password: ");
                 string password = Console.ReadLine();
                 
                 // Build connection string
-                string connectionString = $"Server={server};Port={port};Database={database};Uid={username};Pwd={password};Allow User Variables=True;SslMode=none;AllowPublicKeyRetrieval=true;";
+                string connectionString = $"Host={server};Port={port};Database=postgres;Username={username};Password={password};";
                 
                 // Test the connection
                 Console.WriteLine("\nTesting connection...");
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (var connection = new NpgsqlConnection(connectionString))
                 {
                     connection.Open();
                     Console.WriteLine("Successfully connected to the database!");
@@ -53,8 +53,15 @@ namespace SimpleParkingAdmin
                     // Create database if it doesn't exist
                     CreateDatabaseIfNotExists(connection, database);
                     
-                    // Create users table and add default user
-                    CreateDefaultUser(connection);
+                    // Connect to the new database
+                    string dbConnectionString = $"Host={server};Port={port};Database={database};Username={username};Password={password};";
+                    using (var dbConnection = new NpgsqlConnection(dbConnectionString))
+                    {
+                        dbConnection.Open();
+                        
+                        // Create users table and add default user
+                        CreateDefaultUser(dbConnection);
+                    }
                 }
                 
                 // Save connection settings
@@ -71,35 +78,65 @@ namespace SimpleParkingAdmin
             Console.ReadKey();
         }
         
-        static void CreateDatabaseIfNotExists(MySqlConnection connection, string databaseName)
+        static void CreateDatabaseIfNotExists(NpgsqlConnection connection, string databaseName)
         {
             try
             {
                 Console.WriteLine($"\nChecking if database '{databaseName}' exists...");
                 
-                string createDbQuery = $"CREATE DATABASE IF NOT EXISTS `{databaseName}`";
-                using (MySqlCommand cmd = new MySqlCommand(createDbQuery, connection))
+                // Check if database exists
+                using (var cmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname = @dbname", connection))
                 {
-                    cmd.ExecuteNonQuery();
-                }
-                
-                Console.WriteLine($"Database '{databaseName}' is ready.");
-                
-                // Use the database
-                string useDbQuery = $"USE `{databaseName}`";
-                using (MySqlCommand cmd = new MySqlCommand(useDbQuery, connection))
-                {
-                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("@dbname", databaseName);
+                    var result = cmd.ExecuteScalar();
+                    bool dbExists = (result != null && result != DBNull.Value);
+                    
+                    if (!dbExists)
+                    {
+                        Console.WriteLine($"Database '{databaseName}' does not exist. Creating...");
+                        
+                        // Close any existing connections to postgres database
+                        connection.Close();
+                        
+                        // Extract password from connection string since NpgsqlConnection doesn't expose Password property
+                        string password = "";
+                        var connStringParts = connection.ConnectionString.Split(';');
+                        foreach (var part in connStringParts)
+                        {
+                            if (part.Trim().StartsWith("Password=", StringComparison.OrdinalIgnoreCase))
+                            {
+                                password = part.Substring(part.IndexOf('=') + 1);
+                                break;
+                            }
+                        }
+                        
+                        using (var adminConn = new NpgsqlConnection($"Host={connection.Host};Port={connection.Port};Database=postgres;Username={connection.UserName};Password={password}"))
+                        {
+                            adminConn.Open();
+                            // In PostgreSQL, database names cannot be parameterized
+                            using (var createDbCmd = new NpgsqlCommand($"CREATE DATABASE {databaseName}", adminConn))
+                            {
+                                createDbCmd.ExecuteNonQuery();
+                            }
+                        }
+                        
+                        // Reopen the original connection
+                        connection.Open();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Database '{databaseName}' already exists.");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating/using database: {ex.Message}");
+                Console.WriteLine($"Error creating database: {ex.Message}");
                 throw;
             }
         }
         
-        static void CreateDefaultUser(MySqlConnection connection)
+        static void CreateDefaultUser(NpgsqlConnection connection)
         {
             try
             {
@@ -110,39 +147,43 @@ namespace SimpleParkingAdmin
                 {
                     // Create users table (new schema)
                     @"CREATE TABLE IF NOT EXISTS users (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        username VARCHAR(50) NOT NULL UNIQUE,
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(50) NOT NULL,
                         password VARCHAR(255) NOT NULL,
                         nama VARCHAR(100),
                         role VARCHAR(20) NOT NULL,
-                        active TINYINT(1) DEFAULT 1
+                        active BOOLEAN DEFAULT TRUE,
+                        CONSTRAINT username_unique UNIQUE (username)
                     )",
                     
                     // Create t_user table (old schema)
                     @"CREATE TABLE IF NOT EXISTS t_user (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        username VARCHAR(50) NOT NULL UNIQUE,
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(50) NOT NULL,
                         password VARCHAR(100) NOT NULL,
                         nama VARCHAR(100),
                         role VARCHAR(20) DEFAULT 'operator',
-                        status INT DEFAULT 1,
+                        status BOOLEAN DEFAULT TRUE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        CONSTRAINT t_user_username_unique UNIQUE (username)
                     )",
                     
                     // Add default admin to users table
-                    @"INSERT IGNORE INTO users (username, password, nama, role)
-                      VALUES ('admin', 'admin123', 'Administrator', 'admin')",
+                    @"INSERT INTO users (username, password, nama, role)
+                      VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Administrator', 'admin')
+                      ON CONFLICT (username) DO NOTHING",
                     
                     // Add default admin to t_user table
-                    @"INSERT IGNORE INTO t_user (username, password, nama, role, status)
-                      VALUES ('admin', 'admin123', 'Administrator', 'admin', 1)"
+                    @"INSERT INTO t_user (username, password, nama, role, status)
+                      VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Administrator', 'admin', TRUE)
+                      ON CONFLICT (username) DO NOTHING"
                 };
                 
                 // Execute each query
                 foreach (string query in setupQueries)
                 {
-                    using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                    using (var cmd = new NpgsqlCommand(query, connection))
                     {
                         cmd.ExecuteNonQuery();
                     }
@@ -171,7 +212,8 @@ namespace SimpleParkingAdmin
                     DatabaseName = database,
                     Username = username,
                     Password = password,
-                    Port = port
+                    Port = port,
+                    DatabaseType = "PostgreSQL"
                 };
                 
                 // Ensure config directory exists
@@ -190,7 +232,22 @@ namespace SimpleParkingAdmin
                     serializer.Serialize(writer, settings);
                 }
                 
-                Console.WriteLine($"Settings saved to {settingsPath}");
+                // Save settings to INI file for backward compatibility
+                string iniPath = Path.Combine(configDir, "network.ini");
+                using (var writer = new StreamWriter(iniPath))
+                {
+                    writer.WriteLine("# Konfigurasi untuk database jaringan");
+                    writer.WriteLine("# Set DB_NETWORK=true untuk menggunakan database jaringan");
+                    writer.WriteLine("DB_NETWORK=false");
+                    writer.WriteLine($"DB_SERVER={server}");
+                    writer.WriteLine($"DB_PORT={port}");
+                    writer.WriteLine($"DB_USER={username}");
+                    writer.WriteLine($"DB_PASSWORD={password}");
+                    writer.WriteLine($"DB_NAME={database}");
+                    writer.WriteLine($"DB_TYPE=PostgreSQL");
+                }
+                
+                Console.WriteLine($"Settings saved to {settingsPath} and {iniPath}");
             }
             catch (Exception ex)
             {
@@ -204,9 +261,10 @@ namespace SimpleParkingAdmin
     public class DatabaseNetworkSettings
     {
         public string ServerIP { get; set; } = "localhost";
-        public string DatabaseName { get; set; } = "parking_system";
-        public string Username { get; set; } = "root";
+        public string DatabaseName { get; set; } = "parkirdb";
+        public string Username { get; set; } = "postgres";
         public string Password { get; set; } = "";
-        public int Port { get; set; } = 3306;
+        public int Port { get; set; } = 5432;
+        public string DatabaseType { get; set; } = "PostgreSQL";
     }
 } 

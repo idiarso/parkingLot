@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/UI/Styles/SidebarStyles.xaml"/>
+                <ResourceDictionary Source="/ParkingOut;component/UI/Styles/SidebarStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
             <!-- Converters -->

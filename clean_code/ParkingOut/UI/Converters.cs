@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace SimpleParkingAdmin.UI
+namespace ParkingOut.UI
 {
     /// <summary>
     /// Converts a boolean value to its inverse.
@@ -12,16 +12,20 @@ namespace SimpleParkingAdmin.UI
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue)
-                return !boolValue;
-            return false;
+            if (value is bool booleanValue)
+            {
+                return !booleanValue;
+            }
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue)
-                return !boolValue;
-            return false;
+            if (value is bool booleanValue)
+            {
+                return !booleanValue;
+            }
+            return value;
         }
     }
 
@@ -33,22 +37,18 @@ namespace SimpleParkingAdmin.UI
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool isInverse = parameter as string == "Inverse";
-            if (value is bool boolValue)
+            if (value is bool booleanValue)
             {
-                boolValue = isInverse ? !boolValue : boolValue;
-                return boolValue ? Visibility.Visible : Visibility.Collapsed;
+                return booleanValue ? Visibility.Visible : Visibility.Collapsed;
             }
             return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool isInverse = parameter as string == "Inverse";
             if (value is Visibility visibility)
             {
-                bool result = visibility == Visibility.Visible;
-                return isInverse ? !result : result;
+                return visibility == Visibility.Visible;
             }
             return false;
         }
@@ -62,20 +62,16 @@ namespace SimpleParkingAdmin.UI
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is double width)
+            if (value is double sidebarWidth)
             {
-                return new Thickness(width, 0, 0, 0);
+                return new Thickness(sidebarWidth, 0, 0, 0);
             }
-            return new Thickness(250, 0, 0, 0); // Default margin
+            return new Thickness(0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Thickness thickness)
-            {
-                return thickness.Left;
-            }
-            return 250.0; // Default width
+            throw new NotImplementedException();
         }
     }
 } 

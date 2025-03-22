@@ -18,7 +18,7 @@ namespace ParkingOut.UI
         public VehicleEntryPage()
         {
             InitializeComponent();
-            _logger = new FileLogger();
+            _logger = new AppLogger(GetType().Name);
             _recentEntries = new ObservableCollection<VehicleEntryInfo>();
             dgvRecentEntries.ItemsSource = _recentEntries;
             
@@ -103,7 +103,15 @@ namespace ParkingOut.UI
                 }
                 
                 // Get the vehicle type
-                string vehicleType = ((ComboBoxItem)cmbVehicleType.SelectedItem).Content.ToString();
+                var selectedItem = cmbVehicleType.SelectedItem as ComboBoxItem;
+                if (selectedItem == null)
+                {
+                    System.Windows.MessageBox.Show("Please select a vehicle type.", "Validation Error", 
+                                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                    cmbVehicleType.Focus();
+                    return;
+                }
+                string vehicleType = selectedItem.Content?.ToString() ?? "Unknown";
                 
                 _logger.Info($"Saving entry for plate number: {txtPlateNumber.Text}, ticket: {txtTicketNumber.Text}");
                 
@@ -155,9 +163,9 @@ namespace ParkingOut.UI
     // A simple class to represent vehicle entry information
     public class VehicleEntryInfo
     {
-        public string TicketNo { get; set; }
-        public string PlateNo { get; set; }
-        public string VehicleType { get; set; }
+        public string? TicketNo { get; set; }
+        public string? PlateNo { get; set; }
+        public string? VehicleType { get; set; }
         public DateTime EntryTime { get; set; }
     }
 } 

@@ -552,13 +552,14 @@ namespace SimpleParkingAdmin
             try
             {
                 _logger.Information("Testing database connection");
-                if (Database.TestConnection())
+                string errorMessage;
+                if (Database.TestConnection(out errorMessage))
                 {
                     MessageBox.Show("Database connection successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("Failed to connect to database.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Failed to connect to database: {errorMessage}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)

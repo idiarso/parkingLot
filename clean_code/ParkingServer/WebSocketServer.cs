@@ -46,6 +46,14 @@ namespace ParkingServer
         
         // Database connection
         private string _connectionString = "Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;";
+        private bool _databaseAvailable = false;
+        
+        // Thread-safe property untuk status database
+        public bool IsDatabaseAvailable
+        {
+            get { lock (_lockObject) { return _databaseAvailable; } }
+            private set { lock (_lockObject) { _databaseAvailable = value; } }
+        }
         
         // Thread-safe property untuk status server
         public bool IsRunning
@@ -163,14 +171,14 @@ namespace ParkingServer
         /// </summary>
         public bool Start()
         {
-            if (IsRunning)
-            {
-                LogWarning("WebSocket server already running");
-                return true;
-            }
-            
             try
             {
+                if (IsRunning)
+                {
+                    LogWarning("WebSocket server already running");
+                    return true;
+                }
+                
                 // Dapatkan port dari alamat WebSocket
                 int port = 8181; // Default port
                 var match = Regex.Match(_webSocketAddress, @":(\d+)$");
@@ -180,9 +188,13 @@ namespace ParkingServer
                 }
                 
                 LogInfo($"Starting WebSocket server on port {port}");
+                
+                // Coba inisialisasi database terlebih dahulu
+                InitializeDatabase();
+                
                 _fleckServer = new Fleck.WebSocketServer(_webSocketAddress);
                 
-                // Configure server
+                // Configure WebSocket behavior
                 _fleckServer.Start(socket =>
                 {
                     socket.OnOpen = () =>
@@ -557,6 +569,44 @@ namespace ParkingServer
         private void LogError(string message)
         {
             Console.WriteLine($"[ERROR] {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}");
+        }
+        
+        /// <summary>
+        /// Inisialisasi koneksi database
+        /// </summary>
+        private void InitializeDatabase()
+        {
+            try
+            {
+                LogInfo("Memeriksa koneksi database...");
+                
+                using (NpgsqlConnection connection = new NpgsqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    
+                    // Periksa apakah tabel settings ada
+                    using (NpgsqlCommand command = new NpgsqlCommand(
+                        "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'settings')", 
+                        connection))
+                    {
+                        bool tableExists = Convert.ToBoolean(command.ExecuteScalar());
+                        
+                        if (!tableExists)
+                        {
+                            LogWarning("Tabel 'settings' tidak ditemukan pada database. Beberapa fitur mungkin tidak berfungsi.");
+                        }
+                    }
+                    
+                    IsDatabaseAvailable = true;
+                    LogInfo("Koneksi database berhasil diinisialisasi");
+                }
+            }
+            catch (Exception ex)
+            {
+                IsDatabaseAvailable = false;
+                LogError($"Gagal terhubung ke database: {ex.Message}");
+                LogWarning("Server akan berjalan tanpa koneksi database. Beberapa fitur akan dibatasi.");
+            }
         }
     }
 }

@@ -43,22 +43,27 @@ namespace SimpleParkingAdmin.Forms
         {
             try
             {
-                string query = "SELECT DISTINCT jenis_kendaraan FROM t_tarif WHERE status = 1 ORDER BY jenis_kendaraan";
-                var types = Database.ExecuteQuery(query);
-                cmbVehicleType.Items.Clear();
-                cmbVehicleType.Items.Add("-- All Vehicle Types --");
+                // Use a query that only accesses the t_tarif table and avoids any joins
+                string query = "SELECT jenis_kendaraan FROM t_tarif WHERE status = TRUE GROUP BY jenis_kendaraan ORDER BY jenis_kendaraan";
+                _logger.Debug($"Loading vehicle types with query: {query}");
                 
-                foreach (DataRow row in types.Rows)
+                var result = Database.ExecuteQuery(query);
+                
+                cmbVehicleType.Items.Clear();
+                cmbVehicleType.Items.Add("All");
+                
+                foreach (DataRow row in result.Rows)
                 {
                     cmbVehicleType.Items.Add(row["jenis_kendaraan"].ToString());
                 }
                 
                 cmbVehicleType.SelectedIndex = 0;
+                _logger.Info($"Loaded {result.Rows.Count} vehicle types");
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to load vehicle types", ex);
-                NotificationHelper.ShowError("Failed to load vehicle types.");
+                _logger.Error($"Failed to load vehicle types: {ex.Message}", ex);
+                NotificationHelper.ShowError($"Failed to load vehicle types. Error: {ex.Message}");
             }
         }
 
@@ -79,87 +84,39 @@ namespace SimpleParkingAdmin.Forms
                 
                 string query = "";
                 
+                // Build query based on report type
                 if (rbDaily.Checked)
                 {
                     // Daily report
-                    query = $@"
-                        SELECT 
-                            DATE(p.waktu_masuk) as tanggal,
-                            p.jenis_kendaraan,
-                            COUNT(*) as jumlah_kendaraan,
-                            SUM(CASE WHEN p.member_id IS NOT NULL THEN 1 ELSE 0 END) as jumlah_member,
-                            SUM(CASE WHEN p.member_id IS NULL THEN 1 ELSE 0 END) as jumlah_non_member,
-                            SUM(IFNULL(p.tarif, 0)) as total_pendapatan
-                        FROM t_parkir p
-                        WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
-                            AND '{endDate}'
-                            {vehicleFilter}
-                        GROUP BY DATE(p.waktu_masuk), p.jenis_kendaraan
-                        ORDER BY DATE(p.waktu_masuk), p.jenis_kendaraan";
+                    query = BuildDailyReport(startDate, endDate, vehicleFilter);
                 }
                 else if (rbMonthly.Checked)
                 {
                     // Monthly report
-                    query = $@"
-                        SELECT 
-                            YEAR(p.waktu_masuk) as tahun,
-                            MONTH(p.waktu_masuk) as bulan,
-                            p.jenis_kendaraan,
-                            COUNT(*) as jumlah_kendaraan,
-                            SUM(CASE WHEN p.member_id IS NOT NULL THEN 1 ELSE 0 END) as jumlah_member,
-                            SUM(CASE WHEN p.member_id IS NULL THEN 1 ELSE 0 END) as jumlah_non_member,
-                            SUM(IFNULL(p.tarif, 0)) as total_pendapatan
-                        FROM t_parkir p
-                        WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
-                            AND '{endDate}'
-                            {vehicleFilter}
-                        GROUP BY YEAR(p.waktu_masuk), MONTH(p.waktu_masuk), p.jenis_kendaraan
-                        ORDER BY YEAR(p.waktu_masuk), MONTH(p.waktu_masuk), p.jenis_kendaraan";
+                    query = BuildMonthlyReport(startDate, endDate, vehicleFilter);
                 }
                 else if (rbVehicle.Checked)
                 {
                     // Vehicle type report
-                    query = $@"
-                        SELECT 
-                            p.jenis_kendaraan,
-                            COUNT(*) as jumlah_kendaraan,
-                            SUM(CASE WHEN p.member_id IS NOT NULL THEN 1 ELSE 0 END) as jumlah_member,
-                            SUM(CASE WHEN p.member_id IS NULL THEN 1 ELSE 0 END) as jumlah_non_member,
-                            SUM(IFNULL(p.tarif, 0)) as total_pendapatan
-                        FROM t_parkir p
-                        WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
-                            AND '{endDate}'
-                            {vehicleFilter}
-                        GROUP BY p.jenis_kendaraan
-                        ORDER BY p.jenis_kendaraan";
+                    query = BuildVehicleReport(startDate, endDate, vehicleFilter);
                 }
                 else if (rbMember.Checked)
                 {
                     // Member report
-                    query = $@"
-                        SELECT 
-                            CASE WHEN m.id IS NOT NULL 
-                                THEN CONCAT(m.nama, ' (', m.card_id, ')')
-                                ELSE 'Non-Member' 
-                            END as member_info,
-                            COUNT(*) as jumlah_kendaraan,
-                            SUM(IFNULL(p.tarif, 0)) as total_pendapatan
-                        FROM t_parkir p
-                        LEFT JOIN t_member m ON p.member_id = m.id
-                        WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
-                            AND '{endDate}'
-                            {vehicleFilter}
-                        GROUP BY member_info
-                        ORDER BY member_info";
+                    query = BuildMemberReport(startDate, endDate, vehicleFilter);
                 }
+
+                _logger.Debug($"Executing report query: {query}");
 
                 var result = Database.ExecuteQuery(query);
                 dgvReport.DataSource = result;
                 
+                _logger.Debug($"Report executed successfully: {result.Rows.Count} rows returned");
+                
                 // Format columns
                 foreach (DataGridViewColumn col in dgvReport.Columns)
                 {
-                    if (col.Name.Contains("total") || col.Name.Contains("tarif"))
+                    if (col.Name.Contains("total") || col.Name.Contains("tarif") || col.Name.Contains("pendapatan"))
                     {
                         col.DefaultCellStyle.Format = "N0";
                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -192,13 +149,86 @@ namespace SimpleParkingAdmin.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to generate report", ex);
-                NotificationHelper.ShowError("Failed to generate report.");
+                _logger.Error($"Failed to generate report: {ex.Message}", ex);
+                NotificationHelper.ShowError($"Failed to generate report. Error: {ex.Message}");
             }
             finally
             {
                 Cursor = Cursors.Default;
             }
+        }
+
+        private string BuildDailyReport(string startDate, string endDate, string vehicleFilter)
+        {
+            return $@"
+                SELECT 
+                    DATE(p.waktu_masuk) as tanggal,
+                    p.jenis_kendaraan,
+                    COUNT(*) as jumlah_kendaraan,
+                    SUM(CASE WHEN p.nomor_kartu IS NOT NULL THEN 1 ELSE 0 END) as jumlah_member,
+                    SUM(CASE WHEN p.nomor_kartu IS NULL THEN 1 ELSE 0 END) as jumlah_non_member,
+                    SUM(COALESCE(p.biaya, 0)) as total_pendapatan
+                FROM t_parkir p
+                WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
+                    AND '{endDate}'
+                    {vehicleFilter}
+                GROUP BY DATE(p.waktu_masuk), p.jenis_kendaraan
+                ORDER BY DATE(p.waktu_masuk), p.jenis_kendaraan";
+        }
+
+        private string BuildMonthlyReport(string startDate, string endDate, string vehicleFilter)
+        {
+            return $@"
+                SELECT 
+                    EXTRACT(YEAR FROM p.waktu_masuk) as tahun,
+                    EXTRACT(MONTH FROM p.waktu_masuk) as bulan,
+                    p.jenis_kendaraan,
+                    COUNT(*) as jumlah_kendaraan,
+                    SUM(CASE WHEN p.nomor_kartu IS NOT NULL THEN 1 ELSE 0 END) as jumlah_member,
+                    SUM(CASE WHEN p.nomor_kartu IS NULL THEN 1 ELSE 0 END) as jumlah_non_member,
+                    SUM(COALESCE(p.biaya, 0)) as total_pendapatan
+                FROM t_parkir p
+                WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
+                    AND '{endDate}'
+                    {vehicleFilter}
+                GROUP BY EXTRACT(YEAR FROM p.waktu_masuk), EXTRACT(MONTH FROM p.waktu_masuk), p.jenis_kendaraan
+                ORDER BY EXTRACT(YEAR FROM p.waktu_masuk), EXTRACT(MONTH FROM p.waktu_masuk), p.jenis_kendaraan";
+        }
+
+        private string BuildVehicleReport(string startDate, string endDate, string vehicleFilter)
+        {
+            return $@"
+                SELECT 
+                    p.jenis_kendaraan,
+                    COUNT(*) as jumlah_kendaraan,
+                    SUM(CASE WHEN p.nomor_kartu IS NOT NULL THEN 1 ELSE 0 END) as jumlah_member,
+                    SUM(CASE WHEN p.nomor_kartu IS NULL THEN 1 ELSE 0 END) as jumlah_non_member,
+                    SUM(COALESCE(p.biaya, 0)) as total_pendapatan
+                FROM t_parkir p
+                WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
+                    AND '{endDate}'
+                    {vehicleFilter}
+                GROUP BY p.jenis_kendaraan
+                ORDER BY p.jenis_kendaraan";
+        }
+
+        private string BuildMemberReport(string startDate, string endDate, string vehicleFilter)
+        {
+            return $@"
+                SELECT 
+                    CASE WHEN m.member_id IS NOT NULL
+                        THEN CONCAT(m.nama_pemilik, ' (', m.nomor_kartu, ')')
+                        ELSE 'Non-Member'
+                    END as member_info,
+                    COUNT(*) as jumlah_kendaraan,
+                    SUM(COALESCE(p.biaya, 0)) as total_pendapatan
+                FROM t_parkir p
+                LEFT JOIN m_member m ON p.nomor_kartu = m.nomor_kartu
+                WHERE DATE(p.waktu_masuk) BETWEEN '{startDate}' 
+                    AND '{endDate}'
+                    {vehicleFilter}
+                GROUP BY member_info
+                ORDER BY member_info";
         }
 
         private void ExportToExcel()

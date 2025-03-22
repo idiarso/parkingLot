@@ -4,6 +4,17 @@ echo Building All Parking System Projects
 echo ===================================================
 echo.
 
+echo Checking for and closing running applications...
+taskkill /f /im ParkingIN.exe 2>nul
+taskkill /f /im ParkingOUT.exe 2>nul
+taskkill /f /im ParkingServer.exe 2>nul
+taskkill /f /im dotnet.exe /fi "WINDOWTITLE eq ParkingIN" 2>nul
+taskkill /f /im dotnet.exe /fi "WINDOWTITLE eq ParkingOUT" 2>nul
+taskkill /f /im dotnet.exe /fi "WINDOWTITLE eq ParkingServer" 2>nul
+timeout /t 2 /nobreak > nul
+echo All running applications closed.
+echo.
+
 echo [1/3] Building ParkingIN...
 cd /d D:\21maret\clean_code\ParkingIN
 dotnet build --configuration Release

@@ -1,6 +1,6 @@
 using System;
 using System.Data;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using System.Windows.Forms;
 using SimpleParkingAdmin.Utils;
 using Serilog;
@@ -24,26 +24,26 @@ namespace SimpleParkingAdmin
                 string server = Console.ReadLine();
                 if (string.IsNullOrEmpty(server)) server = "localhost";
                 
-                Console.Write("Port (default: 3306): ");
+                Console.Write("Port (default: 5432): ");
                 string portStr = Console.ReadLine();
-                int port = string.IsNullOrEmpty(portStr) ? 3306 : int.Parse(portStr);
+                int port = string.IsNullOrEmpty(portStr) ? 5432 : int.Parse(portStr);
                 
-                Console.Write("Database (default: parking_system): ");
+                Console.Write("Database (default: parkirdb): ");
                 string database = Console.ReadLine();
-                if (string.IsNullOrEmpty(database)) database = "parking_system";
+                if (string.IsNullOrEmpty(database)) database = "parkirdb";
                 
-                Console.Write("Username (default: root): ");
+                Console.Write("Username (default: postgres): ");
                 string username = Console.ReadLine();
-                if (string.IsNullOrEmpty(username)) username = "root";
+                if (string.IsNullOrEmpty(username)) username = "postgres";
                 
                 Console.Write("Password: ");
                 string password = Console.ReadLine();
                 
                 // Build connection string
-                string connectionString = $"Server={server};Port={port};Database={database};Uid={username};Pwd={password};";
+                string connectionString = $"Host={server};Port={port};Database={database};Username={username};Password={password};";
                 
                 // Test connection
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
                 {
                     Console.WriteLine("\nConnecting to database...");
                     connection.Open();
@@ -68,16 +68,16 @@ namespace SimpleParkingAdmin
             Console.ReadKey();
         }
         
-        static void CheckUsersTable(MySqlConnection connection, string tableName)
+        static void CheckUsersTable(NpgsqlConnection connection, string tableName)
         {
             try
             {
                 // First check if table exists
-                string checkTableQuery = $"SHOW TABLES LIKE '{tableName}'";
-                using (MySqlCommand cmd = new MySqlCommand(checkTableQuery, connection))
+                string checkTableQuery = $"SELECT to_regclass('{tableName}')";
+                using (NpgsqlCommand cmd = new NpgsqlCommand(checkTableQuery, connection))
                 {
                     object result = cmd.ExecuteScalar();
-                    if (result == null)
+                    if (result == null || result == DBNull.Value)
                     {
                         Console.WriteLine($"Table '{tableName}' does not exist.");
                         return;
@@ -88,8 +88,8 @@ namespace SimpleParkingAdmin
                 
                 // Get user records
                 string userQuery = $"SELECT * FROM {tableName}";
-                using (MySqlCommand cmd = new MySqlCommand(userQuery, connection))
-                using (MySqlDataAdapter adapter = new MySqlDataAdapter(cmd))
+                using (NpgsqlCommand cmd = new NpgsqlCommand(userQuery, connection))
+                using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(cmd))
                 {
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
