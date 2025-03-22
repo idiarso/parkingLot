@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using NLog;
+using System.Linq;
 
 namespace ParkingOut.UI
 {
@@ -166,31 +167,125 @@ namespace ParkingOut.UI
         /// <summary>
         /// Adds a menu item to the sidebar.
         /// </summary>
-        /// <param name="menuItem">The menu item to add.</param>
-        public void AddMenuItem(ParkingOut.UI.MenuItem menuItem)
+        /// <param name="text">The text of the menu item.</param>
+        /// <param name="iconPath">The icon path for the menu item.</param>
+        /// <param name="tag">The tag identifying the menu item.</param>
+        /// <returns>The created menu item.</returns>
+        public MenuItem AddMenuItem(string text, string iconPath, string tag)
         {
-            if (menuItem == null)
-                throw new ArgumentNullException(nameof(menuItem));
-
             try
             {
-                var button = new System.Windows.Controls.Button
+                logger.Debug($"Adding menu item: {text} with tag {tag}");
+                
+                // Create menu item
+                var menuItem = new MenuItem(text, iconPath, tag);
+                
+                // Create button for the menu item
+                var button = new Button
                 {
-                    Content = menuItem.Text,
-                    Tag = menuItem.IconPath,
-                    Style = FindResource("MenuItemStyle") as Style,
-                    DataContext = menuItem
+                    Style = (Style)FindResource("MenuButtonStyle"),
+                    Tag = tag,
+                    Margin = new Thickness(2, 5, 2, 5)
                 };
-
+                
+                // Create grid for button content
+                var grid = new Grid();
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(24) });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                
+                // Create icon
+                var iconPath1 = new System.Windows.Shapes.Path
+                {
+                    Data = System.Windows.Media.Geometry.Parse(iconPath),
+                    Fill = System.Windows.Media.Brushes.White,
+                    Stretch = Stretch.Uniform,
+                    Width = 16,
+                    Height = 16,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                
+                // Create text block
+                var textBlock = new TextBlock
+                {
+                    Text = text,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    FontSize = 14,
+                    Margin = new Thickness(10, 0, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                
+                // Add elements to grid
+                Grid.SetColumn(iconPath1, 0);
+                Grid.SetColumn(textBlock, 1);
+                grid.Children.Add(iconPath1);
+                grid.Children.Add(textBlock);
+                
+                // Set button content
+                button.Content = grid;
+                
+                // Add click handler
                 button.Click += MenuButton_Click;
-                _menuButtons.Add(button);
+                
+                // Add button to panel
                 MenuItemsPanel.Children.Add(button);
-                logger.Debug("Added menu item: {MenuItem}", menuItem.Text);
+                
+                // Add button to collection
+                _menuButtons.Add(button);
+                
+                logger.Debug($"Menu item added: {text}");
+                
+                return menuItem;
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Error adding menu item: {MenuItem}", menuItem.Text);
+                logger.Error(ex, $"Error adding menu item: {text}");
                 throw;
+            }
+        }
+        
+        /// <summary>
+        /// Gets a menu item by its tag.
+        /// </summary>
+        /// <param name="tag">The tag of the menu item to get.</param>
+        /// <returns>The menu item with the specified tag, or null if not found.</returns>
+        public MenuItem? GetMenuItem(string tag)
+        {
+            try
+            {
+                logger.Debug($"Getting menu item with tag: {tag}");
+                
+                // Create menu item based on tag
+                var button = _menuButtons.FirstOrDefault(b => b.Tag.ToString() == tag);
+                if (button == null)
+                {
+                    logger.Warn($"Menu item with tag {tag} not found");
+                    return null;
+                }
+                
+                var grid = button.Content as Grid;
+                if (grid == null)
+                {
+                    logger.Warn($"Button content is not a Grid for tag {tag}");
+                    return null;
+                }
+                
+                var textBlock = grid.Children.OfType<TextBlock>().FirstOrDefault();
+                if (textBlock == null)
+                {
+                    logger.Warn($"TextBlock not found in button content for tag {tag}");
+                    return null;
+                }
+                
+                var path = grid.Children.OfType<System.Windows.Shapes.Path>().FirstOrDefault();
+                string iconPath = path?.Data?.ToString() ?? string.Empty;
+                
+                return new MenuItem(textBlock.Text, iconPath, tag);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"Error getting menu item with tag: {tag}");
+                return null;
             }
         }
 
@@ -205,7 +300,7 @@ namespace ParkingOut.UI
 
             foreach (var menuItem in menuItems)
             {
-                AddMenuItem(menuItem);
+                AddMenuItem(menuItem.Text, menuItem.IconPath, menuItem.Tag);
             }
         }
 
@@ -297,19 +392,37 @@ namespace ParkingOut.UI
 
         private void MenuButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            try 
+            try
             {
-                if (sender is System.Windows.Controls.Button button && button.DataContext is ParkingOut.UI.MenuItem menuItem)
+                logger.Debug("Menu button clicked");
+                
+                var button = sender as Button;
+                if (button == null)
                 {
-                    ActiveMenuItem = menuItem;
-                    MenuItemClicked?.Invoke(this, menuItem);
-                    logger.Debug("Menu item clicked: {MenuItem}", menuItem.Text);
+                    logger.Warn("Sender is not a Button");
+                    return;
                 }
+                
+                string tag = button.Tag.ToString() ?? string.Empty;
+                
+                var menuItem = GetMenuItem(tag);
+                if (menuItem == null)
+                {
+                    logger.Warn($"Menu item with tag {tag} not found");
+                    return;
+                }
+                
+                // Set active menu item
+                ActiveMenuItem = menuItem;
+                
+                // Raise event
+                MenuItemClicked?.Invoke(this, menuItem);
+                
+                logger.Debug($"MenuItemClicked event raised for {menuItem.Text}");
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Error handling menu button click");
-                System.Windows.MessageBox.Show($"Error handling menu: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                logger.Error(ex, "Error in MenuButton_Click");
             }
         }
 

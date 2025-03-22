@@ -101,3 +101,55 @@
 - Kredensial default: username=postgres, password=root@rsi
 - Database: parkirdb (dibuat otomatis jika belum ada)
 - File log aplikasi tersedia di folder `Logs` di direktori aplikasi untuk troubleshooting lanjutan 
+
+## Tanggal: 22 Maret 2025
+
+### Perbaikan dan Pembaruan ParkingOut (WPF Migration)
+
+1. **Migrasi ke WPF**
+   - Aplikasi ParkingOut telah berhasil dimigrasi dari WinForms ke WPF
+   - Diimplementasikan UI modern dengan kontrol sidebar dan navigasi yang lebih baik
+   - Ditambahkan halaman Vehicle Entry dan Vehicle Exit dengan antarmuka yang lebih intuitif
+   - Dibuat kontrol SidebarControl khusus untuk navigasi aplikasi
+
+2. **Perbaikan Parameter Logger**
+   - Diperbaiki urutan parameter pada metode logger.Error() di seluruh aplikasi
+   - Dibuat kelas AppLogger yang membungkus NLogLogger untuk standardisasi logging
+   - Ditambahkan utility MessageHelper untuk menampilkan pesan error dengan format konsisten
+   - Dibuat interface IAppLogger untuk memudahkan mocking dan testing
+
+3. **Penanganan Nullable Reference Types**
+   - Diaktifkan fitur nullable reference types untuk meningkatkan keamanan tipe
+   - Ditambahkan null checking untuk mencegah NullReferenceException
+   - Diperbarui property di kelas model untuk mendukung nullable types
+   - Ditambahkan null coalescing operators (??) untuk menangani nilai null dengan aman
+
+4. **Perbaikan Build Error**
+   - Dihapus referensi ke file icon yang hilang
+   - Diperbarui project file untuk menggunakan App.xaml sebagai startup object
+   - Ditambahkan .gitignore untuk mengabaikan file-file yang tidak perlu di-track
+
+5. **Repository Management**
+   - Diinisialisasi Git repository lokal
+   - Kode ParkingOut berhasil di-push ke GitHub di https://github.com/SIJA-SKANSAPUNG/parking-lot.git
+   - Diperbarui dan ditambahkan file dokumentasi (README.md, jejak.md)
+
+### Masalah yang Berhasil Diselesaikan
+
+1. **Argumen Logger Error**
+   - Diperbaiki error CS1503 terkait ketidakcocokan parameter pada logger.Error() di Program.cs
+   - Program.cs diganti dengan App.xaml.cs sebagai entrypoint aplikasi WPF
+
+2. **Kesalahan Referensi Null**
+   - Diperbaiki warning CS8602 dan CS8601 terkait dereferensi referensi yang mungkin null
+   - Ditambahkan perlindungan dengan null checking dan operator conditional
+
+3. **File Icon yang Hilang**
+   - Dihapus referensi ke file parking-meter.ico yang menyebabkan error build
+   - Diset ApplicationIcon kosong di project file
+
+## Catatan Teknis
+
+- Aplikasi ParkingOut sekarang menggunakan .NET 6.0 dengan WPF
+- Struktur proyek telah dioptimalkan dengan memisahkan kode UI dan logika bisnis
+- Implementasi pattern MVVM sedang dalam proses untuk meningkatkan testability 

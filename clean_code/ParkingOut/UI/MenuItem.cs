@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel;
-using System.Windows.Media;
+using System.Runtime.CompilerServices;
 
 namespace ParkingOut.UI
 {
@@ -9,29 +9,29 @@ namespace ParkingOut.UI
     /// </summary>
     public class MenuItem : INotifyPropertyChanged
     {
-        #region Private Fields
+        #region Fields
 
-        private string? _text;
-        private string? _iconPath;
-        private string? _tag;
+        private string _text;
+        private string _iconPath;
+        private string _tag;
         private bool _isActive;
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
-        /// Gets or sets the text displayed for the menu item.
+        /// Gets or sets the text of the menu item.
         /// </summary>
         public string Text
         {
-            get { return _text ?? string.Empty; }
+            get => _text;
             set
             {
                 if (_text != value)
                 {
                     _text = value;
-                    OnPropertyChanged(nameof(Text));
+                    OnPropertyChanged();
                 }
             }
         }
@@ -41,35 +41,35 @@ namespace ParkingOut.UI
         /// </summary>
         public string IconPath
         {
-            get { return _iconPath ?? string.Empty; }
+            get => _iconPath;
             set
             {
                 if (_iconPath != value)
                 {
                     _iconPath = value;
-                    OnPropertyChanged(nameof(IconPath));
+                    OnPropertyChanged();
                 }
             }
         }
 
         /// <summary>
-        /// Gets or sets the tag that identifies this menu item.
+        /// Gets or sets the tag identifying the menu item.
         /// </summary>
         public string Tag
         {
-            get { return _tag ?? string.Empty; }
+            get => _tag;
             set
             {
                 if (_tag != value)
                 {
                     _tag = value;
-                    OnPropertyChanged(nameof(Tag));
+                    OnPropertyChanged();
                 }
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the menu item is active.
+        /// Gets or sets whether the menu item is active.
         /// </summary>
         public bool IsActive
         {
@@ -79,7 +79,7 @@ namespace ParkingOut.UI
                 if (_isActive != value)
                 {
                     _isActive = value;
-                    OnPropertyChanged(nameof(IsActive));
+                    OnPropertyChanged();
                 }
             }
         }
@@ -91,34 +91,23 @@ namespace ParkingOut.UI
         /// <summary>
         /// Initializes a new instance of the <see cref="MenuItem"/> class.
         /// </summary>
-        public MenuItem()
-        {
-            Text = "Menu Item";
-            IconPath = null;
-            Tag = string.Empty;
-            IsActive = false;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MenuItem"/> class with specified text, icon, and tag.
-        /// </summary>
-        /// <param name="text">The display text for the menu item.</param>
-        /// <param name="iconPath">The icon path data for the menu item.</param>
+        /// <param name="text">The text of the menu item.</param>
+        /// <param name="iconPath">The icon path for the menu item.</param>
         /// <param name="tag">The tag identifying the menu item.</param>
         public MenuItem(string text, string iconPath, string tag)
         {
-            Text = text;
-            IconPath = iconPath;
-            Tag = tag;
-            IsActive = false;
+            _text = text;
+            _iconPath = iconPath;
+            _tag = tag;
+            _isActive = false;
         }
 
         #endregion
 
-        #region INotifyPropertyChanged Implementation
+        #region INotifyPropertyChanged
 
         /// <summary>
-        /// Event that is raised when a property value changes.
+        /// Occurs when a property value changes.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -126,7 +115,7 @@ namespace ParkingOut.UI
         /// Raises the PropertyChanged event.
         /// </summary>
         /// <param name="propertyName">The name of the property that changed.</param>
-        protected void OnPropertyChanged(string propertyName)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

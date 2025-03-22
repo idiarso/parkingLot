@@ -8,22 +8,26 @@
         Title="ParkingOut Management System" Height="720" Width="1280" 
         WindowStartupLocation="CenterScreen">
     
-    <!-- Simple content for testing -->
-    <Grid Background="#F5F5F5">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="ParkingOut Management System" 
-                       FontSize="32" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,20"/>
-            <TextBlock Text="Simplified Test Version"
-                       FontSize="18"
-                       Margin="0,0,0,40"/>
-            <Button Content="Test Button" 
-                    Padding="20,10" 
-                    Background="#0078D7" 
-                    Foreground="White"
-                    BorderThickness="0"
-                    FontSize="16"/>
-        </StackPanel>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/ParkingOut;component/UI/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Sidebar Control -->
+        <local:SidebarControl x:Name="Sidebar" Grid.Column="0" MenuItemClicked="Sidebar_MenuItemClicked" LogoutClicked="Sidebar_LogoutClicked"/>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Background="#F5F5F5">
+            <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" Margin="20"/>
+        </Grid>
     </Grid>
 </Window> 

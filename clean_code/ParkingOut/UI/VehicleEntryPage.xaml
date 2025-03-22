@@ -1,92 +1,143 @@
 <Page x:Class="ParkingOut.UI.VehicleEntryPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ParkingOut.UI"
+      mc:Ignorable="d" 
+      d:DesignHeight="650" d:DesignWidth="800"
       Title="Vehicle Entry">
-    <Grid>
+
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Text="Vehicle Entry" FontSize="24" FontWeight="Bold" Margin="20,20,20,10"/>
-        
-        <Grid Grid.Row="1" Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- Entry Form -->
-            <Border Grid.Column="0" BorderThickness="1" BorderBrush="#DDD" Margin="0,0,10,0" Background="#F9F9F9">
-                <Grid Margin="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Text="Vehicle Entry" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <!-- Camera Feed Section -->
+        <GroupBox Grid.Row="1" Header="Camera Feed" Margin="0,0,0,20" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Camera Display -->
+                <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="1" Height="200" Background="#FFE5E5E5">
+                    <Grid>
+                        <TextBlock Text="Camera Feed" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"/>
+                        <!-- Camera Feed will be displayed here -->
+                        <Image x:Name="CameraFeedImage" Stretch="Uniform" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Camera Controls -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
+                    <Button x:Name="CaptureButton" Content="Capture" Padding="10,5" Margin="0,0,10,0" Click="CaptureButton_Click"/>
+                    <Button x:Name="StartCameraButton" Content="Start Camera" Padding="10,5" Click="StartCameraButton_Click"/>
+                </StackPanel>
+                
+                <!-- License Plate Recognition Result -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                    <TextBlock Text="Detected License Plate:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox x:Name="DetectedPlateTextBox" Width="200" IsReadOnly="True"/>
+                    <Button x:Name="RecognizeButton" Content="Recognize" Padding="10,5" Margin="10,0,0,0" Click="RecognizeButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Vehicle Information Section -->
+        <GroupBox Grid.Row="2" Header="Vehicle Information" Margin="0,0,0,20" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Left Column -->
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,10,0">
+                    <TextBlock Text="License Plate:" Margin="0,0,0,5"/>
+                    <TextBox x:Name="LicensePlateTextBox" Margin="0,0,0,10"/>
                     
-                    <TextBlock Grid.Row="0" Text="Vehicle Information" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+                    <TextBlock Text="Entry Time:" Margin="0,0,0,5"/>
+                    <DatePicker x:Name="EntryDatePicker" Margin="0,0,0,5" SelectedDate="{Binding Source={x:Static System.DateTime.Now}}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="EntryTimeHourTextBox" Grid.Column="0" Text="12" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text=":" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBox x:Name="EntryTimeMinuteTextBox" Grid.Column="2" Text="00" TextAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+                
+                <!-- Right Column -->
+                <StackPanel Grid.Column="1" Grid.Row="0">
+                    <TextBlock Text="Vehicle Type:" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="VehicleTypeComboBox" Margin="0,0,0,10">
+                        <ComboBoxItem Content="Car" IsSelected="True"/>
+                        <ComboBoxItem Content="Motorcycle"/>
+                        <ComboBoxItem Content="Truck"/>
+                        <ComboBoxItem Content="Bus"/>
+                    </ComboBox>
                     
-                    <StackPanel Grid.Row="1" Margin="0,0,0,15">
-                        <TextBlock Text="Ticket Number" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtTicketNumber" Height="30" IsReadOnly="True" Background="#F0F0F0" Padding="5,0" VerticalContentAlignment="Center"/>
-                    </StackPanel>
-                    
-                    <StackPanel Grid.Row="2" Margin="0,0,0,15">
-                        <TextBlock Text="Vehicle Type" Margin="0,0,0,5"/>
-                        <ComboBox x:Name="cmbVehicleType" Height="30" Padding="5,5,0,0">
-                            <ComboBoxItem Content="Car"/>
-                            <ComboBoxItem Content="Motorcycle"/>
-                            <ComboBoxItem Content="Truck"/>
-                            <ComboBoxItem Content="Bus"/>
-                        </ComboBox>
-                    </StackPanel>
-                    
-                    <StackPanel Grid.Row="3" Margin="0,0,0,15">
-                        <TextBlock Text="Plate Number" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtPlateNumber" Height="30" Padding="5,0" VerticalContentAlignment="Center"/>
-                    </StackPanel>
-                    
-                    <CheckBox Grid.Row="4" x:Name="chkMember" Content="Member Vehicle" Margin="0,0,0,15"/>
-                    
-                    <StackPanel Grid.Row="5" x:Name="panelMember" Visibility="Collapsed" Margin="0,0,0,15">
-                        <TextBlock Text="Member ID" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtMemberId" Height="30" Padding="5,0" VerticalContentAlignment="Center"/>
-                    </StackPanel>
-                    
-                    <StackPanel Grid.Row="6" VerticalAlignment="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="btnSave" Content="Save" Width="100" Height="35" 
-                                Background="#0078D7" Foreground="White" BorderThickness="0" Margin="0,0,10,0"/>
-                        <Button x:Name="btnClear" Content="Clear" Width="100" Height="35" 
-                                Background="#999" Foreground="White" BorderThickness="0"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-            
-            <!-- Entry List -->
-            <Border Grid.Column="1" BorderThickness="1" BorderBrush="#DDD" Margin="10,0,0,0" Background="#F9F9F9">
-                <Grid Margin="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <TextBlock Grid.Row="0" Text="Recent Entries" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
-                    
-                    <DataGrid Grid.Row="1" x:Name="dgvRecentEntries" AutoGenerateColumns="False" IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Ticket #" Binding="{Binding TicketNo}" Width="80"/>
-                            <DataGridTextColumn Header="Plate #" Binding="{Binding PlateNo}" Width="100"/>
-                            <DataGridTextColumn Header="Vehicle Type" Binding="{Binding VehicleType}" Width="100"/>
-                            <DataGridTextColumn Header="Entry Time" Binding="{Binding EntryTime}" Width="*"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </Border>
-        </Grid>
+                    <TextBlock Text="Notes:" Margin="0,0,0,5"/>
+                    <TextBox x:Name="NotesTextBox" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </StackPanel>
+                
+                <!-- Generate Ticket Button -->
+                <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
+                        x:Name="GenerateTicketButton" Content="Generate Ticket" 
+                        Padding="10,5" Margin="0,10,0,0" HorizontalAlignment="Right"
+                        Click="GenerateTicketButton_Click"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- Recent Entries Section -->
+        <GroupBox Grid.Row="3" Header="Recent Entries" Padding="10">
+            <DataGrid x:Name="RecentEntriesDataGrid" AutoGenerateColumns="False" IsReadOnly="True" 
+                      HeadersVisibility="Column" SelectionMode="Single" 
+                      SelectionChanged="RecentEntriesDataGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Ticket No" Binding="{Binding TicketNo}" Width="100"/>
+                    <DataGridTextColumn Header="License Plate" Binding="{Binding LicensePlate}" Width="120"/>
+                    <DataGridTextColumn Header="Vehicle Type" Binding="{Binding VehicleType}" Width="120"/>
+                    <DataGridTextColumn Header="Entry Time" Binding="{Binding EntryTime}" Width="160"/>
+                    <DataGridTemplateColumn Header="Actions" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="Print" Margin="5,0" Padding="10,3"
+                                            Click="PrintTicket_Click" Tag="{Binding TicketNo}"/>
+                                    <Button Content="Edit" Margin="5,0" Padding="10,3"
+                                            Click="EditEntry_Click" Tag="{Binding TicketNo}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="4" Margin="0,10,0,0">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusBarTextBlock" Text="Ready"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Page> 

@@ -5,8 +5,60 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestWpfApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Parking Management System" Height="600" Width="1000" 
+        WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <!-- Sidebar -->
+        <Border Background="#1E1E1E">
+            <StackPanel>
+                <TextBlock Text="PARKING SYSTEM" Foreground="White" 
+                           FontSize="20" FontWeight="Bold" Margin="20,30,0,40" 
+                           HorizontalAlignment="Left"/>
+
+                <!-- Navigation Items -->
+                <RadioButton x:Name="btnDashboard" Content="Dashboard" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             IsChecked="True" Click="NavButton_Click"/>
+                <RadioButton x:Name="btnVehicleEntry" Content="Vehicle Entry" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+                <RadioButton x:Name="btnVehicleExit" Content="Vehicle Exit" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+                <RadioButton x:Name="btnVehicleMonitoring" Content="Vehicle Monitoring" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+                <RadioButton x:Name="btnReports" Content="Reports" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+                <RadioButton x:Name="btnUserManagement" Content="User Management" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+                <RadioButton x:Name="btnShifts" Content="Shifts" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+                <RadioButton x:Name="btnSettings" Content="Settings" 
+                             Foreground="White" FontSize="14" Height="50" 
+                             Style="{StaticResource NavButtonStyle}" 
+                             Click="NavButton_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Border Grid.Column="1" Background="#F5F5F5">
+            <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+        </Border>
     </Grid>
 </Window>

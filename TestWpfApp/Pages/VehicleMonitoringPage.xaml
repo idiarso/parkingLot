@@ -1,0 +1,329 @@
+<Page x:Class="TestWpfApp.VehicleMonitoringPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:TestWpfApp"
+      mc:Ignorable="d" 
+      d:DesignHeight="650" d:DesignWidth="1000"
+      Title="Vehicle Monitoring">
+
+    <Page.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.2"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#777"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,3"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="#2196F3"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F5F5F5"/>
+            <Setter Property="Foreground" Value="#444"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#DDD"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="#F0F2F5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header and Tabs -->
+        <Border Background="White" Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Vehicle Monitoring" FontSize="22" FontWeight="Bold" Foreground="#333"/>
+                    <Border Background="#4CAF50" CornerRadius="4" Margin="15,0,0,0" Padding="8,3">
+                        <TextBlock x:Name="txtVehiclesInParking" Text="43 Vehicles in Parking" FontSize="14" Foreground="White" FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Style="{StaticResource ActionButtonStyle}" Content="Print Report" 
+                            Background="#FF9800" Click="btnPrintReport_Click"/>
+                    <Button Style="{StaticResource ActionButtonStyle}" Content="Refresh Data" 
+                            Background="#4CAF50" Click="btnRefreshData_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Section: Live Monitoring Cards -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Entry Activity Card -->
+                <Border Style="{StaticResource CardStyle}" Grid.Column="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Entry Activity" FontSize="16" FontWeight="SemiBold" Foreground="#333"/>
+                        
+                        <TextBlock Grid.Row="1" Text="Today" FontSize="14" Foreground="#666" Margin="0,5,0,10"/>
+                        
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock x:Name="txtEntryCount" Text="126" FontSize="36" FontWeight="Bold" Foreground="#2196F3"/>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0,0,0">
+                                <TextBlock x:Name="txtEntryTrend" Text="+12%" FontSize="16" Foreground="#4CAF50" FontWeight="SemiBold"/>
+                                <TextBlock Text="vs Yesterday" FontSize="12" Foreground="#666"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Exit Activity Card -->
+                <Border Style="{StaticResource CardStyle}" Grid.Column="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Exit Activity" FontSize="16" FontWeight="SemiBold" Foreground="#333"/>
+                        
+                        <TextBlock Grid.Row="1" Text="Today" FontSize="14" Foreground="#666" Margin="0,5,0,10"/>
+                        
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock x:Name="txtExitCount" Text="83" FontSize="36" FontWeight="Bold" Foreground="#FF5722"/>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0,0,0">
+                                <TextBlock x:Name="txtExitTrend" Text="+8%" FontSize="16" Foreground="#4CAF50" FontWeight="SemiBold"/>
+                                <TextBlock Text="vs Yesterday" FontSize="12" Foreground="#666"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Average Parking Duration Card -->
+                <Border Style="{StaticResource CardStyle}" Grid.Column="2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Avg Duration" FontSize="16" FontWeight="SemiBold" Foreground="#333"/>
+                        
+                        <TextBlock Grid.Row="1" Text="Today" FontSize="14" Foreground="#666" Margin="0,5,0,10"/>
+                        
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="txtAvgDuration" Text="2h 45m" FontSize="36" FontWeight="Bold" Foreground="#673AB7"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Revenue Card -->
+                <Border Style="{StaticResource CardStyle}" Grid.Column="3">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Revenue" FontSize="16" FontWeight="SemiBold" Foreground="#333"/>
+                        
+                        <TextBlock Grid.Row="1" Text="Today" FontSize="14" Foreground="#666" Margin="0,5,0,10"/>
+                        
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="txtRevenue" Text="$1,250" FontSize="36" FontWeight="Bold" Foreground="#009688"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Bottom Section: Tabbed View for Entry and Exit Data -->
+            <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="10,20,10,10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- View Selection Tabs -->
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="tabVehicleActivity" Content="All Vehicle Activity" 
+                                     Style="{StaticResource TabButtonStyle}" IsChecked="True"
+                                     Checked="tabVehicleActivity_Checked"/>
+                        <RadioButton x:Name="tabEntryOnly" Content="Entry Only" 
+                                     Style="{StaticResource TabButtonStyle}"
+                                     Checked="tabEntryOnly_Checked"/>
+                        <RadioButton x:Name="tabExitOnly" Content="Exit Only" 
+                                     Style="{StaticResource TabButtonStyle}"
+                                     Checked="tabExitOnly_Checked"/>
+                        <RadioButton x:Name="tabCurrentlyParked" Content="Currently Parked" 
+                                     Style="{StaticResource TabButtonStyle}"
+                                     Checked="tabCurrentlyParked_Checked"/>
+                    </StackPanel>
+
+                    <!-- Search and Action Bar -->
+                    <Grid Grid.Row="1" Margin="0,15,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Background="#F5F5F5" CornerRadius="5" Padding="10,0" Height="40">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center"/>
+                                <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" 
+                                         Background="Transparent" VerticalAlignment="Center" 
+                                         Margin="5,0,0,0" Padding="5,0"
+                                         FontSize="14" Text="Search by plate number, ticket, or vehicle type..."
+                                         Foreground="#AAA" GotFocus="txtSearch_GotFocus" 
+                                         LostFocus="txtSearch_LostFocus"
+                                         TextChanged="txtSearch_TextChanged"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="btnNewEntry" Content="New Entry" Style="{StaticResource ActionButtonStyle}" 
+                                    Background="#2196F3" Click="btnNewEntry_Click"/>
+                            <Button x:Name="btnProcessExit" Content="Process Exit" Style="{StaticResource ActionButtonStyle}" 
+                                    Background="#FF5722" Click="btnProcessExit_Click"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Vehicle Data Grid -->
+                    <DataGrid x:Name="gridVehicles" Grid.Row="2" AutoGenerateColumns="False" 
+                              IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                              RowBackground="White" AlternatingRowBackground="#F9F9F9"
+                              ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                              GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#EEE"
+                              CanUserResizeRows="False" SelectionMode="Single"
+                              VerticalScrollBarVisibility="Auto"
+                              SelectionChanged="gridVehicles_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Ticket ID" Binding="{Binding TicketId}" Width="90"/>
+                            <DataGridTextColumn Header="Plate Number" Binding="{Binding PlateNumber}" Width="110"/>
+                            <DataGridTextColumn Header="Vehicle Type" Binding="{Binding VehicleType}" Width="110"/>
+                            <DataGridTextColumn Header="Entry Time" Binding="{Binding EntryTime}" Width="150"/>
+                            <DataGridTextColumn Header="Exit Time" Binding="{Binding ExitTime}" Width="150"/>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="100"/>
+                            <DataGridTextColumn Header="Fee" Binding="{Binding Fee}" Width="80"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                            <DataGridTemplateColumn Header="Actions" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Details" Padding="10,5" Margin="0,0,5,0"
+                                                    Tag="{Binding}" Click="btnViewDetails_Click"/>
+                                            <Button Content="Print" Padding="10,5" Margin="0,0,5,0"
+                                                    Tag="{Binding}" Click="btnPrintTicket_Click"
+                                                    Visibility="{Binding IsPrintVisible, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                            <Button Content="Process Exit" Padding="10,5" Background="#FF5722" Foreground="White"
+                                                    Tag="{Binding}" Click="btnProcessExitRow_Click"
+                                                    Visibility="{Binding IsExitVisible, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page> 

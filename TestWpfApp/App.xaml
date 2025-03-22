@@ -4,6 +4,26 @@
              xmlns:local="clr-namespace:TestWpfApp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style x:Key="NavButtonStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid Background="{TemplateBinding Background}" Height="50">
+                            <Border x:Name="HighlightBorder" Width="4" HorizontalAlignment="Left" Background="Transparent"/>
+                            <ContentPresenter VerticalAlignment="Center" Margin="30,0,0,0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="#2E2E2E"/>
+                                <Setter TargetName="HighlightBorder" Property="Background" Value="#00A1FF"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2E2E2E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>
