@@ -15,6 +15,7 @@
     <UserControl.Resources>
         <converters:BoolToConnectionColorConverter x:Key="BoolToConnectionColorConverter"/>
         <converters:ActionTypeColorConverter x:Key="ActionTypeColorConverter"/>
+        <converters:DictionaryValueConverter x:Key="DictionaryValueConverter"/>
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -141,7 +142,7 @@
                 <Border Classes="card" Width="220">
                     <StackPanel>
                         <TextBlock Text="Total Spots" Classes="card-title"/>
-                        <TextBlock Text="{Binding Statistics.TotalSpots}" Classes="card-value"/>
+                        <TextBlock Text="{Binding TotalSpots}" Classes="card-value"/>
                         <TextBlock Text="Maximum capacity" Classes="status-value" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>
@@ -150,11 +151,11 @@
                 <Border Classes="card" Width="220">
                     <StackPanel>
                         <TextBlock Text="Occupied Spots" Classes="card-title"/>
-                        <TextBlock Text="{Binding Statistics.OccupiedSpots}" Classes="card-value"/>
-                        <ProgressBar Value="{Binding Statistics.OccupiedSpots}" 
-                                   Maximum="{Binding Statistics.TotalSpots}"
+                        <TextBlock Text="{Binding OccupiedSpots}" Classes="card-value"/>
+                        <ProgressBar Value="{Binding OccupiedSpots}" 
+                                   Maximum="{Binding TotalSpots}"
                                    Foreground="#E57373"/>
-                        <TextBlock Text="{Binding Statistics.OccupancyPercentage, StringFormat='{}{0:0}% Occupied'}" 
+                        <TextBlock Text="{Binding OccupiedSpots, StringFormat='{}{0} Occupied'}" 
                                  Classes="status-value"/>
                     </StackPanel>
                 </Border>
@@ -163,11 +164,11 @@
                 <Border Classes="card" Width="220">
                     <StackPanel>
                         <TextBlock Text="Available Spots" Classes="card-title"/>
-                        <TextBlock Text="{Binding Statistics.AvailableSpots}" Classes="card-value"/>
-                        <ProgressBar Value="{Binding Statistics.AvailableSpots}" 
-                                   Maximum="{Binding Statistics.TotalSpots}"
+                        <TextBlock Text="{Binding AvailableSpots}" Classes="card-value"/>
+                        <ProgressBar Value="{Binding AvailableSpots}" 
+                                   Maximum="{Binding TotalSpots}"
                                    Foreground="#81C784"/>
-                        <TextBlock Text="{Binding Statistics.AvailabilityPercentage, StringFormat='{}{0:0}% Available'}" 
+                        <TextBlock Text="{Binding AvailableSpots, StringFormat='{}{0} Available'}" 
                                  Classes="status-value"/>
                     </StackPanel>
                 </Border>
@@ -176,10 +177,13 @@
                 <Border Classes="card" Width="220">
                     <StackPanel>
                         <TextBlock Text="Today's Revenue" Classes="card-title"/>
-                        <TextBlock Classes="card-value" Text="{Binding Statistics.FormattedRevenue}"/>
-                        <TextBlock Text="{Binding Statistics.LastUpdated, StringFormat='Updated: {0:HH:mm:ss}'}" 
-                                 Classes="status-value" 
-                                 Margin="0,5,0,0"/>
+                        <TextBlock Classes="card-value" Text="{Binding TodayRevenue, StringFormat='${0:N2}'}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,5,0,0">
+                            <TextBlock Text="Week:" Classes="status-value"/>
+                            <TextBlock Text="{Binding WeekRevenue, StringFormat='${0:N2}'}" Classes="status-value"/>
+                            <TextBlock Text="Month:" Classes="status-value"/>
+                            <TextBlock Text="{Binding MonthRevenue, StringFormat='${0:N2}'}" Classes="status-value"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </WrapPanel>
@@ -193,77 +197,207 @@
                         
                         <!-- Vehicle Distribution Visualization -->
                         <Grid Grid.Row="1" RowDefinitions="*,Auto">
-                            <!-- Pie Chart Style Visualization -->
+                            <!-- Message when no data is available -->
+                            <TextBlock Text="No vehicles currently parked"
+                                     IsVisible="{Binding !VehicleDistribution.Count}"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     Foreground="#78909C"/>
+                            
+                            <!-- Simple Distribution View (when we have data) -->
                             <ItemsControl Grid.Row="0" 
-                                        ItemsSource="{Binding Statistics.VehicleDistribution}"
+                                        IsVisible="{Binding VehicleDistribution.Count}"
                                         Margin="0,15,0,15">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <UniformGrid Columns="2" Rows="2"/>
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="5">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="120"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-                                            
-                                            <!-- Circle Representation -->
-                                            <Border Grid.Row="0" 
-                                                  Width="100" 
-                                                  Height="100" 
-                                                  CornerRadius="50" 
-                                                  Background="{Binding Color}"
-                                                  HorizontalAlignment="Center">
-                                                <TextBlock Text="{Binding Value}" 
-                                                         HorizontalAlignment="Center" 
-                                                         VerticalAlignment="Center"
-                                                         FontSize="24"
-                                                         FontWeight="Bold"
-                                                         Foreground="#FFFFFF"/>
-                                            </Border>
-                                            
-                                            <!-- Type Label -->
-                                            <TextBlock Grid.Row="1" 
-                                                     Text="{Binding Label}" 
-                                                     HorizontalAlignment="Center"
-                                                     Margin="0,5,0,0"
-                                                     Foreground="#ECEFF1"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.Items>
+                                    <!-- Car -->
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="120"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <Border Grid.Row="0" 
+                                              Width="100" 
+                                              Height="100" 
+                                              CornerRadius="50" 
+                                              Background="#3498db"
+                                              HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Car'}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center"
+                                                     FontSize="24"
+                                                     FontWeight="Bold"
+                                                     Foreground="#FFFFFF"/>
+                                        </Border>
+                                        
+                                        <TextBlock Grid.Row="1" 
+                                                 Text="Car" 
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,5,0,0"
+                                                 Foreground="#ECEFF1"/>
+                                    </Grid>
+                                    
+                                    <!-- Motorcycle -->
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="120"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <Border Grid.Row="0" 
+                                              Width="100" 
+                                              Height="100" 
+                                              CornerRadius="50" 
+                                              Background="#2ecc71"
+                                              HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Motorcycle'}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center"
+                                                     FontSize="24"
+                                                     FontWeight="Bold"
+                                                     Foreground="#FFFFFF"/>
+                                        </Border>
+                                        
+                                        <TextBlock Grid.Row="1" 
+                                                 Text="Motorcycle" 
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,5,0,0"
+                                                 Foreground="#ECEFF1"/>
+                                    </Grid>
+                                    
+                                    <!-- Truck -->
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="120"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <Border Grid.Row="0" 
+                                              Width="100" 
+                                              Height="100" 
+                                              CornerRadius="50" 
+                                              Background="#e74c3c"
+                                              HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Truck'}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center"
+                                                     FontSize="24"
+                                                     FontWeight="Bold"
+                                                     Foreground="#FFFFFF"/>
+                                        </Border>
+                                        
+                                        <TextBlock Grid.Row="1" 
+                                                 Text="Truck" 
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,5,0,0"
+                                                 Foreground="#ECEFF1"/>
+                                    </Grid>
+                                    
+                                    <!-- Bus -->
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="120"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <Border Grid.Row="0" 
+                                              Width="100" 
+                                              Height="100" 
+                                              CornerRadius="50" 
+                                              Background="#f39c12"
+                                              HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Bus'}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center"
+                                                     FontSize="24"
+                                                     FontWeight="Bold"
+                                                     Foreground="#FFFFFF"/>
+                                        </Border>
+                                        
+                                        <TextBlock Grid.Row="1" 
+                                                 Text="Bus" 
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,5,0,0"
+                                                 Foreground="#ECEFF1"/>
+                                    </Grid>
+                                </ItemsControl.Items>
                             </ItemsControl>
                             
-                            <!-- Vehicle Type Legends -->
-                            <ItemsControl Grid.Row="1" 
-                                        ItemsSource="{Binding Statistics.VehicleTypes}" 
-                                        Margin="0,15,0,0">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical" Spacing="8"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
-                                            <Border Grid.Column="0" 
-                                                  Width="12" 
-                                                  Height="12" 
-                                                  CornerRadius="6" 
-                                                  Background="#4CAF50"
-                                                  Margin="0,0,10,0"/>
-                                            <TextBlock Grid.Column="1" 
-                                                     Text="{Binding VehicleType}" 
-                                                     Foreground="#ECEFF1"/>
-                                            <TextBlock Grid.Column="2" 
-                                                     Text="{Binding Count}" 
-                                                     Foreground="#4CAF50"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <!-- Breakdown Table for Distribution -->
+                            <Grid Grid.Row="1" 
+                                 IsVisible="{Binding VehicleDistribution.Count}"
+                                 Margin="0,15,0,0">
+                                <StackPanel Orientation="Vertical" Spacing="8">
+                                    <!-- Car -->
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Border Grid.Column="0" 
+                                              Width="12" 
+                                              Height="12" 
+                                              CornerRadius="6" 
+                                              Background="#3498db"
+                                              Margin="0,0,10,0"/>
+                                        <TextBlock Grid.Column="1" 
+                                                 Text="Car" 
+                                                 Foreground="#ECEFF1"/>
+                                        <TextBlock Grid.Column="2" 
+                                                 Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Car'}" 
+                                                 Foreground="#3498db"/>
+                                    </Grid>
+                                    
+                                    <!-- Motorcycle -->
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Border Grid.Column="0" 
+                                              Width="12" 
+                                              Height="12" 
+                                              CornerRadius="6" 
+                                              Background="#2ecc71"
+                                              Margin="0,0,10,0"/>
+                                        <TextBlock Grid.Column="1" 
+                                                 Text="Motorcycle" 
+                                                 Foreground="#ECEFF1"/>
+                                        <TextBlock Grid.Column="2" 
+                                                 Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Motorcycle'}" 
+                                                 Foreground="#2ecc71"/>
+                                    </Grid>
+                                    
+                                    <!-- Truck -->
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Border Grid.Column="0" 
+                                              Width="12" 
+                                              Height="12" 
+                                              CornerRadius="6" 
+                                              Background="#e74c3c"
+                                              Margin="0,0,10,0"/>
+                                        <TextBlock Grid.Column="1" 
+                                                 Text="Truck" 
+                                                 Foreground="#ECEFF1"/>
+                                        <TextBlock Grid.Column="2" 
+                                                 Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Truck'}" 
+                                                 Foreground="#e74c3c"/>
+                                    </Grid>
+                                    
+                                    <!-- Bus -->
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Border Grid.Column="0" 
+                                              Width="12" 
+                                              Height="12" 
+                                              CornerRadius="6" 
+                                              Background="#f39c12"
+                                              Margin="0,0,10,0"/>
+                                        <TextBlock Grid.Column="1" 
+                                                 Text="Bus" 
+                                                 Foreground="#ECEFF1"/>
+                                        <TextBlock Grid.Column="2" 
+                                                 Text="{Binding VehicleDistribution, Converter={StaticResource DictionaryValueConverter}, ConverterParameter='Bus'}" 
+                                                 Foreground="#f39c12"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Border>

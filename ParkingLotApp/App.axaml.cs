@@ -23,6 +23,11 @@ public partial class App : Application
 
     public override void Initialize()
     {
+        // Mengaktifkan legacy timestamp behavior untuk Npgsql
+        // Ini memungkinkan penggunaan DateTime dengan Kind=Local 
+        // dengan tipe timestamp PostgreSQL
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -61,10 +66,13 @@ public partial class App : Application
             
             if (dbContext != null)
             {
-                // Explicitly create the database and schema instead of using migrations
-                // which appear to be causing issues
-                await dbContext.Database.EnsureCreatedAsync();
+                // Hapus database terlebih dahulu untuk memastikan skema yang bersih
+                Console.WriteLine("Deleting existing database if it exists...");
+                await dbContext.Database.EnsureDeletedAsync();
+                Console.WriteLine("Database deleted successfully");
                 
+                // Buat database dan skema dari awal
+                await dbContext.Database.EnsureCreatedAsync();
                 Console.WriteLine("Database created successfully");
                 
                 // Seed database with initial data
@@ -129,7 +137,15 @@ public partial class App : Application
                 provider
             ));
         
-        services.AddTransient<LoginViewModel>();
+        services.AddTransient<LoginViewModel>(provider =>
+            new LoginViewModel(
+                provider.GetRequiredService<MainWindowViewModel>(),
+                provider.GetRequiredService<ParkingDbContext>(),
+                provider.GetRequiredService<ILogger>(),
+                provider.GetRequiredService<IUserService>(),
+                provider.GetRequiredService<ISettingsService>()
+            ));
+        
         services.AddTransient<DashboardViewModel>(provider =>
             new DashboardViewModel(
                 provider.GetRequiredService<IParkingService>(),

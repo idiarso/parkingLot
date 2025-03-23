@@ -49,8 +49,8 @@ namespace ParkingLotApp.Services
 
                 if (user != null)
                 {
-                    // Verify password
-                    var passwordHash = HashPassword(password);
+                    // Verificar password utilizando la sal almacenada
+                    var passwordHash = HashPassword(password + user.PasswordSalt);
                     if (passwordHash == user.PasswordHash)
                     {
                         user.LastLoginAt = DateTime.Now;
@@ -59,12 +59,16 @@ namespace ParkingLotApp.Services
                         // Store the current user
                         _currentUser = user;
                         
-                        await _logger.LogLoginAttemptAsync(username, true);
+                        await _logger.LogInfoAsync($"Login successful: {username} (User ID: {user.Id})");
                         return user;
+                    }
+                    else
+                    {
+                        await _logger.LogInfoAsync($"Failed login attempt for user '{username}'.");
                     }
                 }
 
-                await _logger.LogLoginAttemptAsync(username, false);
+                await _logger.LogWarningAsync($"Failed login attempt: {username} (Invalid credentials)");
                 return new User();
             }
             catch (Exception ex)

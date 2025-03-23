@@ -16,6 +16,8 @@ using Microsoft.EntityFrameworkCore;
 using ParkingLotApp.Data;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
+using Avalonia.Media;
+using Microsoft.VisualBasic;
 
 namespace ParkingLotApp.ViewModels
 {
@@ -25,7 +27,9 @@ namespace ParkingLotApp.ViewModels
         private readonly ISettingsService _settingsService;
         private readonly DashboardService _dashboardService;
         private readonly ILogger _logger;
+        private readonly IServiceProvider _serviceProvider;
         private readonly DispatcherTimer _refreshTimer;
+        private readonly DispatcherTimer _statusClearTimer;
         private readonly DispatcherTimer _clockTimer;
         
         private string _currentTime;
@@ -38,6 +42,16 @@ namespace ParkingLotApp.ViewModels
         private string _statusMessage;
         private LogViewerViewModel _logViewer;
         private bool _isRefreshing;
+        private int _totalSpots;
+        private int _occupiedSpots;
+        private int _availableSpots;
+        private decimal _todayRevenue;
+        private decimal _weekRevenue;
+        private decimal _monthRevenue;
+        private bool _isLoading;
+        private int _refreshErrorCount = 0;
+        private bool _isInitialLoad = true;
+        private Dictionary<string, int> _vehicleDistribution = new Dictionary<string, int>();
 
         public LogViewerViewModel LogViewer
         {
@@ -99,6 +113,54 @@ namespace ParkingLotApp.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isRefreshing, value);
         }
 
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => this.RaiseAndSetIfChanged(ref _isLoading, value);
+        }
+
+        public int TotalSpots
+        {
+            get => _totalSpots;
+            private set => this.RaiseAndSetIfChanged(ref _totalSpots, value);
+        }
+
+        public int OccupiedSpots
+        {
+            get => _occupiedSpots;
+            private set => this.RaiseAndSetIfChanged(ref _occupiedSpots, value);
+        }
+
+        public int AvailableSpots
+        {
+            get => _availableSpots;
+            private set => this.RaiseAndSetIfChanged(ref _availableSpots, value);
+        }
+
+        public decimal TodayRevenue
+        {
+            get => _todayRevenue;
+            private set => this.RaiseAndSetIfChanged(ref _todayRevenue, value);
+        }
+
+        public decimal WeekRevenue
+        {
+            get => _weekRevenue;
+            private set => this.RaiseAndSetIfChanged(ref _weekRevenue, value);
+        }
+
+        public decimal MonthRevenue
+        {
+            get => _monthRevenue;
+            private set => this.RaiseAndSetIfChanged(ref _monthRevenue, value);
+        }
+
+        public Dictionary<string, int> VehicleDistribution
+        {
+            get => _vehicleDistribution;
+            private set => this.RaiseAndSetIfChanged(ref _vehicleDistribution, value);
+        }
+
         public ICommand RefreshCommand { get; }
 
         public DashboardViewModel(
@@ -112,33 +174,70 @@ namespace ParkingLotApp.ViewModels
             _settingsService = settingsService;
             _dashboardService = dashboardService;
             _logger = logger;
+            _serviceProvider = serviceProvider;
             
             // Inisialisasi nilai dasar untuk property
-            _currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            _dbStatus = "Checking...";
+            _currentTime = DateTime.Now.ToString("HH:mm:ss");
+            _dbStatus = "Unknown";
             _statusMessage = "Initializing...";
             
             // Buat LogViewer dengan serviceProvider
             _logViewer = new LogViewerViewModel(serviceProvider, logger);
+
+            // Inisialisasi vehicle distribution dengan dictionary kosong
+            _vehicleDistribution = new Dictionary<string, int>
+            {
+                { "Car", 0 },
+                { "Motorcycle", 0 },
+                { "Truck", 0 },
+                { "Bus", 0 }
+            };
 
             // Timer untuk pembaruan waktu (setiap detik)
             _clockTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _clockTimer.Tick += (s, e) => CurrentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _clockTimer.Tick += (s, e) => CurrentTime = DateTime.Now.ToString("HH:mm:ss");
             _clockTimer.Start();
 
-            // Timer untuk auto-refresh data (setiap 5 detik)
+            // Timer untuk auto-refresh data (setiap 10 detik)
             _refreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(10)
+            };
+            _refreshTimer.Tick += async (s, e) => 
+            {
+                try
+                {
+                    Console.WriteLine($"[Debug] Auto-refresh timer triggered at {DateTime.Now:HH:mm:ss}");
+                    await RefreshDataAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Exception in refresh timer: {ex.Message}");
+                    await _logger.LogErrorAsync("Exception in dashboard refresh timer", ex);
+                }
+            };
+            _refreshTimer.Start();
+
+            // Timer untuk menghapus pesan status setelah beberapa detik
+            _statusClearTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(5)
             };
-            _refreshTimer.Tick += async (s, e) => await RefreshDashboardDataAsync();
-            _refreshTimer.Start();
+            _statusClearTimer.Tick += (sender, e) =>
+            {
+                StatusMessage = string.Empty;
+                _statusClearTimer.Stop();
+            };
 
             // Command untuk refresh manual
-            RefreshCommand = ReactiveCommand.CreateFromTask(RefreshDashboardDataAsync);
+            RefreshCommand = ReactiveCommand.CreateFromTask(async () => 
+            {
+                Console.WriteLine($"[Debug] Manual refresh triggered at {DateTime.Now:HH:mm:ss}");
+                await RefreshDataAsync();
+            });
 
             // Inisialisasi animasi
             InitializeAnimations();
@@ -146,152 +245,234 @@ namespace ParkingLotApp.ViewModels
             // Inisialisasi data
             Task.Run(async () =>
             {
-                await _logger.LogInfoAsync("Dashboard initialized");
-                await RefreshDashboardDataAsync();
-            });
-        }
-
-        private async Task RefreshDashboardDataAsync()
-        {
-            if (IsBusy) return;
-
-            try
-            {
-                IsBusy = true;
-                IsRefreshing = true;
-                StatusMessage = "Refreshing dashboard data...";
-
-                // Cek koneksi database
                 try
                 {
-                    IsConnected = await _dashboardService.CheckDatabaseConnectionAsync();
-                    DbStatus = IsConnected ? "Connected" : "Disconnected";
+                    await _logger.LogInfoAsync("Dashboard initialized");
+                    Console.WriteLine("[Debug] Dashboard initialized, performing initial data load");
+                    await InitializeAsync();
                 }
                 catch (Exception ex)
                 {
-                    IsConnected = false;
-                    DbStatus = "Error";
-                    StatusMessage = $"Database error: {ex.Message}";
-                    await _logger.LogErrorAsync("Database connection error in dashboard", ex);
+                    Console.WriteLine($"[Error] Error during dashboard initialization: {ex.Message}");
+                    await _logger.LogErrorAsync("Error initializing dashboard", ex);
+                }
+            });
+        }
+
+        private async Task InitializeAsync()
+        {
+            try
+            {
+                await _logger.LogInfoAsync("Dashboard initialized");
+                Console.WriteLine("[Debug] Dashboard initialized, performing initial data load");
+                
+                // Memastikan database sudah siap (jika belum, akan mengembalikan default values)
+                var dbConnected = await _dashboardService.CheckDatabaseConnectionAsync();
+                IsConnected = dbConnected;
+                DbStatus = dbConnected ? "Connected" : "Disconnected";
+                
+                if (!dbConnected)
+                {
+                    Dispatcher.UIThread.Post(() => 
+                    {
+                        StatusMessage = "Database connection error. Data may not be accurate.";
+                    });
+                    Console.WriteLine("[Debug] Database connection check failed during initialization");
+                }
+                else
+                {
+                    Console.WriteLine("[Debug] Database connection successful");
+                }
+                
+                await RefreshDataAsync();
+                _isInitialLoad = false;
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync("Error initializing dashboard", ex);
+                Console.WriteLine($"[Error] Dashboard initialization error: {ex.Message}");
+                Dispatcher.UIThread.Post(() => 
+                {
+                    StatusMessage = "Error loading dashboard data. Check logs for details.";
+                });
+            }
+        }
+
+        private async Task RefreshDataAsync()
+        {
+            if (_isRefreshing)
+            {
+                return; // Hindari refresh bersamaan
+            }
+
+            _isRefreshing = true;
+            
+            try
+            {
+                // Ubah IsLoading hanya jika ini adalah load pertama
+                if (_isInitialLoad)
+                {
+                    Dispatcher.UIThread.Post(() => IsLoading = true);
                 }
 
-                if (IsConnected)
+                // Menyembunyikan pesan status jika ada
+                if (!string.IsNullOrEmpty(StatusMessage))
                 {
-                    try
+                    Dispatcher.UIThread.Post(() => StatusMessage = string.Empty);
+                }
+
+                // Memuat data dari service
+                bool hasError = false;
+                try
+                {
+                    var totalSpots = await _dashboardService.GetTotalSpotsAsync();
+                    var occupiedSpots = await _dashboardService.GetOccupiedSpotsAsync();
+                    var availableSpots = await _dashboardService.GetAvailableSpotsAsync();
+
+                    // Set values pada UI thread
+                    Dispatcher.UIThread.Post(() =>
                     {
-                        // Buat semua task untuk dijalankan secara paralel tapi tidak saling menunggu
-                        var totalSpotsTask = _dashboardService.GetTotalSpotsAsync();
-                        var occupiedSpotsTask = _dashboardService.GetOccupiedSpotsAsync();
-                        var availableSpotsTask = _dashboardService.GetAvailableSpotsAsync();
-                        var todayRevenueTask = _dashboardService.GetTodayRevenueAsync();
-                        var weekRevenueTask = _dashboardService.GetWeekRevenueAsync();
-                        var monthRevenueTask = _dashboardService.GetMonthRevenueAsync();
-                        var vehicleDistributionTask = _dashboardService.GetVehicleDistributionAsync();
-                        var recentActivitiesTask = _dashboardService.GetRecentActivitiesAsync(15);
-                        var systemLogsTask = _dashboardService.GetRecentLogsAsync(15);
+                        TotalSpots = totalSpots;
+                        OccupiedSpots = occupiedSpots;
+                        AvailableSpots = availableSpots;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    hasError = true;
+                    Console.WriteLine($"[Error] Error refreshing spots data: {ex.Message}");
+                    await _logger.LogErrorAsync("Error refreshing spots data", ex);
+                }
 
-                        // Tunggu semua task selesai
-                        await Task.WhenAll(
-                            totalSpotsTask, 
-                            occupiedSpotsTask,
-                            availableSpotsTask,
-                            todayRevenueTask,
-                            weekRevenueTask,
-                            monthRevenueTask,
-                            vehicleDistributionTask,
-                            recentActivitiesTask,
-                            systemLogsTask
-                        );
+                // Memuat data revenue
+                try
+                {
+                    var todayRevenue = await _dashboardService.GetTodayRevenueAsync();
+                    var weekRevenue = await _dashboardService.GetWeekRevenueAsync();
+                    var monthRevenue = await _dashboardService.GetMonthRevenueAsync();
 
-                        // Ambil hasil dari task
-                        int totalSpots = await totalSpotsTask;
-                        int occupiedSpots = await occupiedSpotsTask;
-                        int availableSpots = await availableSpotsTask;
-                        decimal todayRevenue = await todayRevenueTask;
-                        decimal weekRevenue = await weekRevenueTask;
-                        decimal monthRevenue = await monthRevenueTask;
-                        var vehicleDistribution = await vehicleDistributionTask;
-                        var recentActivities = await recentActivitiesTask;
-                        var systemLogs = await systemLogsTask;
+                    // Set values pada UI thread
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        TodayRevenue = todayRevenue;
+                        WeekRevenue = weekRevenue;
+                        MonthRevenue = monthRevenue;
+                    });
 
-                        // Update statistics model
-                        await Dispatcher.UIThread.InvokeAsync(() =>
+                    // Reset error counter jika berhasil
+                    _refreshErrorCount = 0;
+                }
+                catch (Exception ex)
+                {
+                    hasError = true;
+                    _refreshErrorCount++;
+                    
+                    await _logger.LogErrorAsync("Error getting revenue data", ex);
+                    Console.WriteLine($"[Error] Error getting revenue: {ex.Message}");
+                    
+                    if (_refreshErrorCount >= 3)
+                    {
+                        Dispatcher.UIThread.Post(() =>
                         {
-                            Statistics.TotalSpots = totalSpots;
-                            Statistics.OccupiedSpots = occupiedSpots;
-                            Statistics.AvailableSpots = availableSpots;
-                            Statistics.TodayRevenue = todayRevenue;
-                            Statistics.WeekRevenue = weekRevenue;
-                            Statistics.MonthRevenue = monthRevenue;
-                            Statistics.LastUpdated = DateTime.Now;
-
-                            // Update vehicle distribution visualization
-                            Statistics.VehicleDistribution.Clear();
-                            Statistics.VehicleTypes.Clear();
-                            string[] colors = { "#3498db", "#2ecc71", "#e74c3c", "#f39c12", "#9b59b6" };
-                            int colorIndex = 0;
-                            
-                            foreach (var item in vehicleDistribution)
-                            {
-                                Statistics.VehicleDistribution.Add(new VehicleDistributionItem(
-                                    item.Key,
-                                    item.Value,
-                                    colors[colorIndex % colors.Length]
-                                ));
-                                
-                                Statistics.VehicleTypes.Add(new VehicleTypeCount(
-                                    item.Key,
-                                    item.Value
-                                ));
-                                
-                                colorIndex++;
-                            }
-
-                            // Update recent activities
-                            RecentActivities.Clear();
-                            foreach (var activity in recentActivities)
-                            {
-                                // Tambahkan informasi waktu terformat
-                                if (activity.Action == "Entry")
-                                {
-                                    activity.FormattedTime = activity.EntryTime.ToString("HH:mm:ss");
-                                }
-                                else if (activity.Action == "Exit" && activity.ExitTime.HasValue)
-                                {
-                                    activity.FormattedTime = activity.ExitTime.Value.ToString("HH:mm:ss");
-                                }
-                                RecentActivities.Add(activity);
-                            }
-
-                            // Update system logs
-                            SystemLogs.Clear();
-                            foreach (var log in systemLogs)
-                            {
-                                SystemLogs.Add(log);
-                            }
-
-                            StatusMessage = $"Data refreshed at {DateTime.Now:HH:mm:ss}";
+                            StatusMessage = "Error refreshing revenue data. Will try again later.";
                         });
                     }
-                    catch (Exception ex)
+                }
+
+                // Memuat aktivitas terbaru
+                try
+                {
+                    var activities = await _dashboardService.GetRecentActivitiesAsync();
+                    Dispatcher.UIThread.Post(() =>
                     {
-                        await _logger.LogErrorAsync("Error fetching dashboard data", ex);
-                        StatusMessage = $"Error fetching data: {ex.Message}";
+                        RecentActivities.Clear();
+                        foreach (var activity in activities)
+                        {
+                            RecentActivities.Add(activity);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    hasError = true;
+                    await _logger.LogErrorAsync("Error getting recent activities", ex);
+                    Console.WriteLine($"[Error] Error getting recent activities: {ex.Message}");
+                }
+
+                // Memuat log terbaru
+                try
+                {
+                    var logs = await _dashboardService.GetRecentLogsAsync();
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        SystemLogs.Clear();
+                        foreach (var log in logs)
+                        {
+                            SystemLogs.Add(log);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    hasError = true;
+                    await _logger.LogErrorAsync("Error getting recent logs", ex);
+                    Console.WriteLine($"[Error] Error getting recent logs: {ex.Message}");
+                }
+
+                // Memuat distribusi kendaraan
+                try
+                {
+                    var distribution = await _dashboardService.GetVehicleDistributionAsync();
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        VehicleDistribution = distribution;
+                        this.RaisePropertyChanged(nameof(VehicleDistribution));
+                    });
+                }
+                catch (Exception ex)
+                {
+                    hasError = true;
+                    await _logger.LogErrorAsync("Error getting vehicle distribution", ex);
+                    Console.WriteLine($"[Error] Error getting vehicle distribution: {ex.Message}");
+                }
+
+                if (hasError)
+                {
+                    if (_refreshErrorCount >= 3)
+                    {
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            StatusMessage = "Some data could not be loaded. Check connection.";
+                            _statusClearTimer.Start(); // Otomatis clear setelah beberapa detik
+                        });
                     }
+                }
+                else
+                {
+                    // Reset error counter jika berhasil
+                    _refreshErrorCount = 0;
                 }
             }
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync("Error refreshing dashboard data", ex);
-                StatusMessage = $"Error: {ex.Message}";
+                Console.WriteLine($"[Error] General error refreshing dashboard: {ex.Message}");
+                
+                Dispatcher.UIThread.Post(() =>
+                {
+                    StatusMessage = "Error refreshing data. Check logs for details.";
+                    _statusClearTimer.Start();
+                });
             }
             finally
             {
-                IsBusy = false;
+                // Reset loading status pada UI thread
+                if (_isInitialLoad)
+                {
+                    Dispatcher.UIThread.Post(() => IsLoading = false);
+                }
                 
-                // Set IsRefreshing false setelah delay singkat untuk animasi
-                await Task.Delay(500);
-                IsRefreshing = false;
+                _isRefreshing = false;
             }
         }
 
@@ -328,6 +509,7 @@ namespace ParkingLotApp.ViewModels
         {
             _clockTimer?.Stop();
             _refreshTimer?.Stop();
+            _statusClearTimer?.Stop();
             
             // Tambahkan logic untuk membatalkan task animasi jika perlu
             

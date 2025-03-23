@@ -23,6 +23,10 @@ namespace ParkingLotApp.Data
             {
                 Console.WriteLine("[Info] Starting database seeding process...");
                 
+                // Ensure database exists and has applied migrations
+                Console.WriteLine("[Info] Ensuring database exists and schema is up to date...");
+                await EnsureDatabaseCreatedAsync();
+                
                 // Seed roles if they don't exist
                 Console.WriteLine("[Info] Seeding roles...");
                 await SeedRolesAsync();
@@ -54,6 +58,80 @@ namespace ParkingLotApp.Data
                     Console.WriteLine($"[Error] Inner exception stack trace: {ex.InnerException.StackTrace}");
                 }
                 Console.WriteLine($"[Error] Stack trace: {ex.StackTrace}");
+                throw;
+            }
+        }
+        
+        private async Task EnsureDatabaseCreatedAsync()
+        {
+            try
+            {
+                // Periksa apakah database sudah ada, jika belum maka buat
+                bool created = await _dbContext.Database.EnsureCreatedAsync();
+                if (created)
+                {
+                    Console.WriteLine("[Info] Database was created successfully");
+                }
+                else
+                {
+                    Console.WriteLine("[Info] Database already exists");
+                    
+                    // Pastikan skema database terbaru dengan menjalankan migrasi yang belum diterapkan
+                    try 
+                    {
+                        if (_dbContext.Database.GetPendingMigrations().Any())
+                        {
+                            Console.WriteLine("[Info] Applying pending migrations...");
+                            await _dbContext.Database.MigrateAsync();
+                            Console.WriteLine("[Info] Migrations applied successfully");
+                        }
+                        else
+                        {
+                            Console.WriteLine("[Info] Database schema is up to date");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Warning] Error checking/applying migrations: {ex.Message}. Will continue with existing schema.");
+                    }
+                }
+                
+                // Periksa apakah tabel utama sudah ada dan dapat diakses
+                Console.WriteLine("[Info] Verifying database tables...");
+                try
+                {
+                    // Coba mengakses tabel-tabel utama dan hitung jumlah entri
+                    int settingsCount = await _dbContext.Settings.CountAsync();
+                    int usersCount = await _dbContext.Users.CountAsync();
+                    int rolesCount = await _dbContext.Roles.CountAsync();
+                    int activitiesCount = await _dbContext.ParkingActivities.CountAsync();
+                    int logsCount = await _dbContext.Logs.CountAsync();
+                    
+                    Console.WriteLine($"[Info] Database tables verified: Found {settingsCount} settings, {usersCount} users, {rolesCount} roles, {activitiesCount} activities, {logsCount} logs");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Warning] Could not verify tables: {ex.Message}");
+                    
+                    // Jika tidak bisa mengakses tabel, coba buat database dari awal
+                    Console.WriteLine("[Info] Attempting to recreate database schema...");
+                    
+                    // Hapus database jika ada
+                    await _dbContext.Database.EnsureDeletedAsync();
+                    Console.WriteLine("[Info] Existing database deleted");
+                    
+                    // Buat database baru dengan schema terkini
+                    await _dbContext.Database.EnsureCreatedAsync();
+                    Console.WriteLine("[Info] New database created with current schema");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Error] Database initialization error: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[Error] Inner exception: {ex.InnerException.Message}");
+                }
                 throw;
             }
         }

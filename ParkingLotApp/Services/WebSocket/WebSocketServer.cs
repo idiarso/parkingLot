@@ -22,11 +22,6 @@ namespace ParkingLotApp.Services.WebSocket
         private readonly ConcurrentDictionary<string, System.Net.WebSockets.WebSocket> _clients;
         private readonly IWebHost _webHost;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly string _host;
-        private readonly int _port;
-        private readonly WebSocketServer _server;
-        private readonly Timer _heartbeatTimer;
-        private readonly int _heartbeatInterval;
 
         public WebSocketServer(ILogger<WebSocketServer> logger)
         {
@@ -83,10 +78,6 @@ namespace ParkingLotApp.Services.WebSocket
                     });
                 })
                 .Build();
-
-            _host = "0.0.0.0";
-            _port = 5000;
-            _heartbeatInterval = 5000; // Assuming a default heartbeat interval
         }
 
         public async Task StartAsync()

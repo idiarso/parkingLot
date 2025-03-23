@@ -26,7 +26,7 @@ namespace ParkingLotApp.ViewModels
         public string SearchVehicleNumber
         {
             get => _searchVehicleNumber;
-            set => this.RaiseAndSetIfChanged(ref _searchVehicleNumber, value?.ToUpper());
+            set => this.RaiseAndSetIfChanged(ref _searchVehicleNumber, value?.ToUpper() ?? string.Empty);
         }
 
         public ParkingActivity? CurrentParking

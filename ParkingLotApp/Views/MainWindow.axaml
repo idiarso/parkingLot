@@ -4,6 +4,7 @@
         xmlns:views="using:ParkingLotApp.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=netstandard"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="ParkingLotApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -19,6 +20,46 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
+    <Window.Styles>
+        <!-- Styling for navigation menu buttons -->
+        <Style Selector="Button.navButton">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#B0BEC5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <!-- Hover state for nav buttons -->
+        <Style Selector="Button.navButton:pointerover">
+            <Setter Property="Background" Value="#37474F"/>
+            <Setter Property="Foreground" Value="#ECEFF1"/>
+        </Style>
+        
+        <!-- Active nav button style -->
+        <Style Selector="Button.navButton.active">
+            <Setter Property="Background" Value="#455A64"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </Window.Styles>
+
+    <Window.Resources>
+        <!-- Custom converter untuk memeriksa tipe -->
+        <system:Boolean x:Key="TrueValue">True</system:Boolean>
+        <system:Boolean x:Key="FalseValue">False</system:Boolean>
+    </Window.Resources>
+
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
             <ExperimentalAcrylicBorder.Material>
@@ -31,49 +72,104 @@
         </ExperimentalAcrylicBorder>
 
         <Grid ColumnDefinitions="Auto,*">
-            <!-- Only display navigation menu if not on login screen -->
+            <!-- Navigation menu - hidden on login screen -->
             <Border Grid.Column="0" 
                     Width="250"
-                    Background="#263238"
-                    IsVisible="{Binding CurrentViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Margin="20">
-                        <TextBlock Text="Parking Lot"
-                                 FontSize="24"
+                    Background="#263238">
+                <StackPanel Name="NavigationPanel" IsVisible="{Binding !IsLoginViewModel}">
+                    <!-- App title and logo -->
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Parking Management"
+                                 FontSize="22"
                                  FontWeight="Bold"
                                  Foreground="#ECEFF1"
+                                 Margin="0,0,0,5"/>
+                        <TextBlock Text="System"
+                                 FontSize="18"
+                                 Foreground="#78909C"
                                  Margin="0,0,0,20"/>
                     </StackPanel>
 
-                    <StackPanel Spacing="5" Margin="10">
-                        <Button Content="Dashboard"
-                                Command="{Binding ShowDashboardCommand}"
-                                HorizontalAlignment="Stretch"/>
-                        <Button Content="Vehicle Entry"
-                                Command="{Binding ShowVehicleEntryCommand}"
-                                HorizontalAlignment="Stretch"/>
-                        <Button Content="Vehicle Exit"
-                                Command="{Binding ShowVehicleExitCommand}"
-                                HorizontalAlignment="Stretch"/>
-                        <Button Content="Reports"
-                                Command="{Binding ShowReportsCommand}"
-                                HorizontalAlignment="Stretch"/>
-                        <Button Content="User Management"
-                                Command="{Binding ShowUserManagementCommand}"
-                                HorizontalAlignment="Stretch"/>
-                        <Button Content="Settings"
-                                Command="{Binding ShowSettingsCommand}"
-                                HorizontalAlignment="Stretch"/>
+                    <!-- Status info and database check -->
+                    <StackPanel Margin="15,10">
+                        <TextBlock Text="{Binding StatusMessage}" 
+                                  Foreground="#FF5252"
+                                  TextWrapping="Wrap"
+                                  Margin="0,0,0,10"
+                                  IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                        
+                        <Button Content="Check Database Connection"
+                                Command="{Binding CheckDatabaseCommand}"
+                                Classes="navButton"
+                                Margin="0,5,0,10"/>
+                        
                         <Button Content="Logout"
                                 Command="{Binding LogoutCommand}"
-                                HorizontalAlignment="Stretch"/>
+                                Classes="navButton"
+                                Background="#37474F"
+                                Foreground="#ECEFF1"
+                                Margin="0,10,0,0"/>
                     </StackPanel>
-                </DockPanel>
+
+                    <!-- Main navigation menu -->
+                    <StackPanel Spacing="2" Margin="15,10">
+                        <TextBlock Text="NAVIGATION" 
+                                  Foreground="#607D8B" 
+                                  FontSize="12" 
+                                  Margin="5,0,0,10"
+                                  FontWeight="SemiBold"/>
+                        
+                        <!-- Dashboard -->
+                        <Button Content="Dashboard"
+                                Command="{Binding ShowDashboardCommand}"
+                                Classes="navButton"/>
+                        
+                        <!-- Vehicle Management Section -->
+                        <TextBlock Text="VEHICLE MANAGEMENT" 
+                                  Foreground="#607D8B" 
+                                  FontSize="12" 
+                                  Margin="5,15,0,10"
+                                  FontWeight="SemiBold"/>
+                        
+                        <!-- Vehicle Entry -->
+                        <Button Content="Vehicle Entry"
+                                Command="{Binding ShowVehicleEntryCommand}"
+                                Classes="navButton"/>
+                        
+                        <!-- Vehicle Exit -->
+                        <Button Content="Vehicle Exit"
+                                Command="{Binding ShowVehicleExitCommand}"
+                                Classes="navButton"/>
+                        
+                        <!-- Administration Section -->
+                        <TextBlock Text="ADMINISTRATION" 
+                                  Foreground="#607D8B" 
+                                  FontSize="12" 
+                                  Margin="5,15,0,10"
+                                  FontWeight="SemiBold"/>
+                        
+                        <!-- Reports -->
+                        <Button Content="Reports &amp; Analytics"
+                                Command="{Binding ShowReportsCommand}"
+                                Classes="navButton"/>
+                        
+                        <!-- User Management -->
+                        <Button Content="User Management"
+                                Command="{Binding ShowUserManagementCommand}"
+                                Classes="navButton"/>
+                        
+                        <!-- Settings -->
+                        <Button Content="Settings"
+                                Command="{Binding ShowSettingsCommand}"
+                                Classes="navButton"/>
+                    </StackPanel>
+                </StackPanel>
             </Border>
 
             <!-- Main Content Area -->
             <ContentControl Grid.Column="1" 
                           Content="{Binding CurrentViewModel}">
+                <!-- Eliminamos las transiciones por ahora para resolver el error -->
                 <ContentControl.DataTemplates>
                     <DataTemplate DataType="{x:Type vm:LoginViewModel}">
                         <views:LoginView />
