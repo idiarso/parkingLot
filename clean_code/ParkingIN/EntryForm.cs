@@ -69,6 +69,7 @@ namespace ParkingIN
         private TextBox txtPlateNumber;
         private ComboBox cmbVehicleType;
         private Button btnGenerateTicket;
+        private Button btnReject;
 
         private void InitializeControls()
         {
@@ -137,14 +138,24 @@ namespace ParkingIN
             {
                 Text = "Generate Ticket",
                 Location = new Point(120, 90),
-                Size = new Size(200, 30)
+                Size = new Size(100, 30)
             };
             btnGenerateTicket.Click += BtnGenerateTicket_Click;
+            
+            btnReject = new Button
+            {
+                Text = "Reject",
+                Location = new Point(230, 90),
+                Size = new Size(90, 30),
+                BackColor = Color.FromArgb(220, 53, 69),
+                ForeColor = Color.White
+            };
+            btnReject.Click += BtnReject_Click;
             
             detailsPanel.Controls.AddRange(new Control[] {
                 lblPlateNumber, txtPlateNumber,
                 lblVehicleType, cmbVehicleType,
-                btnGenerateTicket
+                btnGenerateTicket, btnReject
             });
             
             // Add all controls to form
@@ -189,7 +200,7 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Error initializing camera");
+                CustomLogManager.GetLogger().Error("Error initializing camera", ex);
                 MessageBox.Show($"Error initializing camera: {ex.Message}", 
                     "Camera Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 btnCapture.Enabled = false;
@@ -251,7 +262,7 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Error capturing image");
+                CustomLogManager.GetLogger().Error("Error capturing image", ex);
                 MessageBox.Show($"Error capturing image: {ex.Message}", 
                     "Capture Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -280,7 +291,7 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Error loading vehicle types");
+                CustomLogManager.GetLogger().Error("Error loading vehicle types", ex);
                 MessageBox.Show($"Error loading vehicle types: {ex.Message}", 
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -330,7 +341,7 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Error generating ticket");
+                CustomLogManager.GetLogger().Error("Error generating ticket", ex);
                 MessageBox.Show($"Error generating ticket: {ex.Message}", 
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -370,7 +381,7 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Error registering vehicle entry");
+                CustomLogManager.GetLogger().Error("Error registering vehicle entry", ex);
                 MessageBox.Show($"Error registering vehicle entry: {ex.Message}", 
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -387,6 +398,45 @@ namespace ParkingIN
             {
                 videoSource.SignalToStop();
                 videoSource.WaitForStop();
+            }
+        }
+        
+        private void BtnReject_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string plateNumber = txtPlateNumber.Text.Trim().ToUpper();
+                
+                if (string.IsNullOrEmpty(plateNumber))
+                {
+                    MessageBox.Show("Please enter a plate number to reject.", "Validation Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtPlateNumber.Focus();
+                    return;
+                }
+                
+                if (MessageBox.Show($"Are you sure you want to reject entry for vehicle {plateNumber}?", 
+                    "Confirm Rejection", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    // Log the rejection
+                    CustomLogManager.GetLogger().Info($"Vehicle entry rejected: {plateNumber}");
+                    
+                    // Clear form for next entry
+                    txtPlateNumber.Clear();
+                    if (cmbVehicleType.Items.Count > 0)
+                        cmbVehicleType.SelectedIndex = 0;
+                    imagePath = null;
+                    txtPlateNumber.Focus();
+                    
+                    MessageBox.Show("Vehicle entry has been rejected.", "Rejection Successful", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                CustomLogManager.GetLogger().Error("Error processing vehicle rejection", ex);
+                MessageBox.Show($"Error processing rejection: {ex.Message}", 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

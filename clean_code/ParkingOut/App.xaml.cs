@@ -40,6 +40,29 @@ namespace ParkingOut
             
             try
             {
+                logger.Debug("Initializing database tables");
+                
+                // Pastikan tabel users ada dan user admin terbuat
+                try
+                {
+                    // Pastikan database sudah terhubung
+                    if (ParkingOut.Utils.Database.IsDatabaseAvailable)
+                    {
+                        logger.Info("Ensuring users table exists");
+                        ParkingOut.Utils.UserManager.Instance.EnsureUsersTableExists();
+                        logger.Info("Users table initialized successfully");
+                    }
+                    else
+                    {
+                        logger.Warn("Database not available, skipping users table initialization");
+                    }
+                }
+                catch (Exception dbEx)
+                {
+                    logger.Error(dbEx, "Error initializing users table");
+                    MessageBox.Show($"Error initializing database tables: {dbEx.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                
                 logger.Debug("Initializing main window");
                 
                 // Create and show the main window
@@ -100,7 +123,7 @@ namespace ParkingOut
         /// <summary>
         /// Configures NLog for application logging.
         /// </summary>
-        private void ConfigureLogging()
+        private static void ConfigureLogging()
         {
             try
             {
@@ -142,4 +165,4 @@ namespace ParkingOut
             }
         }
     }
-} 
+}

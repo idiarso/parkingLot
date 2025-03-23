@@ -11,6 +11,7 @@
 8. [Konfigurasi Kamera](#konfigurasi-kamera)
 9. [Konfigurasi Gate Barrier (Portal)](#konfigurasi-gate-barrier-portal)
 10. [Pemecahan Masalah](#pemecahan-masalah)
+11. [Panduan Dashboard dan Login](#panduan-dashboard-dan-login)
 
 ## Persyaratan Sistem
 
@@ -199,334 +200,79 @@ Berikut adalah langkah lengkap untuk membangun dan menjalankan aplikasi ParkingO
    - Set ParkingOut sebagai Startup Project
    - Tekan F5 untuk menjalankan dalam mode debug
 
-#### Troubleshooting ParkingOut
+#### Menjalankan Aplikasi WPF (TestWpfApp)
 
-1. **Error "MSB1011: Multiple Projects"**
-   - Selalu gunakan flag `--project ParkingOut.csproj` saat menggunakan dotnet run/build
+Aplikasi TestWpfApp adalah versi WPF baru dari sistem parkir dengan dashboard modern dan sistem login.
 
-2. **Error Koneksi Database**
-   - Verifikasi string koneksi di `App.config` sudah benar
-   - Pastikan PostgreSQL berjalan dengan `sc query postgresql-x64-14` (sesuaikan versinya)
-   - Pastikan database parkingdb sudah dibuat
-
-3. **Error "The application was unable to start correctly (0xc000007b)"**
-   - Ini biasanya berarti DLL yang dibutuhkan tidak dapat dimuat
-   - Pastikan .NET Runtime terinstall dengan benar
-   - Jalankan perintah `dotnet restore ParkingOut.csproj` untuk memastikan semua dependensi terunduh
-
-4. **UI Error atau Exception**
-   - Jalankan dengan mengikuti log error: `dotnet run --project ParkingOut.csproj > error-log.txt 2>&1`
-   - Periksa log untuk detail error
-
-5. **Aplikasi Tidak Merespons**
-   - Pastikan ParkingServer berjalan jika aplikasi memerlukan koneksi ke server
-   - Periksa penggunaan memory dan CPU sistem
-
-### Database
-
-#### PostgreSQL
-1. Pastikan PostgreSQL sudah terinstal dan berjalan
-2. Kredensial default: 
-   - Username: postgres
-   - Password: root@rsi
-   - Port: 5432
-   - Database: parkingdb
-3. Untuk menjalankan PostgreSQL secara manual, gunakan:
+1. **Build Aplikasi WPF**
    ```
-   cd /d D:\21maret\clean_code\ParkingIN\Database
-   call StartPostgreSQL.bat
+   cd /d D:\21maret\TestWpfApp
+   dotnet restore
+   dotnet build
    ```
 
-## Konfigurasi Database
-
-### PostgreSQL
-
-1. **Instalasi PostgreSQL**
-   - Unduh PostgreSQL 14 atau yang lebih baru dari [website resmi](https://www.postgresql.org/download/)
-   - Instal dengan mengikuti panduan instalasi
-   - Saat diminta, atur password untuk user "postgres" menjadi "root@rsi"
-   - Pastikan service PostgreSQL berjalan di port default 5432
-
-2. **Inisialisasi Database**
-   - Jalankan script `D:\21maret\InitializeDatabase.bat` untuk membuat database dan tabel
-   - Script akan membuat database "parkingdb" dan semua tabel yang diperlukan
-
-3. **Konfigurasi Koneksi**
-   - Aplikasi menggunakan connection string yang terdapat di file konfigurasi masing-masing aplikasi
-   - ParkingServer: `D:\21maret\clean_code\ParkingServer\appsettings.json`
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Host=localhost;Port=5432;Database=parkingdb;Username=postgres;Password=root@rsi;"
-     }
-   }
+2. **Jalankan Aplikasi WPF**
    ```
-   - ParkingIN: `D:\21maret\clean_code\ParkingIN\App.config`
-   - ParkingOut: `D:\21maret\clean_code\ParkingOut\App.config`
-   - Contoh connection string PostgreSQL:
-   ```xml
-   <connectionStrings>
-     <add name="ParkingConnection" connectionString="Host=localhost;Port=5432;Database=parkingdb;Username=postgres;Password=root@rsi;" providerName="Npgsql" />
-   </connectionStrings>
+   dotnet run
+   ```
+   Atau jalankan executable secara langsung:
+   ```
+   cd /d D:\21maret\TestWpfApp\bin\Debug\net6.0-windows
+   TestWpfApp.exe
    ```
 
-## Konfigurasi Printer Thermal
+## Panduan Dashboard dan Login
 
-### Instalasi Driver
-1. Instal driver printer thermal sesuai dengan model yang digunakan
-2. Verifikasi instalasi dengan mencetak test page dari Windows
+### Menggunakan Sistem Login
 
-### Konfigurasi di Aplikasi
-1. Buka file konfigurasi di `D:\21maret\clean_code\ParkingIN\App.config`
-2. Atur parameter printer sesuai dengan model yang digunakan:
-   ```xml
-   <add key="PrinterName" value="POS-58" />
-   <add key="PrinterWidth" value="58" />
-   <add key="PrinterDPI" value="203" />
-   ```
-3. Jika menggunakan printer yang berbeda, sesuaikan nama printer dengan yang terdaftar di Windows
+Aplikasi WPF terbaru dilengkapi dengan sistem autentikasi yang mengharuskan login sebelum dapat mengakses dashboard.
 
-### Pengujian Printer
-1. Jalankan aplikasi ParkingIN
-2. Buka menu `Pengaturan` > `Printer`
-3. Klik tombol `Test Print` untuk memastikan printer berfungsi
+1. **Halaman Login**
+   - Saat aplikasi dijalankan, halaman login akan muncul terlebih dahulu
+   - Masukkan kredensial berikut untuk login:
+     - Username: `admin`
+     - Password: `password123`
+   - Klik tombol "SIGN IN" atau tekan Enter pada keyboard untuk melakukan login
 
-## Konfigurasi Barcode Scanner
+2. **Fitur Login**
+   - Validasi input untuk memastikan username dan password tidak kosong
+   - Pesan error akan ditampilkan jika kredensial tidak valid
+   - Opsi "Remember me" untuk menyimpan informasi login (fitur ini masih dalam pengembangan)
+   - Link "Forgot Password" yang akan menampilkan petunjuk reset password
 
-### Koneksi Scanner
-1. Hubungkan scanner barcode ke port USB
-2. Tunggu hingga Windows menginstal driver secara otomatis
-3. Verifikasi instalasi dengan scan barcode test
+### Menggunakan Dashboard
 
-### Konfigurasi Mode Operasi
-1. Set scanner barcode ke mode "Keyboard Emulation" menggunakan kode konfigurasi dari manual scanner
-2. Atur sufiks menjadi "Enter" (CR) untuk mengirimkan data setelah scan
-3. Atur scanner untuk membaca kode jenis "Code 128" dan "QR Code"
+Setelah login berhasil, dashboard utama akan ditampilkan dengan berbagai informasi dan fitur.
 
-### Pengujian Scanner
-1. Buka aplikasi ParkingIN
-2. Arahkan kursor ke kolom "Nomor Kendaraan"
-3. Scan barcode untuk memastikan data muncul di kolom tersebut
+1. **Tampilan Dashboard**
+   - **Header**: Menampilkan nama pengguna, peran, dan waktu login terakhir
+   - **Statistik**: Menampilkan 4 kartu statistik (Available Slots, Today's Entries, Today's Exits, Today's Revenue)
+   - **Quick Actions**: Tombol untuk akses cepat ke fungsi utama (Vehicle Entry, Vehicle Exit, Vehicle Monitoring)
+   - **Recent Activity**: Tabel yang menampilkan aktivitas parkir terbaru
 
-## Konfigurasi MCU ATMEL
+2. **Navigasi**
+   - Gunakan sidebar di sebelah kiri untuk navigasi antar halaman
+   - Semua halaman dilindungi dan hanya dapat diakses setelah login berhasil
+   - Jika mencoba mengakses halaman tanpa login, sistem akan mengarahkan kembali ke halaman login
 
-### Koneksi Hardware
-1. Hubungkan MCU ATMEL ke PC menggunakan kabel RS232 (DB9)
-2. Verifikasi port COM yang digunakan (umumnya COM1 atau COM2)
-3. Hubungkan push button dan sensor ke pin input MCU sesuai skema:
-   - Push Button Entry: Pin D2
-   - Vehicle Detector: Pin D3
+3. **Logout**
+   - Klik tombol "Logout" di pojok kanan atas dashboard untuk keluar dari aplikasi
+   - Konfirmasi dialog akan muncul untuk memastikan Anda ingin logout
+   - Setelah logout, Anda akan diarahkan kembali ke halaman login
 
-### Konfigurasi Software
-1. Buka file konfigurasi di `D:\21maret\clean_code\ParkingIN\App.config`
-2. Atur parameter komunikasi serial:
-   ```xml
-   <add key="ComPort" value="COM1" />
-   <add key="BaudRate" value="9600" />
-   <add key="DataBits" value="8" />
-   <add key="Parity" value="None" />
-   <add key="StopBits" value="One" />
-   ```
+## Catatan Teknis Dashboard
 
-### Event Flow
+1. **Keamanan**
+   - Sistem login masih menggunakan kredensial hardcoded untuk demo
+   - Dalam pengembangan selanjutnya akan terintegrasi dengan database untuk autentikasi
+   - Hindari menyimpan password yang sensitif di aplikasi ini untuk saat ini
 
-#### Entry Process
-1. Kendaraan terdeteksi oleh sensor
-2. Pengguna menekan push button
-3. MCU ATMEL mengirim sinyal "IN:<ID>" ke PC melalui port serial
-4. Aplikasi ParkingIN menerima sinyal dan memproses data di database parkingdb
-5. Printer thermal mencetak tiket masuk dengan barcode
+2. **Keterbatasan**
+   - Dashboard saat ini menampilkan data statis untuk demonstrasi
+   - Integrasi dengan data real-time dari database masih dalam pengembangan
+   - Beberapa tombol Quick Action mungkin belum berfungsi sepenuhnya
 
-#### Exit Process
-1. Kendaraan terdeteksi di pintu keluar
-2. Petugas memindai barcode di tiket
-3. MCU mengirim sinyal "OUT:<ID>" ke PC
-4. Aplikasi ParkingOUT memproses data dan memvalidasi di database parkingdb
-5. Printer mencetak tiket keluar atau struk pembayaran
-
-## Konfigurasi Kamera
-
-Sistem ini mendukung dua jenis kamera untuk pengambilan gambar kendaraan:
-
-### Webcam Lokal
-
-1. **Persyaratan Hardware**
-   - Webcam USB standar yang kompatibel dengan DirectShow
-   - Resolusi minimal 640x480 (rekomendasi: 1280x720)
-   - Pastikan webcam terpasang dengan mantap dan terarah ke area kendaraan
-
-2. **Instalasi Driver**
-   - Pasang webcam ke port USB pada komputer
-   - Instal driver yang disertakan atau biarkan Windows menginstal driver secara otomatis
-   - Pastikan webcam muncul di Device Manager (tekan Win+X, pilih Device Manager)
-   - Verifikasi webcam berfungsi dengan aplikasi Camera bawaan Windows
-
-3. **Konfigurasi Sistem**
-   - Edit file `D:\21maret\clean_code\ParkingIN\config\camera.ini`
-   - Ubah `Type=Webcam`
-   - Sesuaikan `Device_Index` jika Anda memiliki beberapa webcam (0 = kamera pertama)
-   - Sesuaikan `Resolution` sesuai kemampuan webcam
-
-4. **Testing**
-   - Jalankan `test_hardware.bat` dan pilih opsi "Test Camera"
-   - Verifikasi bahwa webcam terdeteksi dan dapat mengambil gambar
-   - Cek hasil gambar di folder `test_images`
-
-### IP Camera
-
-1. **Persyaratan Hardware**
-   - IP Camera dengan dukungan RTSP atau HTTP snapshot
-   - Alamat IP statis atau DHCP reservation pada jaringan lokal
-   - PoE (Power over Ethernet) atau adaptor daya terpisah
-   - Kabel jaringan yang terhubung ke jaringan yang sama dengan PC
-
-2. **Instalasi Kamera**
-   - Pasang kamera pada posisi yang tepat untuk memotret kendaraan
-   - Hubungkan kamera ke jaringan 
-   - Konfigurasi alamat IP kamera melalui software bawaannya
-   - Pastikan kamera dapat diakses melalui browser dengan alamat IP nya
-
-3. **Konfigurasi Sistem**
-   - Edit file `D:\21maret\clean_code\ParkingIN\config\camera.ini`
-   - Ubah `Type=IP`
-   - Sesuaikan `IP`, `Username`, `Password`, dan `Port` sesuai konfigurasi kamera
-   - Sesuaikan `Resolution` jika kamera mendukung pengaturan resolusi via URL
-
-4. **Testing**
-   - Jalankan `test_hardware.bat` dan pilih opsi "Test Camera"
-   - Verifikasi bahwa sistem dapat menghubungi IP kamera
-   - Verifikasi bahwa snapshot dapat diambil
-
-## Konfigurasi Gate Barrier
-
-Sistem ini terintegrasi dengan gate barrier (portal) menggunakan kontroler mikro ATMEL melalui port serial RS232.
-
-1. **Perangkat yang Dibutuhkan**
-   - Gate barrier dengan kontroler mikro ATMEL
-   - Kabel RS232 (DB9) atau converter USB-to-RS232
-   - Driver USB-to-Serial jika menggunakan converter
-
-2. **Instalasi Hardware**
-   - Hubungkan gate barrier controller ke PC menggunakan kabel serial
-   - Jika menggunakan converter USB, instal driver yang sesuai
-   - Catat nomor port COM yang digunakan (cek di Device Manager)
-
-3. **Konfigurasi Sistem**
-   - Edit file `D:\21maret\clean_code\ParkingIN\config\gate.ini`
-   - Sesuaikan `COM_Port` dengan port yang digunakan (misal: COM3)
-   - Pastikan `Baud_Rate`, `Data_Bits`, `Stop_Bits`, dan `Parity` sesuai dengan spesifikasi kontroler
-   - Sesuaikan command di bagian `[Commands]` jika berbeda dengan default kontroler
-
-4. **Pengujian Sambungan**
-   - Jalankan `test_hardware.bat` dan pilih opsi "Test Serial Port / Gate"
-   - Verifikasi bahwa sistem dapat berkomunikasi dengan kontroler
-   - Uji perintah buka dan tutup gate jika aman untuk dilakukan
-
-5. **Konfigurasi Safety**
-   - Pastikan sensor keselamatan terpasang dan terkonfigurasi
-   - Atur `Enable_Sensors=true` di bagian `[Safety]`
-   - Aktifkan `Prevent_Close_When_Occupied=true` untuk mencegah portal menutup saat kendaraan terdeteksi
-
-## Konfigurasi Printer Thermal
-
-Sistem ini menggunakan printer thermal untuk mencetak tiket masuk dan struk keluar.
-
-1. **Persyaratan Hardware**
-   - Printer thermal 58mm atau 80mm (Rekomendasi: EPSON TM-T82X, EPSON TM-T20, atau setara)
-   - Kabel USB atau Serial untuk koneksi
-   - Catu daya printer
-
-2. **Instalasi Driver**
-   - Unduh dan instal driver printer dari situs resmi produsen
-   - Pastikan printer muncul di Windows sebagai printer terinstall
-   - Cetak test page dari Windows untuk memastikan printer berfungsi
-
-3. **Konfigurasi Sistem**
-   - Edit file `D:\21maret\clean_code\ParkingIN\config\printer.ini`
-   - Sesuaikan `Name` dengan nama printer yang terinstall
-   - Sesuaikan `Paper_Width` dengan lebar kertas yang digunakan (80 atau 58)
-   - Konfigurasikan header dan footer tiket sesuai kebutuhan
-   - Sesuaikan format tiket di bagian `[TicketFormat]`
-
-4. **Pengujian Printer**
-   - Jalankan `test_hardware.bat` dan pilih opsi "Test Thermal Printer"
-   - Verifikasi bahwa printer terdeteksi
-   - Cetak test page untuk memastikan printer berfungsi dengan baik
-
-## Konfigurasi Barcode Scanner
-
-Sistem menggunakan barcode scanner untuk memindai tiket pada proses keluar.
-
-1. **Persyaratan Hardware**
-   - Barcode scanner USB yang mendukung QR code dan Code128 (jika menggunakan barcode linear)
-   - Scanner harus dikonfigurasi untuk menambahkan Enter (CR) setelah pembacaan
-
-2. **Instalasi Scanner**
-   - Hubungkan scanner ke port USB PC
-   - Scanner biasanya terdeteksi sebagai keyboard device dan tidak memerlukan driver khusus
-   - Jika diperlukan, konfigurasi scanner menggunakan manual bawaan untuk menambahkan Enter setelah scan
-
-3. **Pengujian Scanner**
-   - Jalankan `test_hardware.bat` dan pilih opsi "Test Barcode Scanner"
-   - Pindai barcode untuk memverifikasi pembacaan
-
-## Pengujian Integrasi Hardware
-
-Setelah semua hardware terkonfigurasi, jalankan pengujian integrasi untuk memastikan semua komponen berfungsi bersama.
-
-1. Jalankan `test_hardware.bat` dan pilih opsi "Test All Hardware"
-2. Ikuti instruksi untuk menguji semua komponen
-3. Verifikasi bahwa:
-   - Kamera dapat mengambil gambar
-   - Gate barrier dapat menerima dan merespons perintah
-   - Printer dapat mencetak tiket
-   - Barcode scanner dapat membaca barcode
-   - Semua komponen dapat berinteraksi dengan database parkingdb
-
-## Pemecahan Masalah
-
-### Masalah Database
-
-#### PostgreSQL
-- **PostgreSQL service tidak berjalan**: Jalankan `services.msc` dan start service PostgreSQL
-- **Error koneksi**: Verifikasi username dan password di connection string
-- **Database tidak ditemukan**: Jalankan script inisialisasi database untuk membuat database parkingdb
-- **Error saat memulai service**: Periksa log PostgreSQL di Event Viewer atau di folder log PostgreSQL
-- **Data tidak konsisten**: Gunakan tool pgAdmin untuk memeriksa database parkingdb secara langsung
-
-### Masalah Aplikasi
-
-#### ParkingServer
-- **Tidak dapat memulai**: Pastikan tidak ada instance lain yang berjalan di port yang sama
-- **Error koneksi database**: Verifikasi connection string di appsettings.json merujuk ke database parkingdb
-
-#### ParkingOut
-- **Error build "MSB1011" (multiple projects)**: Gunakan perintah `dotnet build ParkingOut.csproj`
-- **Error restore package**: Pastikan internet aktif dan NuGet dikonfigurasi dengan benar
-- **Error koneksi ke server**: Pastikan ParkingServer berjalan dan terhubung ke database parkingdb
-
-### Masalah Kamera
-- **Webcam tidak terdeteksi**: Pastikan driver terinstall dengan benar dan webcam muncul di Device Manager
-- **IP Camera tidak dapat diakses**: Verifikasi alamat IP, port, dan kredensial. Pastikan kamera berada di jaringan yang sama
-- **Gambar tidak tersimpan**: Periksa folder penyimpanan dan pastikan aplikasi memiliki izin tulis
-
-### Masalah Gate Barrier
-- **Port COM tidak terdeteksi**: Periksa koneksi kabel dan driver USB-to-Serial jika digunakan
-- **Tidak ada respons dari kontroler**: Verifikasi baudrate dan parameter komunikasi lainnya
-- **Gate tidak merespons perintah**: Periksa koneksi antara kontroler dan motor gate
-
-### Masalah Printer
-- **Printer tidak terdeteksi**: Periksa driver dan koneksi USB/Serial
-- **Kertas tidak keluar**: Pastikan printer memiliki kertas dan tidak terjadi paper jam
-- **Hasil cetak tidak jelas**: Periksa kualitas kertas thermal dan pengaturan densitas printer
-
-### Masalah Barcode Scanner
-- **Scanner tidak membaca**: Periksa apakah barcode jelas dan tidak rusak
-- **Scan tidak masuk ke aplikasi**: Pastikan scanner dikonfigurasi untuk menambahkan Enter setelah scan
-- **Scan terbaca sebagai karakter salah**: Sesuaikan keyboard layout pada scanner
-
-## Informasi Kontak Support
-Untuk bantuan teknis, hubungi:
-- Email: support@parking-system.com
-- Telepon: (021) 1234-5678
-- Jam kerja: Senin-Jumat, 08.00-17.00 WIB
+3. **Troubleshooting**
+   - Jika dashboard tidak muncul setelah login, restart aplikasi dan coba lagi
+   - Jika tombol tidak responsif, periksa error di Output window jika menggunakan Visual Studio
+   - Untuk masalah lain, periksa file log aplikasi di folder logs

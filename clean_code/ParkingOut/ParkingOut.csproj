@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
@@ -81,6 +80,14 @@
     <Compile Include="Utils\NLogLogger.cs" />
     <Compile Include="Utils\AppLogger.cs" />
     <Compile Include="UI\**\*.cs" />
+    <!-- Tambahkan file Models dan Services -->
+    <Compile Include="Models\ActivityLogItem.cs" />
+    <Compile Include="Models\VehicleEntry.cs" />
+    <Compile Include="Services\IVehicleEntryService.cs" />
+    <Compile Include="Services\IVehicleExitService.cs" />
+    <Compile Include="Services\IAppLogger.cs" />
+    <Compile Include="Services\IPrintService.cs" />
+    <Compile Include="Services\ICameraService.cs" />
     
     <ApplicationDefinition Include="App.xaml" />
     
@@ -90,5 +97,4 @@
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
   </ItemGroup>
-
-</Project> 
+</Project>

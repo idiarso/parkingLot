@@ -7,16 +7,36 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace TestWpfApp
+namespace TestWpfApp.Pages
 {
     /// <summary>
     /// Interaction logic for VehicleMonitoringPage.xaml
     /// </summary>
-    public partial class VehicleMonitoringPage : Page
+    public partial class VehicleMonitoringPage : Page, INotifyPropertyChanged
     {
+        // UI Controls
+        private TextBlock txtVehiclesInParking;
+        private TextBlock txtEntryCount;
+        private TextBlock txtExitCount;
+        private TextBlock txtRevenue;
+        private DataGrid gridVehicles;
+        private TextBox txtTicketId;
+        private TextBox txtPlateNumber;
+        private ComboBox cmbVehicleType;
+        private TextBox txtEntryTime;
+        private TextBox txtExitTime;
+        private TextBox txtDuration;
+        private TextBox txtFee;
+        private ComboBox cmbStatus;
+        private TextBox txtSearch;
+
         private ObservableCollection<VehicleRecord> _allVehicles;
+        private VehicleRecord? _selectedVehicle;
         private string _searchText = string.Empty;
         private bool _isPlaceholderVisible = true;
+        private string _selectedTab = "All";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public VehicleMonitoringPage()
         {
@@ -25,14 +45,56 @@ namespace TestWpfApp
             // Create value converter for visibility binding
             this.Resources.Add("BoolToVisibilityConverter", new BooleanToVisibilityConverter());
             
-            // Initialize with sample data
+            _allVehicles = new ObservableCollection<VehicleRecord>();
             LoadSampleData();
-            
-            // Initial filter to show all vehicles
-            FilterVehicles("all");
-            
-            // Update statistics
+            FilterVehicles();
             UpdateStatistics();
+        }
+
+        public ObservableCollection<VehicleRecord> AllVehicles
+        {
+            get => _allVehicles;
+            set
+            {
+                _allVehicles = value;
+                OnPropertyChanged(nameof(AllVehicles));
+            }
+        }
+
+        public VehicleRecord? SelectedVehicle
+        {
+            get => _selectedVehicle;
+            set
+            {
+                _selectedVehicle = value;
+                OnPropertyChanged(nameof(SelectedVehicle));
+                if (value != null)
+                {
+                    FillFormWithVehicle(value);
+                }
+            }
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
+                OnPropertyChanged(nameof(SearchText));
+                FilterVehicles();
+            }
+        }
+
+        public string SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                _selectedTab = value;
+                OnPropertyChanged(nameof(SelectedTab));
+                FilterVehicles();
+            }
         }
 
         #region Data Management
@@ -165,91 +227,83 @@ namespace TestWpfApp
 
         private void UpdateStatistics()
         {
-            // Count vehicles currently parked
-            int parkedVehicles = _allVehicles.Count(v => v.Status == "Parked");
+            var parkedVehicles = _allVehicles.Count(v => v.Status == "Parked");
+            var todayEntries = _allVehicles.Count(v => v.EntryTime.Date == DateTime.Today);
+            var todayExits = _allVehicles.Count(v => v.ExitTime?.Date == DateTime.Today);
+            
+            decimal totalRevenue = 0;
+            foreach (var vehicle in _allVehicles.Where(v => v.ExitTime.HasValue))
+            {
+                if (!string.IsNullOrEmpty(vehicle.Fee) && 
+                    decimal.TryParse(vehicle.Fee.Replace("$", ""), out decimal fee))
+                {
+                    totalRevenue += fee;
+                }
+            }
+
             txtVehiclesInParking.Text = $"{parkedVehicles} Vehicles in Parking";
-
-            // Count entry and exit activity for today
-            int entryCount = _allVehicles.Count(v => v.EntryTime.Date == DateTime.Now.Date);
-            int exitCount = _allVehicles.Count(v => v.ExitTime.HasValue && v.ExitTime.Value.Date == DateTime.Now.Date);
-
-            txtEntryCount.Text = entryCount.ToString();
-            txtExitCount.Text = exitCount.ToString();
-
-            // Calculate average duration and total revenue for today
-            var completedToday = _allVehicles.Where(v => 
-                v.Status == "Completed" && 
-                v.ExitTime.HasValue && 
-                v.ExitTime.Value.Date == DateTime.Now.Date).ToList();
-
-            if (completedToday.Any())
-            {
-                double avgMinutes = completedToday.Average(v => 
-                {
-                    TimeSpan duration = v.ExitTime.Value - v.EntryTime;
-                    return duration.TotalMinutes;
-                });
-                
-                int hours = (int)(avgMinutes / 60);
-                int minutes = (int)(avgMinutes % 60);
-                txtAvgDuration.Text = $"{hours}h {minutes}m";
-
-                // Calculate revenue (remove $ and convert to double)
-                double revenue = completedToday.Sum(v => 
-                {
-                    if (double.TryParse(v.Fee.Replace("$", ""), out double fee))
-                        return fee;
-                    return 0;
-                });
-                
-                txtRevenue.Text = $"${revenue:N2}";
-            }
-            else
-            {
-                txtAvgDuration.Text = "0h 0m";
-                txtRevenue.Text = "$0.00";
-            }
+            txtEntryCount.Text = todayEntries.ToString();
+            txtExitCount.Text = todayExits.ToString();
+            txtRevenue.Text = $"Rp {totalRevenue:N0}";
         }
 
-        private void FilterVehicles(string filter, string searchText = "")
+        private void FilterVehicles()
         {
-            if (_allVehicles == null)
-                return;
+            var filteredVehicles = _allVehicles.Where(v =>
+                (string.IsNullOrEmpty(_searchText) ||
+                 v.PlateNumber.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                 v.TicketId.Contains(_searchText, StringComparison.OrdinalIgnoreCase)) &&
+                (_selectedTab == "All" ||
+                 (_selectedTab == "Parked" && v.Status == "Parked") ||
+                 (_selectedTab == "Completed" && v.Status == "Completed")))
+                .ToList();
 
-            ICollectionView view = CollectionViewSource.GetDefaultView(_allVehicles);
-            
-            // Apply filter based on tab and search text
-            view.Filter = item =>
+            gridVehicles.ItemsSource = filteredVehicles;
+        }
+
+        private void FillFormWithVehicle(VehicleRecord vehicle)
+        {
+            txtTicketId.Text = vehicle.TicketId;
+            txtPlateNumber.Text = vehicle.PlateNumber;
+            cmbVehicleType.SelectedItem = vehicle.VehicleType;
+            txtEntryTime.Text = vehicle.EntryTime.ToString("HH:mm");
+            txtExitTime.Text = vehicle.ExitTime?.ToString("HH:mm") ?? string.Empty;
+            txtDuration.Text = vehicle.Duration;
+            txtFee.Text = vehicle.Fee;
+            cmbStatus.SelectedItem = vehicle.Status;
+        }
+
+        private VehicleRecord GetVehicleFromForm()
+        {
+            return new VehicleRecord
             {
-                var vehicle = item as VehicleRecord;
-                if (vehicle == null)
-                    return false;
-
-                // First apply the tab filter
-                bool passesTabFilter = filter switch
-                {
-                    "all" => true,
-                    "entry" => vehicle.EntryTime.Date == DateTime.Now.Date,
-                    "exit" => vehicle.ExitTime.HasValue && vehicle.ExitTime.Value.Date == DateTime.Now.Date,
-                    "parked" => vehicle.Status == "Parked",
-                    _ => true
-                };
-
-                if (!passesTabFilter)
-                    return false;
-
-                // Then apply the search filter if needed
-                if (string.IsNullOrWhiteSpace(searchText) || searchText == "Search by plate number, ticket, or vehicle type...")
-                    return true;
-
-                // Search in multiple fields
-                return 
-                    vehicle.PlateNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                    vehicle.TicketId.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                    vehicle.VehicleType.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+                TicketId = txtTicketId.Text,
+                PlateNumber = txtPlateNumber.Text,
+                VehicleType = cmbVehicleType.SelectedItem?.ToString() ?? "Car",
+                EntryTime = DateTime.Parse(txtEntryTime.Text),
+                ExitTime = string.IsNullOrEmpty(txtExitTime.Text) ? null : DateTime.Parse(txtExitTime.Text),
+                Duration = txtDuration.Text,
+                Fee = txtFee.Text,
+                Status = cmbStatus.SelectedItem?.ToString() ?? "Parked"
             };
+        }
 
-            gridVehicles.ItemsSource = view;
+        private void ClearForm()
+        {
+            txtTicketId.Text = string.Empty;
+            txtPlateNumber.Text = string.Empty;
+            cmbVehicleType.SelectedIndex = 0;
+            txtEntryTime.Text = string.Empty;
+            txtExitTime.Text = string.Empty;
+            txtDuration.Text = string.Empty;
+            txtFee.Text = string.Empty;
+            cmbStatus.SelectedIndex = 0;
+            _selectedVehicle = null;
+        }
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         #endregion
@@ -258,22 +312,22 @@ namespace TestWpfApp
 
         private void tabVehicleActivity_Checked(object sender, RoutedEventArgs e)
         {
-            FilterVehicles("all", _searchText);
+            FilterVehicles();
         }
 
         private void tabEntryOnly_Checked(object sender, RoutedEventArgs e)
         {
-            FilterVehicles("entry", _searchText);
+            FilterVehicles();
         }
 
         private void tabExitOnly_Checked(object sender, RoutedEventArgs e)
         {
-            FilterVehicles("exit", _searchText);
+            FilterVehicles();
         }
 
         private void tabCurrentlyParked_Checked(object sender, RoutedEventArgs e)
         {
-            FilterVehicles("parked", _searchText);
+            FilterVehicles();
         }
 
         private void txtSearch_GotFocus(object sender, RoutedEventArgs e)
@@ -300,18 +354,7 @@ namespace TestWpfApp
         {
             if (!_isPlaceholderVisible)
             {
-                _searchText = txtSearch.Text;
-                
-                // Determine which filter to apply based on selected tab
-                string filter = "all";
-                if (tabEntryOnly.IsChecked == true)
-                    filter = "entry";
-                else if (tabExitOnly.IsChecked == true)
-                    filter = "exit";
-                else if (tabCurrentlyParked.IsChecked == true)
-                    filter = "parked";
-                
-                FilterVehicles(filter, _searchText);
+                SearchText = txtSearch.Text;
             }
         }
 
@@ -329,22 +372,22 @@ namespace TestWpfApp
 
         private void btnPrintReport_Click(object sender, RoutedEventArgs e)
         {
-            // In a real application, this would generate a report
-            MessageBox.Show("This would generate and print a report.", "Print Report", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Printing report...", "Print Report", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btnRefreshData_Click(object sender, RoutedEventArgs e)
         {
-            // In a real application, this would refresh data from the database
-            MessageBox.Show("Data refreshed successfully!", "Refresh Data", MessageBoxButton.OK, MessageBoxImage.Information);
-            
-            // For demo purposes, we'll just update statistics
+            LoadSampleData();
+            FilterVehicles();
             UpdateStatistics();
         }
 
         private void gridVehicles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Optional: Handle selection changed event
+            if (gridVehicles.SelectedItem is VehicleRecord selectedVehicle)
+            {
+                SelectedVehicle = selectedVehicle;
+            }
         }
 
         private void btnViewDetails_Click(object sender, RoutedEventArgs e)
@@ -401,78 +444,133 @@ namespace TestWpfApp
             }
         }
 
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is TabControl tabControl && tabControl.SelectedItem is TabItem selectedTab)
+            {
+                SelectedTab = selectedTab.Header?.ToString() ?? "All";
+            }
+        }
+
         #endregion
     }
 
     public class VehicleRecord : INotifyPropertyChanged
     {
-        public string TicketId { get; set; }
-        public string PlateNumber { get; set; }
-        public string VehicleType { get; set; }
-        public DateTime EntryTime { get; set; }
-        
+        private string _ticketId = string.Empty;
+        private string _plateNumber = string.Empty;
+        private string _vehicleType = string.Empty;
+        private DateTime _entryTime;
         private DateTime? _exitTime;
+        private string _duration = string.Empty;
+        private string _fee = string.Empty;
+        private string _status = string.Empty;
+        private bool _isExitVisible = true;
+        private bool _isPrintVisible = true;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string TicketId
+        {
+            get => _ticketId;
+            set
+            {
+                _ticketId = value;
+                OnPropertyChanged(nameof(TicketId));
+            }
+        }
+
+        public string PlateNumber
+        {
+            get => _plateNumber;
+            set
+            {
+                _plateNumber = value;
+                OnPropertyChanged(nameof(PlateNumber));
+            }
+        }
+
+        public string VehicleType
+        {
+            get => _vehicleType;
+            set
+            {
+                _vehicleType = value;
+                OnPropertyChanged(nameof(VehicleType));
+            }
+        }
+
+        public DateTime EntryTime
+        {
+            get => _entryTime;
+            set
+            {
+                _entryTime = value;
+                OnPropertyChanged(nameof(EntryTime));
+            }
+        }
+
         public DateTime? ExitTime
         {
             get => _exitTime;
             set
             {
-                if (_exitTime != value)
-                {
-                    _exitTime = value;
-                    OnPropertyChanged(nameof(ExitTime));
-                }
+                _exitTime = value;
+                OnPropertyChanged(nameof(ExitTime));
             }
         }
-        
-        public string Duration { get; set; }
-        public string Fee { get; set; }
-        
-        private string _status;
+
+        public string Duration
+        {
+            get => _duration;
+            set
+            {
+                _duration = value;
+                OnPropertyChanged(nameof(Duration));
+            }
+        }
+
+        public string Fee
+        {
+            get => _fee;
+            set
+            {
+                _fee = value;
+                OnPropertyChanged(nameof(Fee));
+            }
+        }
+
         public string Status
         {
             get => _status;
             set
             {
-                if (_status != value)
-                {
-                    _status = value;
-                    OnPropertyChanged(nameof(Status));
-                }
+                _status = value;
+                OnPropertyChanged(nameof(Status));
             }
         }
-        
-        private bool _isExitVisible;
+
         public bool IsExitVisible
         {
             get => _isExitVisible;
             set
             {
-                if (_isExitVisible != value)
-                {
-                    _isExitVisible = value;
-                    OnPropertyChanged(nameof(IsExitVisible));
-                }
+                _isExitVisible = value;
+                OnPropertyChanged(nameof(IsExitVisible));
             }
         }
-        
-        private bool _isPrintVisible;
+
         public bool IsPrintVisible
         {
             get => _isPrintVisible;
             set
             {
-                if (_isPrintVisible != value)
-                {
-                    _isPrintVisible = value;
-                    OnPropertyChanged(nameof(IsPrintVisible));
-                }
+                _isPrintVisible = value;
+                OnPropertyChanged(nameof(IsPrintVisible));
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

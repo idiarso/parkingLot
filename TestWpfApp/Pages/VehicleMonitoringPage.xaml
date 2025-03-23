@@ -1,14 +1,16 @@
-<Page x:Class="TestWpfApp.VehicleMonitoringPage"
+<Page x:Class="TestWpfApp.Pages.VehicleMonitoringPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:TestWpfApp"
+      xmlns:local="clr-namespace:TestWpfApp.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="650" d:DesignWidth="1000"
       Title="Vehicle Monitoring">
 
     <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
         <Style x:Key="CardStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="CornerRadius" Value="10"/>
@@ -103,7 +105,7 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Vehicle Monitoring" FontSize="22" FontWeight="Bold" Foreground="#333"/>
                     <Border Background="#4CAF50" CornerRadius="4" Margin="15,0,0,0" Padding="8,3">
-                        <TextBlock x:Name="txtVehiclesInParking" Text="43 Vehicles in Parking" FontSize="14" Foreground="White" FontWeight="SemiBold"/>
+                        <TextBlock Text="43 Vehicles in Parking" FontSize="14" Foreground="White" FontWeight="SemiBold"/>
                     </Border>
                 </StackPanel>
 
@@ -151,10 +153,10 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock x:Name="txtEntryCount" Text="126" FontSize="36" FontWeight="Bold" Foreground="#2196F3"/>
+                            <TextBlock Text="126" FontSize="36" FontWeight="Bold" Foreground="#2196F3"/>
                             
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0,0,0">
-                                <TextBlock x:Name="txtEntryTrend" Text="+12%" FontSize="16" Foreground="#4CAF50" FontWeight="SemiBold"/>
+                                <TextBlock Text="+12%" FontSize="16" Foreground="#4CAF50" FontWeight="SemiBold"/>
                                 <TextBlock Text="vs Yesterday" FontSize="12" Foreground="#666"/>
                             </StackPanel>
                         </Grid>
@@ -180,10 +182,10 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock x:Name="txtExitCount" Text="83" FontSize="36" FontWeight="Bold" Foreground="#FF5722"/>
+                            <TextBlock Text="83" FontSize="36" FontWeight="Bold" Foreground="#FF5722"/>
                             
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="15,0,0,0">
-                                <TextBlock x:Name="txtExitTrend" Text="+8%" FontSize="16" Foreground="#4CAF50" FontWeight="SemiBold"/>
+                                <TextBlock Text="+8%" FontSize="16" Foreground="#4CAF50" FontWeight="SemiBold"/>
                                 <TextBlock Text="vs Yesterday" FontSize="12" Foreground="#666"/>
                             </StackPanel>
                         </Grid>
@@ -204,7 +206,7 @@
                         <TextBlock Grid.Row="1" Text="Today" FontSize="14" Foreground="#666" Margin="0,5,0,10"/>
                         
                         <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="txtAvgDuration" Text="2h 45m" FontSize="36" FontWeight="Bold" Foreground="#673AB7"/>
+                            <TextBlock Text="2h 45m" FontSize="36" FontWeight="Bold" Foreground="#673AB7"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -223,7 +225,7 @@
                         <TextBlock Grid.Row="1" Text="Today" FontSize="14" Foreground="#666" Margin="0,5,0,10"/>
                         
                         <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="txtRevenue" Text="$1,250" FontSize="36" FontWeight="Bold" Foreground="#009688"/>
+                            <TextBlock Text="$1,250" FontSize="36" FontWeight="Bold" Foreground="#009688"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -240,16 +242,16 @@
 
                     <!-- View Selection Tabs -->
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="tabVehicleActivity" Content="All Vehicle Activity" 
+                        <RadioButton Content="All Vehicle Activity" 
                                      Style="{StaticResource TabButtonStyle}" IsChecked="True"
                                      Checked="tabVehicleActivity_Checked"/>
-                        <RadioButton x:Name="tabEntryOnly" Content="Entry Only" 
+                        <RadioButton Content="Entry Only" 
                                      Style="{StaticResource TabButtonStyle}"
                                      Checked="tabEntryOnly_Checked"/>
-                        <RadioButton x:Name="tabExitOnly" Content="Exit Only" 
+                        <RadioButton Content="Exit Only" 
                                      Style="{StaticResource TabButtonStyle}"
                                      Checked="tabExitOnly_Checked"/>
-                        <RadioButton x:Name="tabCurrentlyParked" Content="Currently Parked" 
+                        <RadioButton Content="Currently Parked" 
                                      Style="{StaticResource TabButtonStyle}"
                                      Checked="tabCurrentlyParked_Checked"/>
                     </StackPanel>
@@ -268,7 +270,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center"/>
-                                <TextBox x:Name="txtSearch" Grid.Column="1" BorderThickness="0" 
+                                <TextBox Grid.Column="1" BorderThickness="0" 
                                          Background="Transparent" VerticalAlignment="Center" 
                                          Margin="5,0,0,0" Padding="5,0"
                                          FontSize="14" Text="Search by plate number, ticket, or vehicle type..."
@@ -279,15 +281,15 @@
                         </Border>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button x:Name="btnNewEntry" Content="New Entry" Style="{StaticResource ActionButtonStyle}" 
+                            <Button Content="New Entry" Style="{StaticResource ActionButtonStyle}" 
                                     Background="#2196F3" Click="btnNewEntry_Click"/>
-                            <Button x:Name="btnProcessExit" Content="Process Exit" Style="{StaticResource ActionButtonStyle}" 
+                            <Button Content="Process Exit" Style="{StaticResource ActionButtonStyle}" 
                                     Background="#FF5722" Click="btnProcessExit_Click"/>
                         </StackPanel>
                     </Grid>
 
                     <!-- Vehicle Data Grid -->
-                    <DataGrid x:Name="gridVehicles" Grid.Row="2" AutoGenerateColumns="False" 
+                    <DataGrid Grid.Row="2" AutoGenerateColumns="False" 
                               IsReadOnly="True" BorderThickness="0" Background="Transparent"
                               RowBackground="White" AlternatingRowBackground="#F9F9F9"
                               ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"

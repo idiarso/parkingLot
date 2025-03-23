@@ -34,7 +34,7 @@ namespace ParkingOut.UI
             InitializeComponent();
 
             // Initialize services
-            logger = LogManager.GetCurrentClassLogger() as IAppLogger;
+            logger = new AppLogger(GetType());
             vehicleEntryService = new VehicleEntryService();
             printService = new PrintService();
             try
@@ -83,7 +83,7 @@ namespace ParkingOut.UI
                     _recentEntries.Add(entry);
                 }
                 
-                UpdateStatus($"Loaded {entries.Count} recent entries");
+                UpdateStatus($"Loaded {entries.Count.ToString()} recent entries");
                 logger?.Debug("Loaded recent entries: {Count}", entries.Count);
             }
             catch (Exception ex)
@@ -451,4 +451,4 @@ namespace ParkingOut.UI
 
         #endregion
     }
-} 
+}

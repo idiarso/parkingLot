@@ -25,6 +25,8 @@ namespace ParkingOut.Utils
         private static bool _useWebSocket = false;
         private static readonly object _lockObject = new object();
         private static bool _isConnected = false;
+        public static bool IsDatabaseAvailable { get; private set; }
+        public static string LastError { get; private set; }
 
         static Database()
         {
@@ -1686,4 +1688,4 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
         }
     }
-} 
+}

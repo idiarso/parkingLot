@@ -35,7 +35,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 // Use the MessageHelper to display error
-                MessageHelper.ShowError("Error initializing main window", ex);
+                MessageHelper.ShowError("Error initializing main window", ex.Message);
                 _logger.Error("Failed to initialize MainWindow component", ex);
             }
         }
@@ -53,8 +53,8 @@ namespace ParkingOut.UI
                 Sidebar.AddMenuItem("Dashboard", IconPaths.Dashboard, "dashboard");
                 
                 // Vehicle management menu items
-                Sidebar.AddMenuItem("Vehicle Entry", IconPaths.CarEnter, "vehicle_entry");
-                Sidebar.AddMenuItem("Vehicle Exit", IconPaths.CarExit, "vehicle_exit");
+                Sidebar.AddMenuItem("Vehicle Entry", IconPaths.VehicleEnter, "vehicle_entry");
+                Sidebar.AddMenuItem("Vehicle Exit", IconPaths.VehicleExit, "vehicle_exit");
                 
                 // Reports menu item
                 Sidebar.AddMenuItem("Reports", IconPaths.Report, "reports");
@@ -67,7 +67,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 _logger.Error("Failed to initialize sidebar", ex);
-                MessageHelper.ShowError("Error initializing sidebar", ex);
+                MessageHelper.ShowError("Error initializing sidebar", ex.Message);
             }
         }
         
@@ -107,7 +107,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 _logger.Error($"Error navigating to {e.Tag}", ex);
-                MessageHelper.ShowError($"Error navigating to {e.Text}", ex);
+                MessageHelper.ShowError($"Error navigating to {e.Text}", ex.Message);
             }
         }
         
@@ -138,7 +138,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 _logger.Error("Error during logout", ex);
-                MessageHelper.ShowError("Error during logout", ex);
+                MessageHelper.ShowError("Error during logout", ex.Message);
             }
         }
         
@@ -161,7 +161,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 _logger.Error("Error navigating to Dashboard", ex);
-                MessageHelper.ShowError("Error navigating to Dashboard", ex);
+                MessageHelper.ShowError("Error navigating to Dashboard", ex.Message);
             }
         }
         
@@ -183,7 +183,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 _logger.Error("Error navigating to Vehicle Entry", ex);
-                MessageHelper.ShowError("Error navigating to Vehicle Entry", ex);
+                MessageHelper.ShowError("Error navigating to Vehicle Entry", ex.Message);
             }
         }
         
@@ -205,8 +205,8 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 _logger.Error("Error navigating to Vehicle Exit", ex);
-                MessageHelper.ShowError("Error navigating to Vehicle Exit", ex);
+                MessageHelper.ShowError("Error navigating to Vehicle Exit", ex.Message);
             }
         }
     }
-} 
+}

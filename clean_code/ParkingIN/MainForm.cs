@@ -17,7 +17,7 @@ namespace ParkingIN
         private NotifyIcon _trayIcon;
         private AppConfig _config;
         private Button _btnTestConnection;
-        private readonly ILogger _logger;
+        private readonly IAppLogger _logger;
 
         public bool IsMinimized { get; private set; }
 
@@ -25,7 +25,7 @@ namespace ParkingIN
         {
             InitializeComponent();
             _stationName = ConfigurationManager.AppSettings["ApplicationTitle"] ?? "Modern Parking System";
-            _logger = LogManager.GetLogger();
+            _logger = CustomLogManager.GetLogger();
             
             // Initialize configuration
             _config = new AppConfig();
@@ -157,7 +157,7 @@ namespace ParkingIN
                     try
                     {
                         _controllerPort.Open();
-                        _logger.Information($"Controller port {controllerPort} opened successfully");
+                        _logger.Info($"Controller port {controllerPort} opened successfully");
                     }
                     catch (Exception ex)
                     {
@@ -187,7 +187,7 @@ namespace ParkingIN
                     try
                     {
                         _printerPort.Open();
-                        _logger.Information($"Printer port {printerPort} opened successfully");
+                        _logger.Info($"Printer port {printerPort} opened successfully");
                     }
                     catch (Exception ex)
                     {

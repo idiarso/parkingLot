@@ -7,7 +7,7 @@ namespace ParkingApp
 {
     public class DatabaseHelper
     {
-        private static string connectionString = ConfigurationManager.ConnectionStrings["ParkingDatabase"].ConnectionString;
+        private static string connectionString = ConfigurationManager.ConnectionStrings["ParkingDBConnection"].ConnectionString;
 
         // Create a connection to PostgreSQL
         public static NpgsqlConnection CreateConnection()
@@ -81,4 +81,4 @@ namespace ParkingApp
             return new NpgsqlParameter("@" + name, value ?? DBNull.Value);
         }
     }
-} 
+}

@@ -4,13 +4,13 @@ using System.Linq;
 using System.IO;
 using ParkingIN.Utils;
 using Serilog;
-using System.Threading;
+using Serilog.Events;
 
 namespace ParkingIN
 {
     static class Program
     {
-        private static ILogger _logger;
+        private static IAppLogger _logger;
 
         /// <summary>
         ///  The main entry point for the application.
@@ -24,29 +24,13 @@ namespace ParkingIN
                 Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
                 AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-                // Ensure logs directory exists
-                string logsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-                if (!Directory.Exists(logsDirectory))
-                {
-                    Directory.CreateDirectory(logsDirectory);
-                }
-
-                // Configure Serilog
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .WriteTo.Console() // Add console logging for debugging
-                    .WriteTo.File(Path.Combine(logsDirectory, "app.log"), 
-                        rollingInterval: RollingInterval.Day,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                    .CreateLogger();
-
-                _logger = Log.Logger;
+                // Initialize logging
+                _logger = CustomLogManager.GetLogger();
+                _logger.Info("Application starting...");
 
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-
-                _logger.Information("Application starting...");
 
                 // Check for simulator files for direct bypass
                 bool bypassFromFile = File.Exists("simulator_bypass.txt");
@@ -68,12 +52,12 @@ namespace ParkingIN
                 
                 if (simulatorMode)
                 {
-                    _logger.Information("Starting in simulator mode - launching Microcontroller Simulator directly");
+                    _logger.Info("Starting in simulator mode - launching Microcontroller Simulator directly");
                     
                     // Setup DB connection bypass if in no-database mode
                     if (noDatabaseMode)
                     {
-                        _logger.Information("No database mode enabled - bypassing database connections");
+                        _logger.Info("No database mode enabled - bypassing database connections");
                         // Here you would set any necessary configurations to bypass DB checks
                     }
                     
@@ -95,11 +79,12 @@ namespace ParkingIN
                 
                 try
                 {
-                    _logger?.Error(ex, "Unhandled exception in Main");
+                    _logger?.Error($"Unhandled exception in Main: {ex.Message}", ex);
                     
                     // Write to emergency log file if logger fails
                     string emergencyLog = Path.Combine(
                         AppDomain.CurrentDomain.BaseDirectory, 
+                        "logs",
                         "emergency_error.log"
                     );
                     File.AppendAllText(emergencyLog, 
@@ -150,15 +135,15 @@ namespace ParkingIN
                     detail += $"\n\nInner exception: {ex.InnerException.Message}\n{ex.InnerException.StackTrace}";
                 }
 
-                _logger?.Error(ex, message);
+                _logger?.Error(message, ex);
 
                 MessageBox.Show($"{message}\n\n{detail}", "Application Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch
             {
-                // Last resort - show raw error
-                MessageBox.Show($"Critical error: {ex.Message}", "Fatal Error",
+                // If logging fails, still show the error
+                MessageBox.Show($"{ex.Message}\n\n{ex.StackTrace}", "Application Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

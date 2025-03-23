@@ -30,37 +30,73 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
             <!-- Stats Cards -->
             <Border Grid.Column="0" Grid.Row="0" Background="White" Margin="0,0,10,0" CornerRadius="8" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Vehicles Today" FontSize="16" Foreground="#666"/>
-                    <TextBlock Text="42" FontSize="32" FontWeight="Bold" Foreground="#1E88E5"/>
+                    <TextBlock x:Name="TotalVehiclesTextBlock" Text="42" FontSize="32" FontWeight="Bold" Foreground="#1E88E5"/>
                 </StackPanel>
             </Border>
             
             <Border Grid.Column="1" Grid.Row="0" Background="White" Margin="5,0,5,0" CornerRadius="8" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Revenue" FontSize="16" Foreground="#666"/>
-                    <TextBlock Text="$765.50" FontSize="32" FontWeight="Bold" Foreground="#43A047"/>
+                    <TextBlock x:Name="RevenueTextBlock" Text="$765.50" FontSize="32" FontWeight="Bold" Foreground="#43A047"/>
                 </StackPanel>
             </Border>
             
             <Border Grid.Column="2" Grid.Row="0" Background="White" Margin="10,0,0,0" CornerRadius="8" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Available Spaces" FontSize="16" Foreground="#666"/>
-                    <TextBlock Text="28/50" FontSize="32" FontWeight="Bold" Foreground="#E53935"/>
+                    <TextBlock x:Name="AvailableSpacesTextBlock" Text="28/50" FontSize="32" FontWeight="Bold" Foreground="#E53935"/>
                 </StackPanel>
             </Border>
             
             <!-- Recent Activity -->
-            <Border Grid.Row="1" Grid.ColumnSpan="3" Background="White" Margin="0,20,0,0" CornerRadius="8" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Recent Activity" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                    <TextBlock Text="No activity data available. This is a placeholder." FontSize="14" Foreground="#666"/>
-                </StackPanel>
+            <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Background="White" Margin="0,20,10,0" CornerRadius="8" Padding="20">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" Text="Recent Activity" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <DataGrid x:Name="RecentActivityDataGrid" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time" Binding="{Binding Timestamp, StringFormat='{}{0:g}'}" Width="120"/>
+                            <DataGridTextColumn Header="Type" Binding="{Binding ActivityType}" Width="100"/>
+                            <DataGridTextColumn Header="Ticket" Binding="{Binding TicketNo}" Width="80"/>
+                            <DataGridTextColumn Header="Details" Binding="{Binding Description}" Width="*"/>
+                            <DataGridTextColumn Header="License Plate" Binding="{Binding LicensePlate}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+            
+            <!-- Vehicle Types Stats -->
+            <Border Grid.Row="1" Grid.Column="2" Background="White" Margin="0,20,0,0" CornerRadius="8" Padding="20">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" Text="Vehicle Types" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                    <DataGrid x:Name="VehicleTypesDataGrid" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Type" Binding="{Binding VehicleType}" Width="*"/>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="60"/>
+                            <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat='{}{0:P1}'}" Width="60"/>
+                            <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue, StringFormat='{}{0:C}'}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+            
+            <!-- Status Bar -->
+            <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#F5F5F5" Margin="0,20,0,0" CornerRadius="4" Padding="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="StatusText" Grid.Column="0" Text="Ready" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="LastUpdateText" Grid.Column="1" Text="Last Update: Never" VerticalAlignment="Center"/>
+                </Grid>
             </Border>
         </Grid>
     </Grid>
-</Page> 
+</Page>

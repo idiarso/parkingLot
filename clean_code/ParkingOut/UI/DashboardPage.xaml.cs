@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using NLog;
 using ParkingOut.Models;
 using ParkingOut.Services;
+using ParkingOut.Utils;
 
 namespace ParkingOut.UI
 {
@@ -34,7 +35,7 @@ namespace ParkingOut.UI
             InitializeComponent();
 
             // Initialize services
-            logger = LogManager.GetCurrentClassLogger() as IAppLogger;
+            logger = new AppLogger(typeof(DashboardPage));
             vehicleEntryService = new VehicleEntryService();
             vehicleExitService = new VehicleExitService(vehicleEntryService);
 
@@ -80,7 +81,7 @@ namespace ParkingOut.UI
             catch (Exception ex)
             {
                 StatusText.Text = "Error loading data";
-                logger?.Error(ex, "Failed to load dashboard data");
+                logger?.LogError("Failed to load dashboard data", ex);
                 MessageBox.Show($"Failed to load dashboard data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -103,25 +104,20 @@ namespace ParkingOut.UI
                 var availableSpaces = totalSpaces - totalVehicles;
                 AvailableSpacesTextBlock.Text = availableSpaces.ToString();
                 
-                // Today's revenue
-                var todayRevenue = new Random().Next(100, 1000);
-                TodayRevenueTextBlock.Text = $"${todayRevenue:F2}";
+                // Revenue
+                var revenue = new Random().Next(100, 1000);
+                RevenueTextBlock.Text = $"${revenue:F2}";
                 
-                var todayVehicles = new Random().Next(10, 50);
-                TodayVehiclesTextBlock.Text = $"From {todayVehicles} Vehicles";
-                
-                // Monthly revenue
-                var monthlyRevenue = new Random().Next(1000, 10000);
-                MonthlyRevenueTextBlock.Text = $"${monthlyRevenue:F2}";
-                
-                var monthlyVehicles = new Random().Next(100, 500);
-                MonthlyVehiclesTextBlock.Text = $"From {monthlyVehicles} Vehicles";
+                // We don't have these UI elements in the XAML, so we'll skip them
+                // var todayVehicles = new Random().Next(10, 50);
+                // var monthlyRevenue = new Random().Next(1000, 10000);
+                // var monthlyVehicles = new Random().Next(100, 500);
                 
                 logger?.Debug("Summary cards updated");
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Failed to update summary cards");
+                logger?.LogError("Failed to update summary cards", ex);
             }
         }
 
@@ -143,7 +139,7 @@ namespace ParkingOut.UI
                     TicketNo = "T000003",
                     LicensePlate = "F9012GH",
                     VehicleType = "Truck",
-                    Details = "Vehicle entered through Gate 1"
+                    Description = "Vehicle entered through Gate 1"
                 });
                 
                 _recentActivities.Add(new ActivityLogItem
@@ -153,7 +149,7 @@ namespace ParkingOut.UI
                     TicketNo = "T000002",
                     LicensePlate = "D5678EF",
                     VehicleType = "Motorcycle",
-                    Details = "Vehicle entered through Gate 2"
+                    Description = "Vehicle entered through Gate 2"
                 });
                 
                 _recentActivities.Add(new ActivityLogItem
@@ -163,7 +159,7 @@ namespace ParkingOut.UI
                     TicketNo = "T000001",
                     LicensePlate = "B1234CD",
                     VehicleType = "Car",
-                    Details = "Vehicle exited through Gate 1. Fee: $10.00"
+                    Description = "Vehicle exited through Gate 1. Fee: $10.00"
                 });
                 
                 _recentActivities.Add(new ActivityLogItem
@@ -173,14 +169,14 @@ namespace ParkingOut.UI
                     TicketNo = "T000001",
                     LicensePlate = "B1234CD",
                     VehicleType = "Car",
-                    Details = "Vehicle entered through Gate 1"
+                    Description = "Vehicle entered through Gate 1"
                 });
                 
                 logger?.Debug("Recent activities loaded: {Count}", _recentActivities.Count);
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Failed to load recent activities");
+                logger?.LogError("Failed to load recent activities", ex);
             }
         }
 
@@ -199,30 +195,34 @@ namespace ParkingOut.UI
                 
                 _vehicleTypeStats.Add(new VehicleTypeStats
                 {
-                    Type = "Car",
+                    VehicleType = "Car",
                     Count = 45,
-                    Percentage = $"{45 * 100 / totalVehicles}%"
+                    Percentage = 45.0 * 100 / totalVehicles,
+                    Revenue = 450.00m
                 });
                 
                 _vehicleTypeStats.Add(new VehicleTypeStats
                 {
-                    Type = "Motorcycle",
+                    VehicleType = "Motorcycle",
                     Count = 20,
-                    Percentage = $"{20 * 100 / totalVehicles}%"
+                    Percentage = 20.0 * 100 / totalVehicles,
+                    Revenue = 200.00m
                 });
                 
                 _vehicleTypeStats.Add(new VehicleTypeStats
                 {
-                    Type = "Truck",
+                    VehicleType = "Truck",
                     Count = 8,
-                    Percentage = $"{8 * 100 / totalVehicles}%"
+                    Percentage = 8.0 * 100 / totalVehicles,
+                    Revenue = 160.00m
                 });
                 
                 _vehicleTypeStats.Add(new VehicleTypeStats
                 {
-                    Type = "Bus",
+                    VehicleType = "Bus",
                     Count = 2,
-                    Percentage = $"{2 * 100 / totalVehicles}%"
+                    Percentage = 2.0 * 100 / totalVehicles,
+                    Revenue = 50.00m
                 });
                 
                 logger?.Debug("Vehicle type stats loaded: {Count}", _vehicleTypeStats.Count);
@@ -256,41 +256,7 @@ namespace ParkingOut.UI
         #endregion
     }
 
-    /// <summary>
-    /// Represents an activity log item.
-    /// </summary>
-    public class ActivityLogItem
-    {
-        /// <summary>
-        /// Gets or sets the timestamp of the activity.
-        /// </summary>
-        public DateTime Timestamp { get; set; }
-
-        /// <summary>
-        /// Gets or sets the type of activity.
-        /// </summary>
-        public string ActivityType { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the ticket number.
-        /// </summary>
-        public string TicketNo { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the license plate.
-        /// </summary>
-        public string LicensePlate { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the vehicle type.
-        /// </summary>
-        public string VehicleType { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets additional details.
-        /// </summary>
-        public string Details { get; set; } = string.Empty;
-    }
+    // Using ActivityLogItem from ParkingOut.Models namespace
 
     /// <summary>
     /// Represents vehicle type statistics.
@@ -300,7 +266,7 @@ namespace ParkingOut.UI
         /// <summary>
         /// Gets or sets the vehicle type.
         /// </summary>
-        public string Type { get; set; } = string.Empty;
+        public string VehicleType { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the count of vehicles of this type.
@@ -310,6 +276,11 @@ namespace ParkingOut.UI
         /// <summary>
         /// Gets or sets the percentage representation.
         /// </summary>
-        public string Percentage { get; set; } = string.Empty;
+        public double Percentage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the revenue generated from this vehicle type.
+        /// </summary>
+        public decimal Revenue { get; set; }
     }
-} 
+}

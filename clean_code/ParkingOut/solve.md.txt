@@ -1,0 +1,329 @@
+Berdasarkan daftar error yang kamu berikan, ada beberapa masalah yang berkaitan dengan namespace yang hilang, tipe yang tidak ditemukan, definisi interface yang kurang lengkap, dan beberapa peringatan kode. Saya akan menangani setiap error secara sistematis dan memberikan solusi yang dapat langsung diterapkan.
+
+---
+
+### **Perbaikan Error**
+
+#### **1. `App.xaml.cs`**
+- **Error CS0234:**
+  - `"The type or namespace name 'Database' does not exist in the namespace 'ParkingOut.Utils'"` (baris 49)
+  - `"The type or namespace name 'UserManager' does not exist in the namespace 'ParkingOut.Utils'"` (baris 52)
+- **Analisis:** Namespace `ParkingOut.Utils` tidak memiliki kelas `Database` atau `UserManager`. Ini mungkin kelas utilitas untuk koneksi database dan manajemen pengguna yang belum dibuat.
+- **Perbaikan:**
+  - Tambahkan kedua kelas di folder `Utils`:
+    - **`D:\21maret\clean_code\ParkingOut\Utils\Database.cs`:**
+      ```csharp
+      namespace ParkingOut.Utils
+      {
+          public class Database
+          {
+              public static string GetConnectionString()
+              {
+                  return "YourConnectionStringHere"; // Ganti dengan string koneksi sebenarnya
+              }
+          }
+      }
+      ```
+    - **`D:\21maret\clean_code\ParkingOut\Utils\UserManager.cs`:**
+      ```csharp
+      namespace ParkingOut.Utils
+      {
+          public class UserManager
+          {
+              public static string CurrentUser => "DefaultUser"; // Ganti dengan logika autentikasi
+          }
+      }
+      ```
+
+#### **2. `Services/IPrintService.cs` dan `Services/IVehicleExitService.cs`**
+- **Error CS0246:**
+  - `"The type or namespace name 'VehicleExit' could not be found"` (berulang di `IPrintService.cs` baris 24 dan `IVehicleExitService.cs` baris 20, 27, 33, 40)
+- **Analisis:** Tipe `VehicleExit` belum didefinisikan di namespace `ParkingOut.Models`.
+- **Perbaikan:**
+  - Tambahkan kelas `VehicleExit`:
+    - **`D:\21maret\clean_code\ParkingOut\Models\VehicleExit.cs`:**
+      ```csharp
+      using System;
+
+      namespace ParkingOut.Models
+      {
+          public class VehicleExit
+          {
+              public int Id { get; set; }
+              public string PlateNumber { get; set; }
+              public DateTime ExitTime { get; set; }
+              public string VehicleType { get; set; }
+          }
+      }
+      ```
+  - Perbarui file interface dengan `using ParkingOut.Models;`:
+    - **`Services/IPrintService.cs`:**
+      ```csharp
+      using ParkingOut.Models;
+
+      namespace ParkingOut.Services
+      {
+          public interface IPrintService
+          {
+              void PrintTicket(VehicleEntry entry);
+              void PrintExitTicket(VehicleExit exit);
+          }
+      }
+      ```
+    - **`Services/IVehicleExitService.cs`:**
+      ```csharp
+      using ParkingOut.Models;
+
+      namespace ParkingOut.Services
+      {
+          public interface IVehicleExitService
+          {
+              VehicleExit ProcessExit(string plateNumber);
+              VehicleExit GetExit(string plateNumber);
+          }
+      }
+      ```
+
+#### **3. `UI/DashboardPage.xaml.cs`**
+- **Error CS0246:**
+  - `"The type or namespace name 'VehicleEntryService' could not be found"` (baris 39)
+  - `"The type or namespace name 'VehicleExitService' could not be found"` (baris 40)
+- **Analisis:** Kelas implementasi `VehicleEntryService` dan `VehicleExitService` belum ada.
+- **Perbaikan:**
+  - Tambahkan implementasi:
+    - **`D:\21maret\clean_code\ParkingOut\Services\VehicleEntryService.cs`:**
+      ```csharp
+      using ParkingOut.Models;
+
+      namespace ParkingOut.Services
+      {
+          public class VehicleEntryService : IVehicleEntryService
+          {
+              public void AddEntry(VehicleEntry entry) { /* Implementasi */ }
+              public VehicleEntry GetEntry(string plateNumber) { return null; /* Implementasi */ }
+          }
+      }
+      ```
+    - **`D:\21maret\clean_code\ParkingOut\Services\VehicleExitService.cs`:**
+      ```csharp
+      using ParkingOut.Models;
+
+      namespace ParkingOut.Services
+      {
+          public class VehicleExitService : IVehicleExitService
+          {
+              public VehicleExit ProcessExit(string plateNumber) { return null; /* Implementasi */ }
+              public VehicleExit GetExit(string plateNumber) { return null; /* Implementasi */ }
+          }
+      }
+      ```
+
+- **Error CS1061:**
+  - `"IAppLogger' does not contain a definition for 'LogError'"` (baris 84, 120, 179)
+- **Analisis:** Interface `IAppLogger` belum memiliki metode `LogError`.
+- **Perbaikan:**
+  - Perbarui `Utils/IAppLogger.cs`:
+    ```csharp
+    namespace ParkingOut.Utils
+    {
+        public interface IAppLogger
+        {
+            void Log(string message);
+            void LogError(string message, Exception ex = null);
+        }
+    }
+    ```
+  - Tambahkan implementasi:
+    - **`D:\21maret\clean_code\ParkingOut\Utils\AppLogger.cs`:**
+      ```csharp
+      using System;
+
+      namespace ParkingOut.Utils
+      {
+          public class AppLogger : IAppLogger
+          {
+              public void Log(string message) => Console.WriteLine(message);
+              public void LogError(string message, Exception ex = null) => Console.WriteLine($"{message} - {ex?.Message}");
+          }
+      }
+      ```
+
+- **Error CS1503:**
+  - `"Argument 2: cannot convert from 'int' to 'System.Exception'"` (baris 175, 228)
+  - `"Argument 1: cannot convert from 'System.Exception' to 'string'"` dan `"Argument 2: cannot convert from 'string' to 'System.Exception'"` (baris 232, 251)
+- **Perbaikan:**
+  - Sesuaikan panggilan `LogError`. Misalnya:
+    - Baris 175: `_logger.LogError("Error", 123);` → `_logger.LogError("Error with code 123");`
+    - Baris 232: `_logger.LogError(ex, "Error occurred");` → `_logger.LogError("Error occurred", ex);`
+
+- **Error CS8618:**
+  - `"Non-nullable field 'logger' must contain a non-null value when exiting constructor"` (baris 33)
+- **Perbaikan:**
+  - Inisialisasi `_logger` di konstruktor:
+    ```csharp
+    private readonly IAppLogger _logger;
+    public DashboardPage(IVehicleEntryService vehicleEntryService, IVehicleExitService vehicleExitService, IAppLogger logger)
+    {
+        _vehicleEntryService = vehicleEntryService;
+        _vehicleExitService = vehicleExitService;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        InitializeComponent();
+    }
+    ```
+
+#### **4. `UI/MainWindow.xaml.cs`**
+- **Error CS0117:**
+  - `"IconPaths' does not contain a definition for 'VehicleEnter'"` (baris 56)
+- **Perbaikan:**
+  - Tambahkan ke `IconPaths.cs`:
+    ```csharp
+    namespace ParkingOut.UI
+    {
+        public static class IconPaths
+        {
+            public static string VehicleEnter => "path/to/vehicle_enter_icon.png";
+        }
+    }
+    ```
+
+#### **5. `UI/VehicleEntryPage.xaml.cs`**
+- **Error CS0246:**
+  - `"IAppLogger' could not be found"` (baris 18)
+  - `"AppLogger' could not be found"` (baris 37)
+  - `"VehicleEntryService' could not be found"` (baris 38)
+  - `"PrintService' could not be found"` (baris 39)
+  - `"CameraService' could not be found"` (baris 42)
+- **Perbaikan:**
+  - Tambahkan `using ParkingOut.Utils;` untuk `IAppLogger`.
+  - Gunakan implementasi yang sudah ada di atas untuk `AppLogger`, `VehicleEntryService`, dan tambahkan:
+    - **`D:\21maret\clean_code\ParkingOut\Services\PrintService.cs`:**
+      ```csharp
+      using ParkingOut.Models;
+
+      namespace ParkingOut.Services
+      {
+          public class PrintService : IPrintService
+          {
+              public void PrintTicket(VehicleEntry entry) { /* Implementasi */ }
+              public void PrintExitTicket(VehicleExit exit) { /* Implementasi */ }
+          }
+      }
+      ```
+    - **`D:\21maret\clean_code\ParkingOut\Services\CameraService.cs`:**
+      ```csharp
+      namespace ParkingOut.Services
+      {
+          public class CameraService : ICameraService
+          {
+              public bool IsRunning { get; private set; }
+              public void Start() { IsRunning = true; }
+              public void Stop() { IsRunning = false; }
+              public void SetImageControl(object control) { /* Implementasi */ }
+              public string RecognizePlate() { return "ABC123"; }
+          }
+      }
+      ```
+
+- **Error CS1061:**
+  - `"ICameraService' does not contain a definition for 'IsRunning', 'Stop', 'Start', 'SetImageControl', 'RecognizePlate'"` (baris 167, 169, 176, 177, 183, 200, 236, 244)
+  - `"IPrintService' does not contain a definition for 'PrintTicket'"` (baris 293, 348)
+- **Perbaikan:**
+  - Perbarui interface:
+    - **`Services/ICameraService.cs`:**
+      ```csharp
+      namespace ParkingOut.Services
+      {
+          public interface ICameraService
+          {
+              bool IsRunning { get; }
+              void Start();
+              void Stop();
+              void SetImageControl(object control);
+              string RecognizePlate();
+          }
+      }
+      ```
+    - **`Services/IPrintService.cs`:**
+      ```csharp
+      using ParkingOut.Models;
+
+      namespace ParkingOut.Services
+      {
+          public interface IPrintService
+          {
+              void PrintTicket(VehicleEntry entry);
+              void PrintExitTicket(VehicleExit exit);
+          }
+      }
+      ```
+
+- **Error CS8602:**
+  - `"Dereference of a possibly null reference"` (baris 208, 244)
+- **Perbaikan:**
+  - Tambahkan pengecekan null:
+    ```csharp
+    if (_cameraService != null)
+    {
+        var plate = _cameraService.RecognizePlate();
+    }
+    ```
+
+#### **6. `Models/ActivityLogItem.cs`**
+- **Error CS8618:**
+  - Properti non-nullable belum diinisialisasi.
+- **Perbaikan:**
+  - Jadikan nullable atau tambahkan konstruktor:
+    ```csharp
+    namespace ParkingOut.Models
+    {
+        public class ActivityLogItem
+        {
+            public string? ActivityType { get; set; }
+            public string? TicketNo { get; set; }
+            public string? VehicleType { get; set; }
+            public string? Description { get; set; }
+            public string? User { get; set; }
+            public string? LicensePlate { get; set; }
+        }
+    }
+    ```
+
+#### **7. `UI/VehicleExitPage.xaml.cs`**
+- **Error CS0219:**
+  - `"The variable 'sql' is assigned but its value is never used"` (baris 44)
+- **Perbaikan:**
+  - Hapus atau gunakan variabel `sql`.
+
+---
+
+### **Langkah Eksekusi**
+1. **Tambahkan File ke `ParkingOut.csproj`:**
+   ```xml
+   <ItemGroup>
+     <Compile Include="Utils\Database.cs" />
+     <Compile Include="Utils\UserManager.cs" />
+     <Compile Include="Utils\AppLogger.cs" />
+     <Compile Include="Models\VehicleExit.cs" />
+     <Compile Include="Services\VehicleEntryService.cs" />
+     <Compile Include="Services\VehicleExitService.cs" />
+     <Compile Include="Services\PrintService.cs" />
+     <Compile Include="Services\CameraService.cs" />
+     <Compile Include="UI\IconPaths.cs" />
+   </ItemGroup>
+   ```
+
+2. **Build Ulang:**
+   ```powershell
+   cd D:\21maret\clean_code\ParkingOut
+   Remove-Item -Path bin -Recurse -Force -ErrorAction SilentlyContinue
+   Remove-Item -Path obj -Recurse -Force -ErrorAction SilentlyContinue
+   dotnet restore
+   dotnet build ParkingOut.csproj
+   ```
+
+---
+
+### **Catatan**
+- Jika masih ada error, kirimkan isi file seperti `App.xaml.cs`, `DashboardPage.xaml.cs`, atau `VehicleEntryPage.xaml.cs` untuk analisis lebih lanjut.
+- Pastikan semua file di atas sudah dibuat dan namespace-nya sesuai.
+

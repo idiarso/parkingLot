@@ -12,7 +12,6 @@ using System.Text.Json;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using Serilog;
 using ParkingIN.Models;
 using ParkingIN.Utils;
 
@@ -25,10 +24,10 @@ namespace ParkingIN
         private const long MAX_LOG_SIZE_MB = 10;
         private const string LOG_ARCHIVE_SUFFIX = ".old";
         private const int MAX_PRINT_RETRIES = 2;
-        private readonly ILogger logger;
+        private readonly IAppLogger logger;
         private readonly StringCollection printerList = new StringCollection();
         
-        public PrinterSettingsForm(ILogger logger)
+        public PrinterSettingsForm(IAppLogger logger)
         {
             InitializeComponent();
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -87,7 +86,7 @@ namespace ParkingIN
                 if (cmbPrinter.Items.Count > 0)
                 {
                     cmbPrinter.SelectedIndex = 0;
-                    logger.Information($"Found {cmbPrinter.Items.Count} printers, selected: {cmbPrinter.Items[0]}");
+                    logger.Info($"Found {cmbPrinter.Items.Count} printers, selected: {cmbPrinter.Items[0]}");
                 }
                 else
                 {
@@ -432,7 +431,7 @@ namespace ParkingIN
                 };
                 var bitmap = writer.Write(data);
                 
-                logger.Information($"Barcode generated successfully for data: {data}, size: {barcodeWidth}x{barcodeHeight}");
+                logger.Info($"Barcode generated successfully for data: {data}, size: {barcodeWidth}x{barcodeHeight}");
                 return bitmap;
             }
             catch (Exception ex)

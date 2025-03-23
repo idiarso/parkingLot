@@ -52,18 +52,18 @@ namespace ParkingIN
                 foreach (string printer in System.Drawing.Printing.PrinterSettings.InstalledPrinters.Cast<string>())
                 {
                     printerName = printer;
-                    Logger.Info($"Found printer: {printer}");
+                    CustomLogManager.GetLogger().Info($"Found printer: {printer}");
                     break; // Get the first available printer
                 }
 
                 if (string.IsNullOrEmpty(printerName))
                 {
-                    Logger.Warning("No printers found in the system");
+                    CustomLogManager.GetLogger().Warning("No printers found in the system");
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogException(ex, "Error loading printer settings");
+                CustomLogManager.GetLogger().Error("Error loading printer settings", ex);
                 MessageBox.Show($"Error loading printer settings: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -78,7 +78,7 @@ namespace ParkingIN
             }
             catch (Exception ex)
             {
-                Logger.LogException(ex, "Error initializing form");
+                CustomLogManager.GetLogger().Error("Error initializing form", ex);
                 MessageBox.Show($"Error initializing form: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

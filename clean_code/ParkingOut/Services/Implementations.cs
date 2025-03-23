@@ -24,6 +24,15 @@ namespace ParkingOut.Services
             _logger = LogManager.GetLogger(loggerName);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppLogger"/> class.
+        /// </summary>
+        /// <param name="type">The type to use for the logger name.</param>
+        public AppLogger(Type type)
+        {
+            _logger = LogManager.GetLogger(type.Name);
+        }
+
         /// <inheritdoc/>
         public void Debug(string message, params object[] args)
         {
@@ -609,4 +618,4 @@ namespace ParkingOut.Services
             }
         }
     }
-} 
+}

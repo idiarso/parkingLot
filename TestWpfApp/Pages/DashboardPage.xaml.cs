@@ -3,32 +3,72 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
+using TestWpfApp.Models;
 
-namespace TestWpfApp
+namespace TestWpfApp.Pages
 {
     /// <summary>
     /// Interaction logic for DashboardPage.xaml
     /// </summary>
     public partial class DashboardPage : Page
     {
-        public ObservableCollection<ParkingActivity> ActivityList { get; set; }
+        private ObservableCollection<ParkingActivity> _recentActivities;
+        private int _currentPage = 1;
+        private const int _pageSize = 5;
 
         public DashboardPage()
         {
             InitializeComponent();
             
-            // Initialize activity list with sample data
-            ActivityList = new ObservableCollection<ParkingActivity>
+            // Check if user is logged in, if not redirect to login page
+            if (!UserSession.IsUserLoggedIn)
             {
-                new ParkingActivity { Time = "08:15", VehicleNumber = "B 1234 KLM", VehicleType = "Car", Action = "Entry", Duration = "-", Fee = "-" },
-                new ParkingActivity { Time = "08:45", VehicleNumber = "B 7890 XYZ", VehicleType = "Motorcycle", Action = "Entry", Duration = "-", Fee = "-" },
-                new ParkingActivity { Time = "09:30", VehicleNumber = "B 5678 ABC", VehicleType = "Car", Action = "Entry", Duration = "-", Fee = "-" },
-                new ParkingActivity { Time = "10:15", VehicleNumber = "B 1234 DEF", VehicleType = "Motorcycle", Action = "Exit", Duration = "1.5 hours", Fee = "Rp 5.000" },
-                new ParkingActivity { Time = "10:30", VehicleNumber = "B 1234 KLM", VehicleType = "Car", Action = "Exit", Duration = "2.25 hours", Fee = "Rp 15.000" }
-            };
+                NavigationService?.Navigate(new LoginPage());
+                return;
+            }
             
-            // Set DataContext
-            this.DataContext = this;
+            // Set welcome message with user's display name
+            txtWelcome.Text = $"Welcome, {UserSession.CurrentUser.DisplayName} | Role: {UserSession.CurrentUser.Role} | Last Login: {UserSession.CurrentUser.LastLogin:g}";
+            
+            _recentActivities = new ObservableCollection<ParkingActivity>();
+            LoadSampleData();
+        }
+
+        private void LoadSampleData()
+        {
+            // Sample data for recent activities
+            _recentActivities.Add(new ParkingActivity
+            {
+                Time = DateTime.Now.AddMinutes(-5),
+                VehicleNumber = "B 1234 CD",
+                VehicleType = "Car",
+                Action = "Entry",
+                Duration = "0:05",
+                Fee = 2000
+            });
+
+            _recentActivities.Add(new ParkingActivity
+            {
+                Time = DateTime.Now.AddMinutes(-15),
+                VehicleNumber = "B 5678 EF",
+                VehicleType = "Motorcycle",
+                Action = "Exit",
+                Duration = "0:30",
+                Fee = 3000
+            });
+
+            _recentActivities.Add(new ParkingActivity
+            {
+                Time = DateTime.Now.AddMinutes(-30),
+                VehicleNumber = "B 9012 GH",
+                VehicleType = "Car",
+                Action = "Entry",
+                Duration = "0:30",
+                Fee = 2000
+            });
+
+            dgRecentActivities.ItemsSource = _recentActivities;
         }
 
         private void btnQuickVehicleEntry_Click(object sender, RoutedEventArgs e)
@@ -48,15 +88,31 @@ namespace TestWpfApp
             // Navigate to Vehicle Monitoring page
             NavigationService.Navigate(new VehicleMonitoringPage());
         }
+        
+        private void btnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            // Confirm logout
+            var result = MessageBox.Show("Are you sure you want to log out?", "Logout Confirmation", 
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+                
+            if (result == MessageBoxResult.Yes)
+            {
+                // Clear user session
+                UserSession.Logout();
+                
+                // Navigate to login page
+                NavigationService.Navigate(new LoginPage());
+            }
+        }
     }
 
     public class ParkingActivity
     {
-        public string Time { get; set; }
+        public DateTime Time { get; set; }
         public string VehicleNumber { get; set; }
         public string VehicleType { get; set; }
         public string Action { get; set; }
         public string Duration { get; set; }
-        public string Fee { get; set; }
+        public decimal Fee { get; set; }
     }
-} 
+}

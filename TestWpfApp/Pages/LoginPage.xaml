@@ -1,0 +1,86 @@
+<Page x:Class="TestWpfApp.Pages.LoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:TestWpfApp.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="1000"
+      Title="LoginPage">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FF1E1E1E" Offset="0"/>
+                <GradientStop Color="#FF2D2D2D" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        
+        <Border Width="400" Height="400" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Border.Background>
+                <SolidColorBrush Color="White" Opacity="0.95"/>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" Direction="-90" RenderingBias="Quality" ShadowDepth="2"/>
+            </Border.Effect>
+            <Border.CornerRadius>
+                <CornerRadius>8</CornerRadius>
+            </Border.CornerRadius>
+            
+            <Grid Margin="30">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Login Header -->
+                <TextBlock Text="PARKING SYSTEM" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="#1E1E1E"/>
+                <TextBlock Grid.Row="1" Text="Sign In" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,30" Foreground="#1E1E1E"/>
+
+                <!-- Username Input -->
+                <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                    <TextBlock Text="Username" FontSize="14" Margin="0,0,0,5" Foreground="#1E1E1E"/>
+                    <TextBox x:Name="txtUsername" Height="40" Padding="10,0" VerticalContentAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Password Input -->
+                <StackPanel Grid.Row="3" Margin="0,0,0,15">
+                    <TextBlock Text="Password" FontSize="14" Margin="0,0,0,5" Foreground="#1E1E1E"/>
+                    <PasswordBox x:Name="txtPassword" Height="40" Padding="10,0" VerticalContentAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Remember Me & Forgot Password -->
+                <Grid Grid.Row="4" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <CheckBox x:Name="chkRememberMe" Content="Remember me" VerticalContentAlignment="Center" Foreground="#1E1E1E"/>
+                    <TextBlock Grid.Column="1" Text="Forgot Password?" Foreground="#1976D2" Cursor="Hand" VerticalAlignment="Center" MouseLeftButtonDown="btnForgotPassword_Click"/>
+                </Grid>
+
+                <!-- Progress Bar for Login -->
+                <ProgressBar Grid.Row="5" x:Name="loginProgress" Height="5" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,0,10"/>
+                
+                <!-- Error Message -->
+                <TextBlock Grid.Row="6" x:Name="errorMessage" Foreground="Red" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
+
+                <!-- Login Button -->
+                <Button Grid.Row="7" x:Name="btnLogin" Content="SIGN IN" Height="45" Background="#1E1E1E" Foreground="White" FontWeight="SemiBold" Click="btnLogin_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

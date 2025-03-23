@@ -327,7 +327,11 @@ namespace ParkingIN
                         LogHelper.LogUserAction(_currentUser.UserId, "LOGOUT", $"User {_currentUser.Username} logged out");
                         this.Close();
                     };
+                    
+                    // Show main form and ensure it's visible
                     mainForm.Show();
+                    mainForm.BringToFront();
+                    mainForm.Activate();
                 }
                 else
                 {
@@ -339,6 +343,7 @@ namespace ParkingIN
             {
                 StopLoadingAnimation();
                 ShowError($"Authentication error: {ex.Message}");
+                LogHelper.LogUserAction(_currentUser.UserId, "ERROR", $"Login failed: {ex.Message}");
             }
         }
 

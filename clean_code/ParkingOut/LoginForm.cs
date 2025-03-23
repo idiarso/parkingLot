@@ -303,80 +303,56 @@ namespace SimpleParkingAdmin
                 string username = txtUsername.Text;
                 string passwordText = txtPassword.Text;
                 
-                // Hash password menggunakan SHA-256
-                string hashedPassword = ComputeSHA256Hash(passwordText);
+                // Disable login controls and show loading message
+                btnLogin.Enabled = false;
+                btnLogin.Text = "Logging in...";
+                this.Cursor = Cursors.WaitCursor;
                 
-                // Coba login
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@username", username },
-                    { "@password", hashedPassword }
-                };
-                
-                try
-                {
-                    // Query user dari database
-                    DataTable result = Database.ExecuteQuery(
-                        "SELECT * FROM users WHERE username = @username AND password = @password", 
-                        parameters);
-                    
-                    // Jika user ditemukan
-                    if (result.Rows.Count > 0)
-                    {
-                        _logger.Information($"User {username} login successful");
-                        DataRow userRow = result.Rows[0];
-                        
-                        // Isi data user
-                        _currentUser.Id = Convert.ToInt32(userRow["id"]);
-                        _currentUser.Username = username;
-                        _currentUser.NamaLengkap = userRow["nama"].ToString();
-                        _currentUser.Role = userRow["role"].ToString();
-                        
-                        // Update last login
-                        Database.ExecuteNonQuery(
-                            "UPDATE users SET last_login = NOW() WHERE id = @id",
-                            new Dictionary<string, object> { { "@id", _currentUser.Id } });
-                        
-                        // Tutup form login dan buka form utama
-                        this.DialogResult = DialogResult.OK;
-                        this.Close();
-                    }
-                    else
-                    {
-                        _logger.Warning($"Login failed for user {username}: Invalid credentials");
-                        MessageBox.Show("Invalid username or password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                catch (Exception dbEx)
-                {
-                    _logger.Error($"Database error during login: {dbEx.Message}", dbEx);
-                    MessageBox.Show($"Database error: {dbEx.Message}", "Login Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                // Gunakan UserManager untuk autentikasi
+                var userTask = UserManager.Instance.AuthenticateAsync(username, passwordText);
+                userTask.ContinueWith(t => {
+                    // Jalankan di UI thread
+                    this.Invoke((Action)(() => {
+                        if (t.Result != null)
+                        {
+                            _logger.Information($"User {username} login successful");
+                            
+                            // Set current user di LoginForm.CurrentUser (static) untuk backward compatibility
+                            _currentUser = t.Result;
+                            
+                            // Tutup form login dan buka form utama
+                            this.DialogResult = DialogResult.OK;
+                            this.Close();
+                        }
+                        else
+                        {
+                            _logger.Warning($"Login failed for user {username}: Invalid credentials");
+                            MessageBox.Show("Invalid username or password.", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            
+                            // Re-enable login controls
+                            btnLogin.Enabled = true;
+                            btnLogin.Text = "Login";
+                            this.Cursor = Cursors.Default;
+                        }
+                    }));
+                });
             }
             catch (Exception ex)
             {
                 _logger.Error($"Unexpected error during login: {ex.Message}", ex);
                 MessageBox.Show($"Error: {ex.Message}", "Login Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // Re-enable login controls
+                btnLogin.Enabled = true;
+                btnLogin.Text = "Login";
+                this.Cursor = Cursors.Default;
             }
         }
 
-        // Metode untuk hash password menggunakan SHA-256
+        // Metode untuk hash password menggunakan SHA-256 - Sudah dipindahkan ke UserManager
         private string ComputeSHA256Hash(string rawData)
         {
-            // Create a SHA256
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                // ComputeHash - returns byte array  
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-
-                // Convert byte array to a string   
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
-            }
+            return UserManager.Instance.ComputeSHA256Hash(rawData);
         }
 
         private void AnimateLoginForm()
