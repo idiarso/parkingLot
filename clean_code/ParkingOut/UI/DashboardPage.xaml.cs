@@ -6,6 +6,7 @@ using NLog;
 using ParkingOut.Models;
 using ParkingOut.Services;
 using ParkingOut.Utils;
+using ParkingOut.Services.Implementations;
 
 namespace ParkingOut.UI
 {
@@ -16,7 +17,7 @@ namespace ParkingOut.UI
     {
         #region Fields
 
-        private readonly IAppLogger logger;
+        private IAppLogger _logger;
         private readonly IVehicleEntryService vehicleEntryService;
         private readonly IVehicleExitService vehicleExitService;
 
@@ -30,14 +31,14 @@ namespace ParkingOut.UI
         /// <summary>
         /// Initializes a new instance of the <see cref="DashboardPage"/> class.
         /// </summary>
-        public DashboardPage()
+        public DashboardPage(IAppLogger logger)
         {
             InitializeComponent();
 
             // Initialize services
-            logger = new AppLogger(typeof(DashboardPage));
-            vehicleEntryService = new VehicleEntryService();
-            vehicleExitService = new VehicleExitService(vehicleEntryService);
+            _logger = logger;
+            _entryService = Services.ServiceLocator.GetService<IVehicleEntryService>();
+            _exitService = Services.ServiceLocator.GetService<IVehicleExitService>();
 
             // Set data contexts
             RecentActivityDataGrid.ItemsSource = _recentActivities;
@@ -46,7 +47,7 @@ namespace ParkingOut.UI
             // Load dashboard data
             LoadDashboardData();
 
-            logger?.Debug("DashboardPage initialized");
+            _logger.Debug("DashboardPage initialized");
         }
 
         #endregion
@@ -54,7 +55,7 @@ namespace ParkingOut.UI
         #region Private Methods
 
         /// <summary>
-        /// Loads the dashboard data.
+        /// Loads dashboard data.
         /// </summary>
         private void LoadDashboardData()
         {
@@ -76,12 +77,12 @@ namespace ParkingOut.UI
                 
                 StatusText.Text = "Ready";
                 
-                logger?.Debug("Dashboard data loaded");
+                _logger.Debug("Dashboard data loaded");
             }
             catch (Exception ex)
             {
                 StatusText.Text = "Error loading data";
-                logger?.LogError("Failed to load dashboard data", ex);
+                _logger.Error("Failed to load dashboard data", ex);
                 MessageBox.Show($"Failed to load dashboard data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -113,11 +114,11 @@ namespace ParkingOut.UI
                 // var monthlyRevenue = new Random().Next(1000, 10000);
                 // var monthlyVehicles = new Random().Next(100, 500);
                 
-                logger?.Debug("Summary cards updated");
+                _logger.Debug("Summary cards updated");
             }
             catch (Exception ex)
             {
-                logger?.LogError("Failed to update summary cards", ex);
+                _logger.LogError("Failed to update summary cards", ex);
             }
         }
 
@@ -172,11 +173,11 @@ namespace ParkingOut.UI
                     Description = "Vehicle entered through Gate 1"
                 });
                 
-                logger?.Debug("Recent activities loaded: {Count}", _recentActivities.Count);
+                _logger.Debug($"Recent activities loaded: {_recentActivities.Count}");
             }
             catch (Exception ex)
             {
-                logger?.LogError("Failed to load recent activities", ex);
+                _logger.LogError("Failed to load recent activities", ex);
             }
         }
 
@@ -225,11 +226,11 @@ namespace ParkingOut.UI
                     Revenue = 50.00m
                 });
                 
-                logger?.Debug("Vehicle type stats loaded: {Count}", _vehicleTypeStats.Count);
+                _logger.Debug($"Vehicle type stats loaded: {_vehicleTypeStats.Count}");
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Failed to load vehicle type stats");
+                _logger.Error("Failed to load vehicle type stats", ex);
             }
         }
 
@@ -248,7 +249,7 @@ namespace ParkingOut.UI
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Error refreshing dashboard data");
+                _logger.Error("Error refreshing dashboard data", ex);
                 MessageBox.Show($"Error refreshing dashboard data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

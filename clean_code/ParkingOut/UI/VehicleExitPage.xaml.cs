@@ -12,13 +12,13 @@ namespace ParkingOut.UI
     /// </summary>
     public partial class VehicleExitPage : Page
     {
-        private readonly IAppLogger _logger;
+        private IAppLogger _logger;
         private ObservableCollection<VehicleExitInfo> _vehicles;
 
-        public VehicleExitPage()
+        public VehicleExitPage(IAppLogger logger)
         {
             InitializeComponent();
-            _logger = new AppLogger(GetType().Name);
+            _logger = logger;
             _vehicles = new ObservableCollection<VehicleExitInfo>();
             dgvVehicles.ItemsSource = _vehicles;
             
@@ -41,10 +41,6 @@ namespace ParkingOut.UI
                 _vehicles.Clear();
                 
                 // In a real implementation, this would query the database
-                string sql = "SELECT * FROM t_parkir WHERE waktu_keluar IS NULL";
-                
-                // Use the sql variable in a real implementation
-                // var data = Database.ExecuteQuery(sql);
                 
                 // Add some sample data for demonstration
                 _vehicles.Add(new VehicleExitInfo
@@ -161,4 +157,4 @@ namespace ParkingOut.UI
         public string? Duration { get; set; }
         public string? TotalFee { get; set; }
     }
-} 
+}

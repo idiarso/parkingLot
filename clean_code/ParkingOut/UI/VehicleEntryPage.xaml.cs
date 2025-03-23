@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using NLog;
 using ParkingOut.Models;
 using ParkingOut.Services;
+using ParkingOut.Utils;
 
 namespace ParkingOut.UI
 {
@@ -15,7 +16,7 @@ namespace ParkingOut.UI
     {
         #region Fields
 
-        private readonly IAppLogger logger;
+        private IAppLogger _logger;
         private readonly IVehicleEntryService vehicleEntryService;
         private readonly IPrintService printService;
         private readonly ICameraService? cameraService;
@@ -29,21 +30,21 @@ namespace ParkingOut.UI
         /// <summary>
         /// Initializes a new instance of the <see cref="VehicleEntryPage"/> class.
         /// </summary>
-        public VehicleEntryPage()
+        public VehicleEntryPage(IAppLogger logger)
         {
             InitializeComponent();
 
             // Initialize services
-            logger = new AppLogger(GetType());
-            vehicleEntryService = new VehicleEntryService();
-            printService = new PrintService();
+            _logger = logger;
+            vehicleEntryService = ServiceLocator.GetService<IVehicleEntryService>();
+            printService = ServiceLocator.GetService<IPrintService>();
             try
             {
-                cameraService = new CameraService();
+                cameraService = ServiceLocator.GetService<ICameraService>();
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Failed to initialize camera service");
+                _logger.Error(ex, "Failed to initialize camera service");
                 cameraService = null;
             }
 
@@ -59,7 +60,7 @@ namespace ParkingOut.UI
             // Update status
             UpdateStatus("Ready");
 
-            logger?.Debug("VehicleEntryPage initialized");
+            _logger.Debug("VehicleEntryPage initialized");
         }
 
         #endregion
@@ -84,12 +85,12 @@ namespace ParkingOut.UI
                 }
                 
                 UpdateStatus($"Loaded {entries.Count.ToString()} recent entries");
-                logger?.Debug("Loaded recent entries: {Count}", entries.Count);
+                _logger.Debug("Loaded recent entries: {Count}", entries.Count);
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error loading recent entries");
-                logger?.Error(ex, "Failed to load recent entries");
+                _logger.Error(ex, "Failed to load recent entries");
                 MessageBox.Show($"Failed to load recent entries: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -108,7 +109,7 @@ namespace ParkingOut.UI
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Failed to set current date and time");
+                _logger.Error(ex, "Failed to set current date and time");
             }
         }
 
@@ -180,12 +181,12 @@ namespace ParkingOut.UI
                     UpdateStatus("Camera started");
                 }
                 
-                logger?.Debug("Camera {Status}", cameraService.IsRunning ? "started" : "stopped");
+                _logger.Debug("Camera {Status}", cameraService.IsRunning ? "started" : "stopped");
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error controlling camera");
-                logger?.Error(ex, "Failed to control camera");
+                _logger.Error(ex, "Failed to control camera");
                 MessageBox.Show($"Failed to control camera: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -210,18 +211,18 @@ namespace ParkingOut.UI
                 {
                     // Here we would save the image or process it further
                     UpdateStatus("Image captured");
-                    logger?.Debug("Image captured");
+                    _logger.Debug("Image captured");
                 }
                 else
                 {
                     UpdateStatus("Failed to capture image");
-                    logger?.Warn("Failed to capture image");
+                    _logger.Warn("Failed to capture image");
                 }
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error capturing image");
-                logger?.Error(ex, "Failed to capture image");
+                _logger.Error(ex, "Failed to capture image");
                 MessageBox.Show($"Failed to capture image: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -247,18 +248,18 @@ namespace ParkingOut.UI
                     DetectedPlateTextBox.Text = plate;
                     LicensePlateTextBox.Text = plate;
                     UpdateStatus($"License plate recognized: {plate}");
-                    logger?.Debug("License plate recognized: {Plate}", plate);
+                    _logger.Debug("License plate recognized: {Plate}", plate);
                 }
                 else
                 {
                     UpdateStatus("Failed to recognize license plate");
-                    logger?.Warn("Failed to recognize license plate");
+                    _logger.Warn("Failed to recognize license plate");
                 }
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error recognizing license plate");
-                logger?.Error(ex, "Failed to recognize license plate");
+                _logger.Error(ex, "Failed to recognize license plate");
                 MessageBox.Show($"Failed to recognize license plate: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -293,12 +294,12 @@ namespace ParkingOut.UI
                     if (printService.PrintTicket(entry))
                     {
                         UpdateStatus($"Ticket generated and printed: {entry.TicketNo}");
-                        logger?.Debug("Ticket generated and printed: {TicketNo}", entry.TicketNo);
+                        _logger.Debug("Ticket generated and printed: {TicketNo}", entry.TicketNo);
                     }
                     else
                     {
                         UpdateStatus($"Ticket generated but printing failed: {entry.TicketNo}");
-                        logger?.Warn("Ticket generated but printing failed: {TicketNo}", entry.TicketNo);
+                        _logger.Warn("Ticket generated but printing failed: {TicketNo}", entry.TicketNo);
                     }
                     
                     // Clear form
@@ -312,14 +313,14 @@ namespace ParkingOut.UI
                 else
                 {
                     UpdateStatus("Failed to generate ticket");
-                    logger?.Warn("Failed to generate ticket");
+                    _logger.Warn("Failed to generate ticket");
                     MessageBox.Show("Failed to generate ticket", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error generating ticket");
-                logger?.Error(ex, "Failed to generate ticket");
+                _logger.Error(ex, "Failed to generate ticket");
                 MessageBox.Show($"Failed to generate ticket: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -336,7 +337,7 @@ namespace ParkingOut.UI
                 
                 if (string.IsNullOrEmpty(ticketNo))
                 {
-                    logger?.Warn("Print ticket clicked with no ticket number");
+                    _logger.Warn("Print ticket clicked with no ticket number");
                     return;
                 }
                 
@@ -348,26 +349,26 @@ namespace ParkingOut.UI
                     if (printService.PrintTicket(entry))
                     {
                         UpdateStatus($"Ticket printed: {ticketNo}");
-                        logger?.Debug("Ticket printed: {TicketNo}", ticketNo);
+                        _logger.Debug("Ticket printed: {TicketNo}", ticketNo);
                     }
                     else
                     {
                         UpdateStatus($"Failed to print ticket: {ticketNo}");
-                        logger?.Warn("Failed to print ticket: {TicketNo}", ticketNo);
+                        _logger.Warn("Failed to print ticket: {TicketNo}", ticketNo);
                         MessageBox.Show("Failed to print ticket", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
                 else
                 {
                     UpdateStatus($"Ticket not found: {ticketNo}");
-                    logger?.Warn("Ticket not found: {TicketNo}", ticketNo);
+                    _logger.Warn("Ticket not found: {TicketNo}", ticketNo);
                     MessageBox.Show("Ticket not found", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error printing ticket");
-                logger?.Error(ex, "Failed to print ticket");
+                _logger.Error(ex, "Failed to print ticket");
                 MessageBox.Show($"Failed to print ticket: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -384,7 +385,7 @@ namespace ParkingOut.UI
                 
                 if (string.IsNullOrEmpty(ticketNo))
                 {
-                    logger?.Warn("Edit entry clicked with no ticket number");
+                    _logger.Warn("Edit entry clicked with no ticket number");
                     return;
                 }
                 
@@ -413,19 +414,19 @@ namespace ParkingOut.UI
                     NotesTextBox.Text = entry.Notes;
                     
                     UpdateStatus($"Editing entry: {ticketNo}");
-                    logger?.Debug("Editing entry: {TicketNo}", ticketNo);
+                    _logger.Debug("Editing entry: {TicketNo}", ticketNo);
                 }
                 else
                 {
                     UpdateStatus($"Entry not found: {ticketNo}");
-                    logger?.Warn("Entry not found: {TicketNo}", ticketNo);
+                    _logger.Warn("Entry not found: {TicketNo}", ticketNo);
                     MessageBox.Show("Entry not found", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
                 UpdateStatus("Error editing entry");
-                logger?.Error(ex, "Failed to edit entry");
+                _logger.Error(ex, "Failed to edit entry");
                 MessageBox.Show($"Failed to edit entry: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -445,7 +446,7 @@ namespace ParkingOut.UI
             }
             catch (Exception ex)
             {
-                logger?.Error(ex, "Error in RecentEntriesDataGrid_SelectionChanged");
+                _logger.Error(ex, "Error in RecentEntriesDataGrid_SelectionChanged");
             }
         }
 

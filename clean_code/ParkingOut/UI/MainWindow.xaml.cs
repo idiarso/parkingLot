@@ -11,14 +11,14 @@ namespace ParkingOut.UI
     public partial class MainWindow : Window
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        private readonly IAppLogger _logger;
+        private Utils.IAppLogger _logger;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
-            _logger = new AppLogger(typeof(MainWindow));
+            _logger = Services.ServiceLocator.GetService<Utils.IAppLogger>();
             
             try
             {
@@ -50,17 +50,17 @@ namespace ParkingOut.UI
                 _logger.Info("Initializing sidebar");
                 
                 // Dashboard menu item
-                Sidebar.AddMenuItem("Dashboard", IconPaths.Dashboard, "dashboard");
+                Sidebar.AddMenuItem("Dashboard", IconPaths.DashboardIcon, "dashboard");
                 
                 // Vehicle management menu items
-                Sidebar.AddMenuItem("Vehicle Entry", IconPaths.VehicleEnter, "vehicle_entry");
-                Sidebar.AddMenuItem("Vehicle Exit", IconPaths.VehicleExit, "vehicle_exit");
+                Sidebar.AddMenuItem("Vehicle Entry", IconPaths.VehicleEntryIcon, "vehicle_entry");
+                Sidebar.AddMenuItem("Vehicle Exit", IconPaths.VehicleExitIcon, "vehicle_exit");
                 
                 // Reports menu item
-                Sidebar.AddMenuItem("Reports", IconPaths.Report, "reports");
+                Sidebar.AddMenuItem("Reports", IconPaths.ReportIcon, "reports");
                 
                 // Settings menu item
-                Sidebar.AddMenuItem("Settings", IconPaths.Settings, "settings");
+                Sidebar.AddMenuItem("Settings", IconPaths.SettingsIcon, "settings");
                 
                 _logger.Info("Sidebar initialized successfully");
             }
@@ -151,8 +151,8 @@ namespace ParkingOut.UI
             {
                 _logger.Info("Navigating to Dashboard");
                 
-                // For now, just show a simple message
-                var dashboardPage = new DashboardPage();
+                // Create and initialize DashboardPage with logger
+                var dashboardPage = new DashboardPage(_logger);
                 MainFrame.Navigate(dashboardPage);
                 
                 // Set the active menu item
@@ -174,7 +174,8 @@ namespace ParkingOut.UI
             {
                 _logger.Info("Navigating to Vehicle Entry");
                 
-                var vehicleEntryPage = new VehicleEntryPage();
+                // Create and initialize VehicleEntryPage with logger
+                var vehicleEntryPage = new VehicleEntryPage(_logger);
                 MainFrame.Navigate(vehicleEntryPage);
                 
                 // Set the active menu item
@@ -196,7 +197,8 @@ namespace ParkingOut.UI
             {
                 _logger.Info("Navigating to Vehicle Exit");
                 
-                var vehicleExitPage = new VehicleExitPage();
+                // Create and initialize VehicleExitPage with logger
+                var vehicleExitPage = new VehicleExitPage(_logger);
                 MainFrame.Navigate(vehicleExitPage);
                 
                 // Set the active menu item

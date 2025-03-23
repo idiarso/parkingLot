@@ -58,6 +58,16 @@ namespace ParkingOut.Utils
             _logger.Error(ex, message);
         }
 
+        public void LogError(string message)
+        {
+            _logger.Error(message);
+        }
+
+        public void LogError(string message, Exception ex)
+        {
+            _logger.Error(ex, message);
+        }
+
         public void Debug(string message)
         {
             _logger.Debug(message);
@@ -104,19 +114,29 @@ namespace ParkingOut.Utils
             _logger.Fatal(string.Format(format, args));
         }
 
-        public void LogError(string message)
-        {
-            Error(message);
-        }
-
-        public void LogError(string message, Exception ex)
-        {
-            Error(message, ex);
-        }
-
         public void Warn(string message)
         {
             Warning(message);
+        }
+        
+        public void Warn(string message, Exception ex)
+        {
+            Warning(message, ex);
+        }
+        
+        public void Warn(string format, params object[] args)
+        {
+            Warning(format, args);
+        }
+        
+        public void LogInfo(string message)
+        {
+            Info(message);
+        }
+        
+        public void LogInfo(string message, Exception ex)
+        {
+            Info(message, ex);
         }
     }
 }

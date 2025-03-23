@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace ParkingOut.Services
 {
@@ -9,6 +11,11 @@ namespace ParkingOut.Services
     /// </summary>
     public interface ICameraService
     {
+        /// <summary>
+        /// Gets a value indicating whether the camera is running
+        /// </summary>
+        bool IsRunning { get; }
+        
         /// <summary>
         /// Initializes the camera
         /// </summary>
@@ -47,5 +54,39 @@ namespace ParkingOut.Services
         /// <param name="height">The height in pixels</param>
         /// <returns>True if successful, false otherwise</returns>
         bool SetResolution(int width, int height);
+        
+        /// <summary>
+        /// Legacy method to start the camera
+        /// </summary>
+        void Start();
+        
+        /// <summary>
+        /// Legacy method to stop the camera
+        /// </summary>
+        void Stop();
+        
+        /// <summary>
+        /// Sets the image control to display the camera feed
+        /// </summary>
+        /// <param name="imageControl">The image control</param>
+        void SetImageControl(System.Windows.Controls.Image imageControl);
+        
+        /// <summary>
+        /// Legacy method to recognize license plate
+        /// </summary>
+        /// <returns>The recognized license plate or "Unknown" if failed</returns>
+        string RecognizePlate();
+        
+        /// <summary>
+        /// Legacy method to capture image and return file path
+        /// </summary>
+        /// <returns>The captured image file path or null if failed</returns>
+        string CaptureImageToFile();
+        
+        /// <summary>
+        /// Legacy method to capture plate number
+        /// </summary>
+        /// <returns>The captured plate number or "Unknown" if failed</returns>
+        string CapturePlateNumber();
     }
 }

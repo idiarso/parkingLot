@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using TestWpfApp.Models;
 using TestWpfApp.Services;
+using TestWpfApp.Services.Interfaces;
 using System.Threading.Tasks;
 
 namespace TestWpfApp.Pages
@@ -13,19 +14,23 @@ namespace TestWpfApp.Pages
     /// </summary>
     public partial class LoginPage : Page
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IAppLogger _logger;
+        private readonly IDatabaseService _databaseService;
 
         public LoginPage()
         {
             InitializeComponent();
             
-            // Inisialisasi service database
-            _databaseService = new DatabaseService();
+            // Initialize logger
+            _logger = App.Logger;
             
-            // Memastikan tabel user ada dan user admin tersedia
+            // Initialize database service
+            _databaseService = new DatabaseService(_logger);
+            
+            // Ensure user table exists and create admin user if needed
             InitializeDatabaseAsync();
             
-            // Set focus to the username field when the page loads
+            // Set focus to username field when page loads
             Loaded += (s, e) => txtUsername.Focus();
             
             // Allow pressing Enter in password field to login
@@ -39,23 +44,24 @@ namespace TestWpfApp.Pages
         {
             try
             {
-                // Pastikan tabel user ada dan buat user admin default jika belum ada
+                // Ensure user table exists and create admin user if needed
                 await _databaseService.EnsureUserTableExistsAsync();
             }
             catch (Exception ex)
             {
+                _logger.Error($"Error initializing database: {ex.Message}", ex);
                 MessageBox.Show($"Error initializing database: {ex.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void btnLogin_Click(object sender, RoutedEventArgs e)
+        private async void btnLogin_Click(object sender, RoutedEventArgs e)
         {
             AttemptLogin();
         }
 
         private async void AttemptLogin()
         {
-            // Disable login button dan tampilkan loading indicator
+            // Disable login button and show loading indicator
             btnLogin.IsEnabled = false;
             loginProgress.Visibility = Visibility.Visible;
             errorMessage.Visibility = Visibility.Collapsed;
@@ -71,34 +77,38 @@ namespace TestWpfApp.Pages
                     return;
                 }
 
-                // Autentikasi user dengan database
+                // Authenticate user with database
                 var user = await _databaseService.AuthenticateUserAsync(username, password);
                 
                 if (user != null)
                 {
                     // Authentication successful - update last login time
-                    await _databaseService.UpdateLastLoginAsync(user.Id);
+                    await _databaseService.UpdateLastLoginAsync(user);
                     
                     // Store the logged-in user information
                     UserSession.CurrentUser = user;
                     UserSession.IsUserLoggedIn = true;
-
+                    
+                    _logger.Info($"User {user.Username} logged in successfully");
+                    
                     // Navigate to Dashboard Page
-                    NavigationService?.Navigate(new DashboardPage());
+                    NavigationService?.Navigate(new DashboardPage(_logger, _databaseService));
                 }
                 else
                 {
                     // Authentication failed
                     ShowError("Invalid username or password. Please try again.");
+                    _logger.Warning($"Failed login attempt for user: {username}");
                 }
             }
             catch (Exception ex)
             {
-                ShowError($"Login error: {ex.Message}");
+                _logger.Error($"Login error: {ex.Message}", ex);
+                ShowError($"An error occurred during login: {ex.Message}");
             }
             finally
             {
-                // Re-enable login button dan sembunyikan loading indicator
+                // Re-enable login button and hide loading indicator
                 btnLogin.IsEnabled = true;
                 loginProgress.Visibility = Visibility.Collapsed;
             }
@@ -108,8 +118,6 @@ namespace TestWpfApp.Pages
         {
             errorMessage.Text = message;
             errorMessage.Visibility = Visibility.Visible;
-            loginProgress.Visibility = Visibility.Collapsed;
-            btnLogin.IsEnabled = true;
         }
 
         private void btnForgotPassword_Click(object sender, RoutedEventArgs e)

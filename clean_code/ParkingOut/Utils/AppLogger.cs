@@ -1,108 +1,158 @@
 using System;
+using NLog;
+using ParkingOut.Utils;
 
 namespace ParkingOut.Utils
 {
     /// <summary>
-    /// Application logger implementation that wraps NLogLogger
+    /// Implementation of IAppLogger using NLog.
     /// </summary>
     public class AppLogger : IAppLogger
     {
-        private readonly NLogLogger _logger;
+        private readonly Logger _logger;
 
         /// <summary>
-        /// Constructor with logger name
+        /// Initializes a new instance of the <see cref="AppLogger"/> class.
         /// </summary>
+        /// <param name="loggerName">The name of the logger.</param>
         public AppLogger(string loggerName)
         {
-            _logger = new NLogLogger(loggerName ?? nameof(AppLogger));
+            _logger = LogManager.GetLogger(loggerName);
         }
 
         /// <summary>
-        /// Constructor with type
+        /// Initializes a new instance of the <see cref="AppLogger"/> class.
         /// </summary>
+        /// <param name="type">The type to use for the logger name.</param>
         public AppLogger(Type type)
         {
-            _logger = new NLogLogger(type ?? typeof(AppLogger));
+            _logger = LogManager.GetLogger(type.Name);
         }
 
-        /// <summary>
-        /// Log debug message
-        /// </summary>
+        /// <inheritdoc/>
         public void Debug(string message)
         {
             _logger.Debug(message);
         }
 
-        /// <summary>
-        /// Log debug message with exception
-        /// </summary>
+        /// <inheritdoc/>
         public void Debug(string message, Exception ex)
         {
-            _logger.Debug(message, ex);
+            _logger.Debug(ex, message);
         }
 
-        /// <summary>
-        /// Log info message
-        /// </summary>
+        /// <inheritdoc/>
+        public void Debug(string message, params object[] args)
+        {
+            _logger.Debug(message, args);
+        }
+
+        /// <inheritdoc/>
         public void Info(string message)
         {
             _logger.Info(message);
         }
 
-        /// <summary>
-        /// Log info message with exception
-        /// </summary>
+        /// <inheritdoc/>
         public void Info(string message, Exception ex)
         {
-            _logger.Info(message, ex);
+            _logger.Info(ex, message);
         }
 
-        /// <summary>
-        /// Log warning message
-        /// </summary>
-        public void Warning(string message)
+        /// <inheritdoc/>
+        public void Info(string message, params object[] args)
         {
-            _logger.Warning(message);
+            _logger.Info(message, args);
         }
 
-        /// <summary>
-        /// Log warning message with exception
-        /// </summary>
-        public void Warning(string message, Exception ex)
+        /// <inheritdoc/>
+        public void Warn(string message)
         {
-            _logger.Warning(message, ex);
+            _logger.Warn(message);
         }
 
-        /// <summary>
-        /// Log error message
-        /// </summary>
+        /// <inheritdoc/>
+        public void Warn(string message, Exception ex)
+        {
+            _logger.Warn(ex, message);
+        }
+
+        /// <inheritdoc/>
+        public void Warn(string message, params object[] args)
+        {
+            _logger.Warn(message, args);
+        }
+
+        /// <inheritdoc/>
         public void Error(string message)
         {
             _logger.Error(message);
         }
 
-        /// <summary>
-        /// Log error message with exception
-        /// </summary>
+        /// <inheritdoc/>
         public void Error(string message, Exception ex)
         {
-            _logger.Error(message, ex);
+            _logger.Error(ex, message);
         }
 
-        /// <summary>
-        /// Log fatal error message
-        /// </summary>
+        /// <inheritdoc/>
+        public void Error(string message, params object[] args)
+        {
+            _logger.Error(message, args);
+        }
+
+        /// <inheritdoc/>
         public void Fatal(string message)
         {
             _logger.Fatal(message);
         }
 
-        /// <summary>
-        /// Log fatal error message with exception
-        /// </summary>
+        /// <inheritdoc/>
         public void Fatal(string message, Exception ex)
         {
-            _logger.Fatal(message, ex);
+            _logger.Fatal(ex, message);
+        }
+
+        /// <inheritdoc/>
+        public void Fatal(string message, params object[] args)
+        {
+            _logger.Fatal(message, args);
+        }
+        
+        /// <inheritdoc/>
+        public void LogInfo(string message)
+        {
+            _logger.Info(message);
+        }
+        
+        /// <inheritdoc/>
+        public void LogInfo(string message, Exception ex)
+        {
+            _logger.Info(ex, message);
+        }
+        
+        /// <inheritdoc/>
+        public void Warning(string message)
+        {
+            _logger.Warn(message);
+        }
+        
+        /// <inheritdoc/>
+        public void Warning(string message, Exception ex)
+        {
+            _logger.Warn(ex, message);
+        }
+        
+        /// <inheritdoc/>
+        public void LogError(string message)
+        {
+            _logger.Error(message);
+        }
+        
+        /// <inheritdoc/>
+        public void LogError(string message, Exception ex)
+        {
+            _logger.Error(ex, message);
         }
     }
-} 
+}

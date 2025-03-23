@@ -36,7 +36,7 @@ namespace ParkingOut.Utils
         {
             try
             {
-                _logger.Information($"Attempting to authenticate user: {username}");
+                _logger.LogInfo($"Attempting to authenticate user: {username}");
 
                 // Hash password using SHA-256
                 string hashedPassword = ComputeSHA256Hash(password);
@@ -55,7 +55,7 @@ namespace ParkingOut.Utils
                 // If user found
                 if (result != null && result.Rows.Count > 0)
                 {
-                    _logger.Information($"User {username} authenticated successfully");
+                    _logger.LogInfo($"User {username} authenticated successfully");
                     DataRow userRow = result.Rows[0];
 
                     // Create user object
@@ -80,12 +80,12 @@ namespace ParkingOut.Utils
                     return user;
                 }
 
-                _logger.Warning($"Authentication failed for user {username}");
+                _logger.LogWarning($"Authentication failed for user {username}");
                 return null;
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error during authentication for user {username}: {ex.Message}", ex);
+                _logger.LogError($"Error during authentication for user {username}: {ex.Message}", ex);
                 return null;
             }
         }
@@ -97,7 +97,7 @@ namespace ParkingOut.Utils
         {
             try
             {
-                _logger.Info("Checking if users table exists");
+                _logger.LogInfo("Checking if users table exists");
                 
                 // Check if users table exists
                 var tableExists = Database.ExecuteQuery(
@@ -105,7 +105,7 @@ namespace ParkingOut.Utils
                 
                 if (tableExists.Rows.Count == 0 || Convert.ToBoolean(tableExists.Rows[0][0]) == false)
                 {
-                    _logger.Info("Users table does not exist, creating it");
+                    _logger.LogInfo("Users table does not exist, creating it");
                     
                     // Create users table
                     Database.ExecuteNonQuery(@"
@@ -136,16 +136,16 @@ namespace ParkingOut.Utils
                             { "@status", true }
                         });
                     
-                    _logger.Info("Users table created with default admin user");
+                    _logger.LogInfo("Users table created with default admin user");
                 }
                 else
                 {
-                    _logger.Info("Users table already exists");
+                    _logger.LogInfo("Users table already exists");
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error ensuring users table exists: {ex.Message}", ex);
+                _logger.LogError($"Error ensuring users table exists: {ex.Message}", ex);
             }
         }
 
@@ -153,7 +153,7 @@ namespace ParkingOut.Utils
         {
             try
             {
-                _logger.Information("Creating default admin user...");
+                _logger.LogInfo("Creating default admin user...");
 
                 // Hash for password123
                 string hashedPassword = ComputeSHA256Hash("password123");
@@ -171,11 +171,11 @@ namespace ParkingOut.Utils
                     "INSERT INTO users (username, password, nama, role, level, status) VALUES (@username, @password, @nama, @role, @level, TRUE)",
                     parameters);
 
-                _logger.Information("Default admin user created successfully");
+                _logger.LogInfo("Default admin user created successfully");
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error creating default admin user: {ex.Message}", ex);
+                _logger.LogError($"Error creating default admin user: {ex.Message}", ex);
             }
         }
 
@@ -227,6 +227,7 @@ namespace ParkingOut.Utils
 
         public void Logout()
         {
+            _logger.LogInfo("User logging out");
             CurrentUser = null;
         }
     }

@@ -1,5 +1,5 @@
 using System;
-using System.Windows; // Added for WPF MessageBox
+using System.Windows.Forms; // Using Windows Forms MessageBox
 
 namespace ParkingOut.Utils
 {
@@ -16,8 +16,8 @@ namespace ParkingOut.Utils
             // Log to console for debugging
             Console.WriteLine($"[INFO] {title}: {message}");
             
-            // Use WPF MessageBox explicitly to avoid ambiguity
-            System.Windows.MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+            // Use Windows Forms MessageBox
+            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -28,8 +28,8 @@ namespace ParkingOut.Utils
             // Log to console for debugging
             Console.WriteLine($"[WARNING] {title}: {message}");
             
-            // Use WPF MessageBox explicitly to avoid ambiguity
-            System.Windows.MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+            // Use Windows Forms MessageBox
+            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         /// <summary>
@@ -40,8 +40,8 @@ namespace ParkingOut.Utils
             // Log to console for debugging
             Console.WriteLine($"[ERROR] {title}: {message}");
             
-            // Use WPF MessageBox explicitly to avoid ambiguity
-            System.Windows.MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            // Use Windows Forms MessageBox
+            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         /// <summary>
@@ -52,14 +52,14 @@ namespace ParkingOut.Utils
             // Log to console for debugging
             Console.WriteLine($"[CONFIRM] {title}: {message} (Y/N)");
             
-            // Use WPF MessageBox explicitly to avoid ambiguity
-            MessageBoxResult result = System.Windows.MessageBox.Show(
+            // Use Windows Forms MessageBox
+            DialogResult result = MessageBox.Show(
                 message, 
                 title, 
-                MessageBoxButton.YesNo, 
-                MessageBoxImage.Question);
+                MessageBoxButtons.YesNo, 
+                MessageBoxIcon.Question);
                 
-            return result == MessageBoxResult.Yes;
+            return result == DialogResult.Yes;
         }
     }
-} 
+}

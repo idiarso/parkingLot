@@ -237,8 +237,8 @@ Aplikasi WPF terbaru dilengkapi dengan sistem autentikasi yang mengharuskan logi
 2. **Fitur Login**
    - Validasi input untuk memastikan username dan password tidak kosong
    - Pesan error akan ditampilkan jika kredensial tidak valid
-   - Opsi "Remember me" untuk menyimpan informasi login (fitur ini masih dalam pengembangan)
-   - Link "Forgot Password" yang akan menampilkan petunjuk reset password
+   - Opsi "Remember me" untuk menyimpan informasi login
+   - Link "Forgot Password" untuk reset password
 
 ### Menggunakan Dashboard
 
@@ -252,6 +252,15 @@ Setelah login berhasil, dashboard utama akan ditampilkan dengan berbagai informa
 
 2. **Navigasi**
    - Gunakan sidebar di sebelah kiri untuk navigasi antar halaman
+   - Halaman yang tersedia:
+     - Dashboard: Tampilan utama dengan statistik dan aktivitas terbaru
+     - Vehicle Entry: Form untuk mendaftarkan kendaraan masuk
+     - Vehicle Exit: Form untuk mengelola keluar kendaraan dan pembayaran
+     - Vehicle Monitoring: Tampilan real-time untuk memantau kendaraan di dalam parkir
+     - Reports: Generate laporan harian, mingguan, dan bulanan
+     - User Management: Manajemen pengguna dan hak akses
+     - Shifts: Manajemen shift operator
+     - Settings: Konfigurasi sistem dan tarif parkir
    - Semua halaman dilindungi dan hanya dapat diakses setelah login berhasil
    - Jika mencoba mengakses halaman tanpa login, sistem akan mengarahkan kembali ke halaman login
 
@@ -263,7 +272,7 @@ Setelah login berhasil, dashboard utama akan ditampilkan dengan berbagai informa
 ## Catatan Teknis Dashboard
 
 1. **Keamanan**
-   - Sistem login masih menggunakan kredensial hardcoded untuk demo
+   - Sistem login menggunakan kredensial default untuk demo
    - Dalam pengembangan selanjutnya akan terintegrasi dengan database untuk autentikasi
    - Hindari menyimpan password yang sensitif di aplikasi ini untuk saat ini
 

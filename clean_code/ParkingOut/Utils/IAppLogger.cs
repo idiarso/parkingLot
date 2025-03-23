@@ -56,5 +56,35 @@ namespace ParkingOut.Utils
         /// Log fatal error message with exception
         /// </summary>
         void Fatal(string message, Exception ex);
+        
+        /// <summary>
+        /// Log error message (alternative method)
+        /// </summary>
+        void LogError(string message);
+        
+        /// <summary>
+        /// Log error message with exception (alternative method)
+        /// </summary>
+        void LogError(string message, Exception ex);
+        
+        /// <summary>
+        /// Log warning message (alternative name)
+        /// </summary>
+        void Warn(string message);
+        
+        /// <summary>
+        /// Log warning message with exception (alternative name)
+        /// </summary>
+        void Warn(string message, Exception ex);
+        
+        /// <summary>
+        /// Log info message (alternative method)
+        /// </summary>
+        void LogInfo(string message);
+        
+        /// <summary>
+        /// Log info message with exception (alternative method)
+        /// </summary>
+        void LogInfo(string message, Exception ex);
     }
 }

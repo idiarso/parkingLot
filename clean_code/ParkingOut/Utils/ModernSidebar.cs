@@ -17,13 +17,13 @@ namespace ParkingOut.Utils
         private Label lblAppName;
         private Button btnToggle;
         private FlowLayoutPanel pnlMenu;
-        private List<ModernMenuButton> menuButtons;
+        private List<Button> menuButtons;
         private System.Windows.Forms.Timer animationTimer;
         private int expandedWidth = 220;
         private int collapsedWidth = 60;
         private int targetWidth;
         private bool isCollapsed = false;
-        
+
         // Events
         public event EventHandler<string> MenuItemClicked;
 
@@ -103,7 +103,7 @@ namespace ParkingOut.Utils
         public ModernSidebar()
         {
             InitializeComponent();
-            menuButtons = new List<ModernMenuButton>();
+            menuButtons = new List<Button>();
             SetupAnimation();
         }
 
@@ -117,7 +117,7 @@ namespace ParkingOut.Utils
                 ColorTop = Color.FromArgb(42, 40, 60),
                 ColorBottom = Color.FromArgb(64, 62, 80)
             };
-            
+
             // Logo panel
             pnlLogo = new Panel
             {
@@ -125,7 +125,7 @@ namespace ParkingOut.Utils
                 Height = 60,
                 BackColor = Color.Transparent
             };
-            
+
             // Logo image
             pbLogo = new PictureBox
             {
@@ -134,7 +134,7 @@ namespace ParkingOut.Utils
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.Transparent
             };
-            
+
             // Application name label
             lblAppName = new Label
             {
@@ -146,7 +146,7 @@ namespace ParkingOut.Utils
                 BackColor = Color.Transparent,
                 AutoSize = false
             };
-            
+
             // Toggle button
             btnToggle = new Button
             {
@@ -161,7 +161,7 @@ namespace ParkingOut.Utils
             btnToggle.Font = new Font("Segoe UI", 14, FontStyle.Bold);
             btnToggle.ForeColor = Color.White;
             btnToggle.Click += BtnToggle_Click;
-            
+
             // Menu container
             pnlMenu = new FlowLayoutPanel
             {
@@ -172,16 +172,16 @@ namespace ParkingOut.Utils
                 Padding = new Padding(5, 10, 5, 10),
                 BackColor = Color.Transparent
             };
-            
+
             // Add controls to the logo panel
             pnlLogo.Controls.Add(pbLogo);
             pnlLogo.Controls.Add(lblAppName);
             pnlLogo.Controls.Add(btnToggle);
-            
+
             // Add controls to the sidebar
             pnlSidebar.Controls.Add(pnlMenu);
             pnlSidebar.Controls.Add(pnlLogo);
-            
+
             // Configure the user control
             this.Size = new Size(expandedWidth, 600);
             this.Controls.Add(pnlSidebar);
@@ -211,7 +211,7 @@ namespace ParkingOut.Utils
             {
                 pnlSidebar.Width += step;
                 this.Width += step;
-                
+
                 if (pnlSidebar.Width > targetWidth)
                 {
                     pnlSidebar.Width = targetWidth;
@@ -222,7 +222,7 @@ namespace ParkingOut.Utils
             {
                 pnlSidebar.Width -= step;
                 this.Width -= step;
-                
+
                 if (pnlSidebar.Width < targetWidth)
                 {
                     pnlSidebar.Width = targetWidth;
@@ -239,12 +239,12 @@ namespace ParkingOut.Utils
         {
             isCollapsed = !isCollapsed;
             targetWidth = isCollapsed ? collapsedWidth : expandedWidth;
-            
+
             // Update UI elements based on collapsed state
             lblAppName.Visible = !isCollapsed;
-            
+
             // Update menu buttons
-            foreach (ModernMenuButton btn in menuButtons)
+            foreach (Button btn in menuButtons)
             {
                 if (isCollapsed)
                 {
@@ -255,7 +255,7 @@ namespace ParkingOut.Utils
                     btn.Text = btn.Tag?.ToString() ?? "";
                 }
             }
-            
+
             // Start animation
             animationTimer.Start();
         }
@@ -266,35 +266,43 @@ namespace ParkingOut.Utils
         }
 
         // Add a menu item to the sidebar
-        public ModernMenuButton AddMenuItem(string text, Image icon = null, string name = null)
+        public Button AddMenuItem(string text, Image icon = null, string name = null)
         {
-            ModernMenuButton btn = new ModernMenuButton
+            Button btn = new Button
             {
                 Text = text,
-                Image = icon,
-                Tag = text, // Store the full text for when we expand again
-                Margin = new Padding(0, 5, 0, 0),
-                Width = pnlMenu.Width - 10,
-                Name = name ?? "btn" + text.Replace(" ", "")
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance.BorderSize = 0,
+                ForeColor = Color.White,
+                BackColor = Color.FromArgb(33, 37, 41),
+                Size = new Size(pnlMenu.Width - 10, 40),
+                Font = new Font("Segoe UI", 9F),
+                Padding = new Padding(10, 0, 0, 0)
             };
-            
-            btn.Click += (s, e) => 
+
+            btn.Click += (s, e) =>
             {
-                foreach (ModernMenuButton menuBtn in menuButtons)
+                foreach (Button menuBtn in menuButtons)
                 {
-                    menuBtn.IsActive = (menuBtn == btn);
+                    menuBtn.BackColor = Color.FromArgb(33, 37, 41);
                 }
-                
+
+                btn.BackColor = Color.FromArgb(40, 44, 49);
+
                 // Raise the event with the clicked item's name
                 MenuItemClicked?.Invoke(this, btn.Name);
             };
-            
-            // If sidebar is collapsed, don't show text
-            if (isCollapsed)
+
+            btn.MouseEnter += (s, e) => btn.BackColor = Color.FromArgb(40, 44, 49);
+            btn.MouseLeave += (s, e) =>
             {
-                btn.Text = "";
-            }
-            
+                if (btn != menuButtons[menuButtons.Count - 1])
+                    btn.BackColor = Color.FromArgb(33, 37, 41);
+            };
+
+            btn.Tag = text;
+            btn.Name = name ?? "btn" + text.Replace(" ", "");
+
             menuButtons.Add(btn);
             pnlMenu.Controls.Add(btn);
             return btn;
@@ -303,12 +311,19 @@ namespace ParkingOut.Utils
         // Set active menu item by name
         public void SetActiveMenuItem(string name)
         {
-            foreach (ModernMenuButton btn in menuButtons)
+            foreach (Button btn in menuButtons)
             {
-                btn.IsActive = (btn.Name == name);
+                if (btn.Name == name)
+                {
+                    btn.BackColor = Color.FromArgb(40, 44, 49);
+                }
+                else
+                {
+                    btn.BackColor = Color.FromArgb(33, 37, 41);
+                }
             }
         }
-        
+
         // Clear all menu items
         public void ClearMenuItems()
         {
@@ -316,4 +331,4 @@ namespace ParkingOut.Utils
             pnlMenu.Controls.Clear();
         }
     }
-} 
+}

@@ -3,219 +3,225 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:TestWpfApp.Pages"
+      xmlns:local="clr-namespace:TestWpfApp"
+      xmlns:viewmodels="clr-namespace:TestWpfApp.ViewModels"
+      xmlns:converters="clr-namespace:TestWpfApp.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Dashboard">
 
+    <Page.DataContext>
+        <viewmodels:DashboardViewModel/>
+    </Page.DataContext>
+
     <Page.Resources>
-        <Style x:Key="PrimaryButton" TargetType="Button">
-            <!-- Add your primary button style here -->
+        <converters:GreaterThanOneConverter x:Key="GreaterThanOneConverter"/>
+        <converters:LessThanTotalPagesConverter x:Key="LessThanTotalPagesConverter"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
         </Style>
-        <Style x:Key="SecondaryButton" TargetType="Button">
-            <!-- Add your secondary button style here -->
+        <Style TargetType="Border">
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Page.Resources>
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header with Welcome and Logout -->
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10" Background="#F5F5F5">
+            <TextBlock Text="Dashboard" FontSize="24" FontWeight="Bold" Margin="10,0"/>
+            <TextBlock Text="Current Time: " Margin="20,0,0,0"/>
+            <TextBlock x:Name="CurrentTimeText" Text="{Binding CurrentTime}" FontSize="16"/>
             
-            <StackPanel>
-                <TextBlock Text="Dashboard" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,5"/>
-                <TextBlock x:Name="txtWelcome" 
-                       Text="Welcome, Administrator" 
-                       FontSize="14" 
-                       FontStyle="Italic" 
-                       Opacity="0.8" 
-                       Margin="0,0,0,20"/>
+            <StackPanel HorizontalAlignment="Right" Margin="0,0,20,0">
+                <Button Command="{Binding LogoutCommand}" Content="Logout"/>
             </StackPanel>
-            
-            <Button x:Name="btnLogout" 
-                Grid.Column="1" 
-                Content="Logout" 
-                Width="100" 
-                Height="35" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Click="btnLogout_Click">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="4"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-        </Grid>
+        </StackPanel>
 
-        <!-- Stats Cards -->
-        <Grid Grid.Row="1" Margin="0,0,0,20">
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Available Slots -->
-            <Border Grid.Column="0" 
-                    Background="#E3F2FD" 
-                    CornerRadius="10" 
-                    Padding="15" 
-                    Margin="0,0,10,0">
-                <StackPanel>
-                    <TextBlock Text="Available Slots" 
-                             Foreground="#1976D2" 
-                             FontSize="14"/>
-                    <TextBlock Text="45" 
-                             FontSize="24" 
-                             FontWeight="Bold" 
-                             Margin="0,5,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Today's Entries -->
-            <Border Grid.Column="1" 
-                    Background="#E8F5E9" 
-                    CornerRadius="10" 
-                    Padding="15" 
-                    Margin="5,0">
-                <StackPanel>
-                    <TextBlock Text="Today's Entries" 
-                             Foreground="#2E7D32" 
-                             FontSize="14"/>
-                    <TextBlock Text="28" 
-                             FontSize="24" 
-                             FontWeight="Bold" 
-                             Margin="0,5,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Today's Exits -->
-            <Border Grid.Column="2" 
-                    Background="#FFF3E0" 
-                    CornerRadius="10" 
-                    Padding="15" 
-                    Margin="5,0">
-                <StackPanel>
-                    <TextBlock Text="Today's Exits" 
-                             Foreground="#F57C00" 
-                             FontSize="14"/>
-                    <TextBlock Text="25" 
-                             FontSize="24" 
-                             FontWeight="Bold" 
-                             Margin="0,5,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Today's Revenue -->
-            <Border Grid.Column="3" 
-                    Background="#FCE4EC" 
-                    CornerRadius="10" 
-                    Padding="15" 
-                    Margin="10,0,0,0">
-                <StackPanel>
-                    <TextBlock Text="Today's Revenue" 
-                             Foreground="#C2185B" 
-                             FontSize="14"/>
-                    <TextBlock Text="Rp 450.000" 
-                             FontSize="24" 
-                             FontWeight="Bold" 
-                             Margin="0,5,0,0"/>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <!-- Quick Actions and Recent Activity -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Quick Actions -->
-            <StackPanel Grid.Column="0" 
-                        Width="200" 
-                        Margin="0,0,20,0">
-                <TextBlock Text="Quick Actions" 
-                         FontSize="16" 
-                         FontWeight="Bold" 
-                         Margin="0,0,0,10"/>
-                
-                <Button x:Name="btnQuickVehicleEntry"
-                        Content="Vehicle Entry"
-                        Height="40"
-                        Margin="0,0,0,10"
-                        Click="btnQuickVehicleEntry_Click"
-                        Style="{DynamicResource PrimaryButton}"/>
-                
-                <Button x:Name="btnQuickVehicleExit"
-                        Content="Vehicle Exit"
-                        Height="40"
-                        Margin="0,0,0,10"
-                        Click="btnQuickVehicleExit_Click"
-                        Style="{DynamicResource SecondaryButton}"/>
-                
-                <Button x:Name="btnQuickVehicleMonitoring"
-                        Content="Vehicle Monitoring"
-                        Height="40"
-                        Click="btnQuickVehicleMonitoring_Click"
-                        Style="{DynamicResource SecondaryButton}"/>
-            </StackPanel>
-
-            <!-- Recent Activity -->
-            <Grid Grid.Column="1">
+            <!-- Left Column - Statistics -->
+            <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Recent Activity" 
-                         FontSize="16" 
-                         FontWeight="Bold" 
-                         Margin="0,0,0,10"/>
+                <!-- Parking Statistics -->
+                <Border Grid.Row="0" Background="#F5F5F5">
+                    <StackPanel>
+                        <TextBlock Text="Parking Statistics" FontWeight="Bold" FontSize="18"/>
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                <DataGrid x:Name="dgRecentActivities"
-                         Grid.Row="1"
-                         AutoGenerateColumns="False"
-                         IsReadOnly="True"
-                         GridLinesVisibility="None"
-                         BorderThickness="1"
-                         BorderBrush="#E0E0E0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Time" 
-                                          Binding="{Binding Time, StringFormat=HH:mm}" 
-                                          Width="80"/>
-                        <DataGridTextColumn Header="Vehicle Number" 
-                                          Binding="{Binding VehicleNumber}" 
-                                          Width="120"/>
-                        <DataGridTextColumn Header="Vehicle Type" 
-                                          Binding="{Binding VehicleType}" 
-                                          Width="100"/>
-                        <DataGridTextColumn Header="Action" 
-                                          Binding="{Binding Action}" 
-                                          Width="80"/>
-                        <DataGridTextColumn Header="Duration" 
-                                          Binding="{Binding Duration}" 
-                                          Width="80"/>
-                        <DataGridTextColumn Header="Fee" 
-                                          Binding="{Binding Fee, StringFormat='Rp {0:N0}'}" 
-                                          Width="100"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Total Spots"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding TotalSpots}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Occupied"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding OccupiedSpots}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Available"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AvailableSpots}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Revenue -->
+                <Border Grid.Row="1" Background="#F5F5F5">
+                    <StackPanel>
+                        <TextBlock Text="Revenue" FontWeight="Bold" FontSize="18"/>
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Today"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding RevenueToday, StringFormat=C}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="This Week"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RevenueWeek, StringFormat=C}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="This Month"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RevenueMonth, StringFormat=C}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Vehicle Types -->
+                <Border Grid.Row="2" Background="#F5F5F5">
+                    <StackPanel>
+                        <TextBlock Text="Vehicle Types" FontWeight="Bold" FontSize="18"/>
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Cars"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding VehicleTypeCars}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Motorcycles"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding VehicleTypeMotorcycles}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Buses"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding VehicleTypeBuses}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Right Column - Quick Actions and System Status -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Quick Actions -->
+                <Border Grid.Row="0" Background="#F5F5F5">
+                    <StackPanel>
+                        <TextBlock Text="Quick Actions" FontWeight="Bold" FontSize="18"/>
+                        <UniformGrid Rows="2" Columns="2" Margin="10">
+                            <Button Command="{Binding NavigateToVehicleEntryPageCommand}" Content="Vehicle Entry"/>
+                            <Button Command="{Binding NavigateToVehicleExitPageCommand}" Content="Vehicle Exit"/>
+                            <Button Command="{Binding NavigateToVehicleMonitoringPageCommand}" Content="Vehicle Monitoring"/>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- System Status -->
+                <Border Grid.Row="1" Background="#F5F5F5">
+                    <StackPanel>
+                        <TextBlock Text="System Status" FontWeight="Bold" FontSize="18"/>
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Database"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DbStatus}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Camera"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CameraStatus}" FontWeight="Bold"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Printer"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PrinterStatus}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
+
+        <!-- Recent Activities -->
+        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#F5F5F5" Margin="10">
+            <StackPanel>
+                <TextBlock Text="Recent Activities" FontWeight="Bold" FontSize="18"/>
+                <DataGrid x:Name="dgRecentActivities" AutoGenerateColumns="False" ItemsSource="{Binding RecentActivities}" Margin="10">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="120"/>
+                        <DataGridTextColumn Header="Vehicle Number" Binding="{Binding VehicleNumber}" Width="120"/>
+                        <DataGridTextColumn Header="Vehicle Type" Binding="{Binding VehicleType}" Width="100"/>
+                        <DataGridTextColumn Header="Action" Binding="{Binding Action}" Width="80"/>
+                        <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="80"/>
+                        <DataGridTextColumn Header="Fee" Binding="{Binding Fee}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>

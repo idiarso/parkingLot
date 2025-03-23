@@ -1,329 +1,1330 @@
-Berdasarkan daftar error yang kamu berikan, ada beberapa masalah yang berkaitan dengan namespace yang hilang, tipe yang tidak ditemukan, definisi interface yang kurang lengkap, dan beberapa peringatan kode. Saya akan menangani setiap error secara sistematis dan memberikan solusi yang dapat langsung diterapkan.
-
----
-
-### **Perbaikan Error**
-
-#### **1. `App.xaml.cs`**
-- **Error CS0234:**
-  - `"The type or namespace name 'Database' does not exist in the namespace 'ParkingOut.Utils'"` (baris 49)
-  - `"The type or namespace name 'UserManager' does not exist in the namespace 'ParkingOut.Utils'"` (baris 52)
-- **Analisis:** Namespace `ParkingOut.Utils` tidak memiliki kelas `Database` atau `UserManager`. Ini mungkin kelas utilitas untuk koneksi database dan manajemen pengguna yang belum dibuat.
-- **Perbaikan:**
-  - Tambahkan kedua kelas di folder `Utils`:
-    - **`D:\21maret\clean_code\ParkingOut\Utils\Database.cs`:**
-      ```csharp
-      namespace ParkingOut.Utils
-      {
-          public class Database
-          {
-              public static string GetConnectionString()
-              {
-                  return "YourConnectionStringHere"; // Ganti dengan string koneksi sebenarnya
-              }
-          }
-      }
-      ```
-    - **`D:\21maret\clean_code\ParkingOut\Utils\UserManager.cs`:**
-      ```csharp
-      namespace ParkingOut.Utils
-      {
-          public class UserManager
-          {
-              public static string CurrentUser => "DefaultUser"; // Ganti dengan logika autentikasi
-          }
-      }
-      ```
-
-#### **2. `Services/IPrintService.cs` dan `Services/IVehicleExitService.cs`**
-- **Error CS0246:**
-  - `"The type or namespace name 'VehicleExit' could not be found"` (berulang di `IPrintService.cs` baris 24 dan `IVehicleExitService.cs` baris 20, 27, 33, 40)
-- **Analisis:** Tipe `VehicleExit` belum didefinisikan di namespace `ParkingOut.Models`.
-- **Perbaikan:**
-  - Tambahkan kelas `VehicleExit`:
-    - **`D:\21maret\clean_code\ParkingOut\Models\VehicleExit.cs`:**
-      ```csharp
-      using System;
-
-      namespace ParkingOut.Models
-      {
-          public class VehicleExit
-          {
-              public int Id { get; set; }
-              public string PlateNumber { get; set; }
-              public DateTime ExitTime { get; set; }
-              public string VehicleType { get; set; }
-          }
-      }
-      ```
-  - Perbarui file interface dengan `using ParkingOut.Models;`:
-    - **`Services/IPrintService.cs`:**
-      ```csharp
-      using ParkingOut.Models;
-
-      namespace ParkingOut.Services
-      {
-          public interface IPrintService
-          {
-              void PrintTicket(VehicleEntry entry);
-              void PrintExitTicket(VehicleExit exit);
-          }
-      }
-      ```
-    - **`Services/IVehicleExitService.cs`:**
-      ```csharp
-      using ParkingOut.Models;
-
-      namespace ParkingOut.Services
-      {
-          public interface IVehicleExitService
-          {
-              VehicleExit ProcessExit(string plateNumber);
-              VehicleExit GetExit(string plateNumber);
-          }
-      }
-      ```
-
-#### **3. `UI/DashboardPage.xaml.cs`**
-- **Error CS0246:**
-  - `"The type or namespace name 'VehicleEntryService' could not be found"` (baris 39)
-  - `"The type or namespace name 'VehicleExitService' could not be found"` (baris 40)
-- **Analisis:** Kelas implementasi `VehicleEntryService` dan `VehicleExitService` belum ada.
-- **Perbaikan:**
-  - Tambahkan implementasi:
-    - **`D:\21maret\clean_code\ParkingOut\Services\VehicleEntryService.cs`:**
-      ```csharp
-      using ParkingOut.Models;
-
-      namespace ParkingOut.Services
-      {
-          public class VehicleEntryService : IVehicleEntryService
-          {
-              public void AddEntry(VehicleEntry entry) { /* Implementasi */ }
-              public VehicleEntry GetEntry(string plateNumber) { return null; /* Implementasi */ }
-          }
-      }
-      ```
-    - **`D:\21maret\clean_code\ParkingOut\Services\VehicleExitService.cs`:**
-      ```csharp
-      using ParkingOut.Models;
-
-      namespace ParkingOut.Services
-      {
-          public class VehicleExitService : IVehicleExitService
-          {
-              public VehicleExit ProcessExit(string plateNumber) { return null; /* Implementasi */ }
-              public VehicleExit GetExit(string plateNumber) { return null; /* Implementasi */ }
-          }
-      }
-      ```
-
-- **Error CS1061:**
-  - `"IAppLogger' does not contain a definition for 'LogError'"` (baris 84, 120, 179)
-- **Analisis:** Interface `IAppLogger` belum memiliki metode `LogError`.
-- **Perbaikan:**
-  - Perbarui `Utils/IAppLogger.cs`:
-    ```csharp
-    namespace ParkingOut.Utils
-    {
-        public interface IAppLogger
-        {
-            void Log(string message);
-            void LogError(string message, Exception ex = null);
-        }
-    }
-    ```
-  - Tambahkan implementasi:
-    - **`D:\21maret\clean_code\ParkingOut\Utils\AppLogger.cs`:**
-      ```csharp
-      using System;
-
-      namespace ParkingOut.Utils
-      {
-          public class AppLogger : IAppLogger
-          {
-              public void Log(string message) => Console.WriteLine(message);
-              public void LogError(string message, Exception ex = null) => Console.WriteLine($"{message} - {ex?.Message}");
-          }
-      }
-      ```
-
-- **Error CS1503:**
-  - `"Argument 2: cannot convert from 'int' to 'System.Exception'"` (baris 175, 228)
-  - `"Argument 1: cannot convert from 'System.Exception' to 'string'"` dan `"Argument 2: cannot convert from 'string' to 'System.Exception'"` (baris 232, 251)
-- **Perbaikan:**
-  - Sesuaikan panggilan `LogError`. Misalnya:
-    - Baris 175: `_logger.LogError("Error", 123);` → `_logger.LogError("Error with code 123");`
-    - Baris 232: `_logger.LogError(ex, "Error occurred");` → `_logger.LogError("Error occurred", ex);`
-
-- **Error CS8618:**
-  - `"Non-nullable field 'logger' must contain a non-null value when exiting constructor"` (baris 33)
-- **Perbaikan:**
-  - Inisialisasi `_logger` di konstruktor:
-    ```csharp
-    private readonly IAppLogger _logger;
-    public DashboardPage(IVehicleEntryService vehicleEntryService, IVehicleExitService vehicleExitService, IAppLogger logger)
-    {
-        _vehicleEntryService = vehicleEntryService;
-        _vehicleExitService = vehicleExitService;
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        InitializeComponent();
-    }
-    ```
-
-#### **4. `UI/MainWindow.xaml.cs`**
-- **Error CS0117:**
-  - `"IconPaths' does not contain a definition for 'VehicleEnter'"` (baris 56)
-- **Perbaikan:**
-  - Tambahkan ke `IconPaths.cs`:
-    ```csharp
-    namespace ParkingOut.UI
-    {
-        public static class IconPaths
-        {
-            public static string VehicleEnter => "path/to/vehicle_enter_icon.png";
-        }
-    }
-    ```
-
-#### **5. `UI/VehicleEntryPage.xaml.cs`**
-- **Error CS0246:**
-  - `"IAppLogger' could not be found"` (baris 18)
-  - `"AppLogger' could not be found"` (baris 37)
-  - `"VehicleEntryService' could not be found"` (baris 38)
-  - `"PrintService' could not be found"` (baris 39)
-  - `"CameraService' could not be found"` (baris 42)
-- **Perbaikan:**
-  - Tambahkan `using ParkingOut.Utils;` untuk `IAppLogger`.
-  - Gunakan implementasi yang sudah ada di atas untuk `AppLogger`, `VehicleEntryService`, dan tambahkan:
-    - **`D:\21maret\clean_code\ParkingOut\Services\PrintService.cs`:**
-      ```csharp
-      using ParkingOut.Models;
-
-      namespace ParkingOut.Services
-      {
-          public class PrintService : IPrintService
-          {
-              public void PrintTicket(VehicleEntry entry) { /* Implementasi */ }
-              public void PrintExitTicket(VehicleExit exit) { /* Implementasi */ }
-          }
-      }
-      ```
-    - **`D:\21maret\clean_code\ParkingOut\Services\CameraService.cs`:**
-      ```csharp
-      namespace ParkingOut.Services
-      {
-          public class CameraService : ICameraService
-          {
-              public bool IsRunning { get; private set; }
-              public void Start() { IsRunning = true; }
-              public void Stop() { IsRunning = false; }
-              public void SetImageControl(object control) { /* Implementasi */ }
-              public string RecognizePlate() { return "ABC123"; }
-          }
-      }
-      ```
-
-- **Error CS1061:**
-  - `"ICameraService' does not contain a definition for 'IsRunning', 'Stop', 'Start', 'SetImageControl', 'RecognizePlate'"` (baris 167, 169, 176, 177, 183, 200, 236, 244)
-  - `"IPrintService' does not contain a definition for 'PrintTicket'"` (baris 293, 348)
-- **Perbaikan:**
-  - Perbarui interface:
-    - **`Services/ICameraService.cs`:**
-      ```csharp
-      namespace ParkingOut.Services
-      {
-          public interface ICameraService
-          {
-              bool IsRunning { get; }
-              void Start();
-              void Stop();
-              void SetImageControl(object control);
-              string RecognizePlate();
-          }
-      }
-      ```
-    - **`Services/IPrintService.cs`:**
-      ```csharp
-      using ParkingOut.Models;
-
-      namespace ParkingOut.Services
-      {
-          public interface IPrintService
-          {
-              void PrintTicket(VehicleEntry entry);
-              void PrintExitTicket(VehicleExit exit);
-          }
-      }
-      ```
-
-- **Error CS8602:**
-  - `"Dereference of a possibly null reference"` (baris 208, 244)
-- **Perbaikan:**
-  - Tambahkan pengecekan null:
-    ```csharp
-    if (_cameraService != null)
-    {
-        var plate = _cameraService.RecognizePlate();
-    }
-    ```
-
-#### **6. `Models/ActivityLogItem.cs`**
-- **Error CS8618:**
-  - Properti non-nullable belum diinisialisasi.
-- **Perbaikan:**
-  - Jadikan nullable atau tambahkan konstruktor:
-    ```csharp
-    namespace ParkingOut.Models
-    {
-        public class ActivityLogItem
-        {
-            public string? ActivityType { get; set; }
-            public string? TicketNo { get; set; }
-            public string? VehicleType { get; set; }
-            public string? Description { get; set; }
-            public string? User { get; set; }
-            public string? LicensePlate { get; set; }
-        }
-    }
-    ```
-
-#### **7. `UI/VehicleExitPage.xaml.cs`**
-- **Error CS0219:**
-  - `"The variable 'sql' is assigned but its value is never used"` (baris 44)
-- **Perbaikan:**
-  - Hapus atau gunakan variabel `sql`.
-
----
-
-### **Langkah Eksekusi**
-1. **Tambahkan File ke `ParkingOut.csproj`:**
-   ```xml
-   <ItemGroup>
-     <Compile Include="Utils\Database.cs" />
-     <Compile Include="Utils\UserManager.cs" />
-     <Compile Include="Utils\AppLogger.cs" />
-     <Compile Include="Models\VehicleExit.cs" />
-     <Compile Include="Services\VehicleEntryService.cs" />
-     <Compile Include="Services\VehicleExitService.cs" />
-     <Compile Include="Services\PrintService.cs" />
-     <Compile Include="Services\CameraService.cs" />
-     <Compile Include="UI\IconPaths.cs" />
-   </ItemGroup>
-   ```
-
-2. **Build Ulang:**
-   ```powershell
-   cd D:\21maret\clean_code\ParkingOut
-   Remove-Item -Path bin -Recurse -Force -ErrorAction SilentlyContinue
-   Remove-Item -Path obj -Recurse -Force -ErrorAction SilentlyContinue
-   dotnet restore
-   dotnet build ParkingOut.csproj
-   ```
-
----
-
-### **Catatan**
-- Jika masih ada error, kirimkan isi file seperti `App.xaml.cs`, `DashboardPage.xaml.cs`, atau `VehicleEntryPage.xaml.cs` untuk analisis lebih lanjut.
-- Pastikan semua file di atas sudah dibuat dan namespace-nya sesuai.
-
+[{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0234",
+	"severity": 8,
+	"message": "The type or namespace name 'Implementations' does not exist in the namespace 'ParkingOut.Services' (are you missing an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 11,
+	"startColumn": 27,
+	"endLineNumber": 11,
+	"endColumn": 42,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 46,
+	"startColumn": 13,
+	"endLineNumber": 46,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0246",
+	"severity": 8,
+	"message": "The type or namespace name 'AppLoggerImpl' could not be found (are you missing a using directive or an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 46,
+	"startColumn": 60,
+	"endLineNumber": 46,
+	"endColumn": 73,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 47,
+	"startColumn": 13,
+	"endLineNumber": 47,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0246",
+	"severity": 8,
+	"message": "The type or namespace name 'VehicleEntryService' could not be found (are you missing a using directive or an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 47,
+	"startColumn": 70,
+	"endLineNumber": 47,
+	"endColumn": 89,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 48,
+	"startColumn": 13,
+	"endLineNumber": 48,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0246",
+	"severity": 8,
+	"message": "The type or namespace name 'VehicleExitService' could not be found (are you missing a using directive or an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 48,
+	"startColumn": 69,
+	"endLineNumber": 48,
+	"endColumn": 87,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 48,
+	"startColumn": 88,
+	"endLineNumber": 48,
+	"endColumn": 102,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/App.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 46,
+	"startColumn": 44,
+	"endLineNumber": 46,
+	"endColumn": 54,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0234",
+	"severity": 8,
+	"message": "The type or namespace name 'Implementations' does not exist in the namespace 'ParkingOut.Services' (are you missing an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 9,
+	"startColumn": 27,
+	"endLineNumber": 9,
+	"endColumn": 42,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name '_entryService' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 40,
+	"startColumn": 13,
+	"endLineNumber": 40,
+	"endColumn": 26,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0234",
+	"severity": 8,
+	"message": "The type or namespace name 'ServiceLocator' does not exist in the namespace 'ParkingOut.Services' (are you missing an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 40,
+	"startColumn": 29,
+	"endLineNumber": 40,
+	"endColumn": 52,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name '_exitService' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 41,
+	"startColumn": 13,
+	"endLineNumber": 41,
+	"endColumn": 25,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0234",
+	"severity": 8,
+	"message": "The type or namespace name 'ServiceLocator' does not exist in the namespace 'ParkingOut.Services' (are you missing an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 41,
+	"startColumn": 28,
+	"endLineNumber": 41,
+	"endColumn": 51,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 20,
+	"startColumn": 17,
+	"endLineNumber": 20,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'ActivityLogItem' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs' conflicts with the imported type 'ActivityLogItem' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 24,
+	"startColumn": 38,
+	"endLineNumber": 24,
+	"endColumn": 53,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'ActivityLogItem' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs' conflicts with the imported type 'ActivityLogItem' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 24,
+	"startColumn": 100,
+	"endLineNumber": 24,
+	"endColumn": 115,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS8618",
+	"severity": 4,
+	"message": "Non-nullable field 'vehicleEntryService' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 34,
+	"startColumn": 16,
+	"endLineNumber": 34,
+	"endColumn": 29,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS8618",
+	"severity": 4,
+	"message": "Non-nullable field 'vehicleExitService' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 34,
+	"startColumn": 16,
+	"endLineNumber": 34,
+	"endColumn": 29,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 34,
+	"startColumn": 30,
+	"endLineNumber": 34,
+	"endColumn": 40,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'ActivityLogItem' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs' conflicts with the imported type 'ActivityLogItem' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 136,
+	"startColumn": 43,
+	"endLineNumber": 136,
+	"endColumn": 58,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'ActivityLogItem' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs' conflicts with the imported type 'ActivityLogItem' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 146,
+	"startColumn": 43,
+	"endLineNumber": 146,
+	"endColumn": 58,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'ActivityLogItem' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs' conflicts with the imported type 'ActivityLogItem' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 156,
+	"startColumn": 43,
+	"endLineNumber": 156,
+	"endColumn": 58,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/DashboardPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'ActivityLogItem' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs' conflicts with the imported type 'ActivityLogItem' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\ActivityLogItem.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 166,
+	"startColumn": 43,
+	"endLineNumber": 166,
+	"endColumn": 58,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0234",
+	"severity": 8,
+	"message": "The type or namespace name 'ServiceLocator' does not exist in the namespace 'ParkingOut.Services' (are you missing an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 21,
+	"startColumn": 23,
+	"endLineNumber": 21,
+	"endColumn": 46,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'ParkingOut.Utils.IAppLogger' to 'IAppLogger' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 178,
+	"startColumn": 61,
+	"endLineNumber": 178,
+	"endColumn": 68,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 14,
+	"startColumn": 23,
+	"endLineNumber": 14,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 21,
+	"startColumn": 64,
+	"endLineNumber": 21,
+	"endColumn": 74,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 38,
+	"startColumn": 17,
+	"endLineNumber": 38,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 70,
+	"startColumn": 17,
+	"endLineNumber": 70,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 96,
+	"startColumn": 25,
+	"endLineNumber": 96,
+	"endColumn": 38,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 100,
+	"startColumn": 25,
+	"endLineNumber": 100,
+	"endColumn": 38,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 110,
+	"startColumn": 17,
+	"endLineNumber": 110,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 135,
+	"startColumn": 21,
+	"endLineNumber": 135,
+	"endColumn": 34,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 141,
+	"startColumn": 17,
+	"endLineNumber": 141,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 164,
+	"startColumn": 17,
+	"endLineNumber": 164,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 187,
+	"startColumn": 17,
+	"endLineNumber": 187,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/MainWindow.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'MessageHelper' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs' conflicts with the imported type 'MessageHelper' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\MessageHelper.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 210,
+	"startColumn": 17,
+	"endLineNumber": 210,
+	"endColumn": 30,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 39,
+	"startColumn": 35,
+	"endLineNumber": 39,
+	"endColumn": 49,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 40,
+	"startColumn": 28,
+	"endLineNumber": 40,
+	"endColumn": 42,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'ServiceLocator' does not exist in the current context [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 43,
+	"startColumn": 33,
+	"endLineNumber": 43,
+	"endColumn": 47,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 47,
+	"startColumn": 31,
+	"endLineNumber": 47,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 47,
+	"startColumn": 35,
+	"endLineNumber": 47,
+	"endColumn": 72,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'int' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 88,
+	"startColumn": 65,
+	"endLineNumber": 88,
+	"endColumn": 78,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 93,
+	"startColumn": 31,
+	"endLineNumber": 93,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 93,
+	"startColumn": 35,
+	"endLineNumber": 93,
+	"endColumn": 66,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 112,
+	"startColumn": 31,
+	"endLineNumber": 112,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 112,
+	"startColumn": 35,
+	"endLineNumber": 112,
+	"endColumn": 72,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 184,
+	"startColumn": 50,
+	"endLineNumber": 184,
+	"endColumn": 97,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 189,
+	"startColumn": 31,
+	"endLineNumber": 189,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 189,
+	"startColumn": 35,
+	"endLineNumber": 189,
+	"endColumn": 61,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 225,
+	"startColumn": 31,
+	"endLineNumber": 225,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 225,
+	"startColumn": 35,
+	"endLineNumber": 225,
+	"endColumn": 60,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 251,
+	"startColumn": 72,
+	"endLineNumber": 251,
+	"endColumn": 77,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 262,
+	"startColumn": 31,
+	"endLineNumber": 262,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 262,
+	"startColumn": 35,
+	"endLineNumber": 262,
+	"endColumn": 70,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1061",
+	"severity": 8,
+	"message": "'IPrintService' does not contain a definition for 'PrintTicket' and no accessible extension method 'PrintTicket' accepting a first argument of type 'IPrintService' could be found (are you missing a using directive or an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 294,
+	"startColumn": 38,
+	"endLineNumber": 294,
+	"endColumn": 49,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 297,
+	"startColumn": 83,
+	"endLineNumber": 297,
+	"endColumn": 97,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 302,
+	"startColumn": 90,
+	"endLineNumber": 302,
+	"endColumn": 104,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 323,
+	"startColumn": 31,
+	"endLineNumber": 323,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 323,
+	"startColumn": 35,
+	"endLineNumber": 323,
+	"endColumn": 62,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1061",
+	"severity": 8,
+	"message": "'IPrintService' does not contain a definition for 'PrintTicket' and no accessible extension method 'PrintTicket' accepting a first argument of type 'IPrintService' could be found (are you missing a using directive or an assembly reference?) [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 349,
+	"startColumn": 38,
+	"endLineNumber": 349,
+	"endColumn": 49,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 352,
+	"startColumn": 69,
+	"endLineNumber": 352,
+	"endColumn": 77,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 357,
+	"startColumn": 76,
+	"endLineNumber": 357,
+	"endColumn": 84,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 364,
+	"startColumn": 66,
+	"endLineNumber": 364,
+	"endColumn": 74,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 371,
+	"startColumn": 31,
+	"endLineNumber": 371,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 371,
+	"startColumn": 35,
+	"endLineNumber": 371,
+	"endColumn": 59,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 417,
+	"startColumn": 64,
+	"endLineNumber": 417,
+	"endColumn": 72,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 422,
+	"startColumn": 65,
+	"endLineNumber": 422,
+	"endColumn": 73,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 429,
+	"startColumn": 31,
+	"endLineNumber": 429,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 429,
+	"startColumn": 35,
+	"endLineNumber": 429,
+	"endColumn": 57,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 1: cannot convert from 'System.Exception' to 'string' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 449,
+	"startColumn": 31,
+	"endLineNumber": 449,
+	"endColumn": 33,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS1503",
+	"severity": 8,
+	"message": "Argument 2: cannot convert from 'string' to 'System.Exception' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 449,
+	"startColumn": 35,
+	"endLineNumber": 449,
+	"endColumn": 84,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 19,
+	"startColumn": 17,
+	"endLineNumber": 19,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 24,
+	"startColumn": 38,
+	"endLineNumber": 24,
+	"endColumn": 50,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 24,
+	"startColumn": 94,
+	"endLineNumber": 24,
+	"endColumn": 106,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 33,
+	"startColumn": 33,
+	"endLineNumber": 33,
+	"endColumn": 43,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 441,
+	"startColumn": 75,
+	"endLineNumber": 441,
+	"endColumn": 87,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0044",
+	"severity": 2,
+	"message": "Make field readonly [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 19,
+	"startColumn": 28,
+	"endLineNumber": 19,
+	"endColumn": 35,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0044",
+	"severity": 2,
+	"message": "Make field readonly [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 24,
+	"startColumn": 52,
+	"endLineNumber": 24,
+	"endColumn": 66,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0090",
+	"severity": 2,
+	"message": "'new' expression can be simplified [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 24,
+	"startColumn": 73,
+	"endLineNumber": 24,
+	"endColumn": 107,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0071",
+	"severity": 2,
+	"message": "Interpolation can be simplified [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 87,
+	"startColumn": 53,
+	"endLineNumber": 87,
+	"endColumn": 64,
+	"tags": [
+		1
+	],
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0018",
+	"severity": 2,
+	"message": "Variable declaration can be inlined [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 133,
+	"startColumn": 13,
+	"endLineNumber": 133,
+	"endColumn": 25,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0059",
+	"severity": 2,
+	"message": "Unnecessary assignment of a value to 'hour' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 133,
+	"startColumn": 17,
+	"endLineNumber": 133,
+	"endColumn": 21,
+	"tags": [
+		1
+	],
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0018",
+	"severity": 2,
+	"message": "Variable declaration can be inlined [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 134,
+	"startColumn": 13,
+	"endLineNumber": 134,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0059",
+	"severity": 2,
+	"message": "Unnecessary assignment of a value to 'minute' [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 134,
+	"startColumn": 17,
+	"endLineNumber": 134,
+	"endColumn": 23,
+	"tags": [
+		1
+	],
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleEntryPage.xaml.cs",
+	"owner": "csharp",
+	"code": "IDE0019",
+	"severity": 2,
+	"message": "Use pattern matching [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 441,
+	"startColumn": 17,
+	"endLineNumber": 441,
+	"endColumn": 88,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/ModernSidebar.cs",
+	"owner": "csharp",
+	"code": "CS0103",
+	"severity": 8,
+	"message": "The name 'FlatAppearance' does not exist in the current context [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 275,
+	"startColumn": 17,
+	"endLineNumber": 275,
+	"endColumn": 31,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/ModernSidebar.cs",
+	"owner": "csharp",
+	"code": "CS0747",
+	"severity": 8,
+	"message": "Invalid initializer member declarator [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 275,
+	"startColumn": 17,
+	"endLineNumber": 275,
+	"endColumn": 46,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/ResourceHelper.cs",
+	"owner": "csharp",
+	"code": "CS1061",
+	"severity": 8,
+	"message": "'IAppLogger' does not contain a definition for 'Information' and no accessible extension method 'Information' accepting a first argument of type 'IAppLogger' could be found (are you missing a using directive or an assembly reference?) [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 69,
+	"startColumn": 29,
+	"endLineNumber": 69,
+	"endColumn": 40,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/Services/AppLogger.cs",
+	"owner": "csharp",
+	"code": "CS0111",
+	"severity": 8,
+	"message": "Type 'AppLogger' already defines a member called 'LogInfo' with the same parameter types [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 35,
+	"startColumn": 21,
+	"endLineNumber": 35,
+	"endColumn": 28,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/Services/AppLoggerImpl.cs",
+	"owner": "csharp",
+	"code": "CS0535",
+	"severity": 8,
+	"message": "'AppLoggerImpl' does not implement interface member 'IAppLogger.LogInfo(string)' [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 9,
+	"startColumn": 34,
+	"endLineNumber": 9,
+	"endColumn": 44,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/Services/AppLoggerImpl.cs",
+	"owner": "csharp",
+	"code": "CS0535",
+	"severity": 8,
+	"message": "'AppLoggerImpl' does not implement interface member 'IAppLogger.LogWarning(string)' [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 9,
+	"startColumn": 34,
+	"endLineNumber": 9,
+	"endColumn": 44,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/UserManager.cs",
+	"owner": "csharp",
+	"code": "CS1061",
+	"severity": 8,
+	"message": "'IAppLogger' does not contain a definition for 'LogWarning' and no accessible extension method 'LogWarning' accepting a first argument of type 'IAppLogger' could be found (are you missing a using directive or an assembly reference?) [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 83,
+	"startColumn": 25,
+	"endLineNumber": 83,
+	"endColumn": 35,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/UserManager.cs",
+	"owner": "csharp",
+	"code": "CS1998",
+	"severity": 4,
+	"message": "This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [ParkingOut.Utils]",
+	"source": "csharp",
+	"startLineNumber": 35,
+	"startColumn": 33,
+	"endLineNumber": 35,
+	"endColumn": 50,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Models/ActivityLogItem.cs",
+	"owner": "csharp",
+	"code": "CS8632",
+	"severity": 4,
+	"message": "The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [ParkingOut.Models]",
+	"source": "csharp",
+	"startLineNumber": 23,
+	"startColumn": 22,
+	"endLineNumber": 23,
+	"endColumn": 23,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Models/ActivityLogItem.cs",
+	"owner": "csharp",
+	"code": "CS8632",
+	"severity": 4,
+	"message": "The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [ParkingOut.Models]",
+	"source": "csharp",
+	"startLineNumber": 28,
+	"startColumn": 22,
+	"endLineNumber": 28,
+	"endColumn": 23,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Models/ActivityLogItem.cs",
+	"owner": "csharp",
+	"code": "CS8632",
+	"severity": 4,
+	"message": "The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [ParkingOut.Models]",
+	"source": "csharp",
+	"startLineNumber": 33,
+	"startColumn": 22,
+	"endLineNumber": 33,
+	"endColumn": 23,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Models/ActivityLogItem.cs",
+	"owner": "csharp",
+	"code": "CS8632",
+	"severity": 4,
+	"message": "The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [ParkingOut.Models]",
+	"source": "csharp",
+	"startLineNumber": 38,
+	"startColumn": 22,
+	"endLineNumber": 38,
+	"endColumn": 23,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Models/ActivityLogItem.cs",
+	"owner": "csharp",
+	"code": "CS8632",
+	"severity": 4,
+	"message": "The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [ParkingOut.Models]",
+	"source": "csharp",
+	"startLineNumber": 43,
+	"startColumn": 22,
+	"endLineNumber": 43,
+	"endColumn": 23,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Models/ActivityLogItem.cs",
+	"owner": "csharp",
+	"code": "CS8632",
+	"severity": 4,
+	"message": "The annotation for nullable reference types should only be used in code within a '#nullable' annotations context. [ParkingOut.Models]",
+	"source": "csharp",
+	"startLineNumber": 48,
+	"startColumn": 22,
+	"endLineNumber": 48,
+	"endColumn": 23,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Services/IPrintService.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 17,
+	"startColumn": 37,
+	"endLineNumber": 17,
+	"endColumn": 49,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Services/IVehicleEntryService.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 20,
+	"startColumn": 9,
+	"endLineNumber": 20,
+	"endColumn": 21,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Services/IVehicleEntryService.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 27,
+	"startColumn": 9,
+	"endLineNumber": 27,
+	"endColumn": 21,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Services/IVehicleEntryService.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 34,
+	"startColumn": 9,
+	"endLineNumber": 34,
+	"endColumn": 21,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Services/IVehicleEntryService.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 40,
+	"startColumn": 14,
+	"endLineNumber": 40,
+	"endColumn": 26,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Services/IVehicleEntryService.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'VehicleEntry' in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs' conflicts with the imported type 'VehicleEntry' in 'ParkingOut.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Models\\VehicleEntry.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 47,
+	"startColumn": 14,
+	"endLineNumber": 47,
+	"endColumn": 26,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleExitPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 15,
+	"startColumn": 17,
+	"endLineNumber": 15,
+	"endColumn": 27,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/UI/VehicleExitPage.xaml.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 18,
+	"startColumn": 32,
+	"endLineNumber": 18,
+	"endColumn": 42,
+	"extensionID": "muhammad-sammy.csharp"
+},{
+	"resource": "/d:/21maret/clean_code/ParkingOut/Utils/AppLogger.cs",
+	"owner": "csharp",
+	"code": "CS0436",
+	"severity": 4,
+	"message": "The type 'IAppLogger' in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs' conflicts with the imported type 'IAppLogger' in 'ParkingOut.Utils, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'd:\\21maret\\clean_code\\ParkingOut\\Utils\\IAppLogger.cs'. [ParkingOut]",
+	"source": "csharp",
+	"startLineNumber": 10,
+	"startColumn": 30,
+	"endLineNumber": 10,
+	"endColumn": 40,
+	"extensionID": "muhammad-sammy.csharp"
+}]

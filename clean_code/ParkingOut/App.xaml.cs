@@ -6,6 +6,10 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using ParkingOut.UI;
+using ParkingOut.Utils;
+using ParkingOut.Services;
+using ParkingOut.Services.Implementations;
+using ParkingOut.Models;
 
 namespace ParkingOut
 {
@@ -37,6 +41,11 @@ namespace ParkingOut
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            
+            // Register services
+            ServiceLocator.RegisterService<IAppLogger>(new AppLoggerImpl());
+            ServiceLocator.RegisterService<IVehicleEntryService>(new VehicleEntryService());
+            ServiceLocator.RegisterService<IVehicleExitService>(new VehicleExitService(ServiceLocator.GetService<IVehicleEntryService>()));
             
             try
             {

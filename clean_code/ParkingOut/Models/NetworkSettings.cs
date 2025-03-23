@@ -1,37 +1,21 @@
 using System;
 using System.Data;
-using System.Collections.Generic;
-using ParkingOut.Utils;
 
 namespace ParkingOut.Models
 {
     public class NetworkSettings
     {
-        public bool UseWebSocket { get; set; }
-        public string WebSocketUrl { get; set; }
-        public string ServerAddress { get; set; }
-        public int Port { get; set; }
-        public string DatabaseName { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        
-        public NetworkSettings()
-        {
-            // Default values
-            UseWebSocket = false;
-            WebSocketUrl = "ws://localhost:8181";
-            ServerAddress = "localhost";
-            Port = 5432;
-            DatabaseName = "parkirdb";
-            Username = "postgres";
-            Password = "root@rsi";
-        }
-        
+        public string DatabaseHost { get; set; } = "localhost";
+        public int DatabasePort { get; set; } = 5432;
+        public string DatabaseName { get; set; } = "parking_db";
+        public string DatabaseUser { get; set; } = "postgres";
+        public string DatabasePassword { get; set; } = "";
+
         public string GetConnectionString()
         {
-            return $"Host={ServerAddress};Port={Port};Database={DatabaseName};Username={Username};Password={Password};";
+            return $"Host={DatabaseHost};Port={DatabasePort};Database={DatabaseName};Username={DatabaseUser};Password={DatabasePassword}";
         }
-        
+
         public static NetworkSettings FromDataTable(DataTable dt)
         {
             var settings = new NetworkSettings();
@@ -46,27 +30,21 @@ namespace ParkingOut.Models
                 
                 switch (key)
                 {
-                    case "network_use_websocket":
-                        settings.UseWebSocket = value == "1" || value.ToLower() == "true";
-                        break;
-                    case "network_websocket_url":
-                        settings.WebSocketUrl = value;
-                        break;
                     case "network_server":
-                        settings.ServerAddress = value;
+                        settings.DatabaseHost = value;
                         break;
                     case "network_port":
                         if (int.TryParse(value, out int port))
-                            settings.Port = port;
+                            settings.DatabasePort = port;
                         break;
                     case "network_database":
                         settings.DatabaseName = value;
                         break;
                     case "network_username":
-                        settings.Username = value;
+                        settings.DatabaseUser = value;
                         break;
                     case "network_password":
-                        settings.Password = value;
+                        settings.DatabasePassword = value;
                         break;
                 }
             }
@@ -74,4 +52,4 @@ namespace ParkingOut.Models
             return settings;
         }
     }
-} 
+}

@@ -32,33 +32,33 @@ namespace ParkingOut.Utils
         {
             try
             {
-                _logger.Information("Initializing Database class...");
+                _logger.LogInfo("Initializing Database class...");
                 LoadConnectionString();
                 
                 // Tambahkan property untuk menandakan status koneksi database
                 try
                 {
-                    _logger.Information("Connection string: " + MaskPassword(_connectionString));
+                    _logger.LogInfo("Connection string: " + MaskPassword(_connectionString));
                     InitializeConnectionString(); // Memastikan database setup
                     
                     // Explicitly test connection to verify it's working
                     using (var conn = new NpgsqlConnection(_connectionString))
                     {
-                        _logger.Information("Attempting to open database connection...");
+                        _logger.LogInfo("Attempting to open database connection...");
                         conn.Open();
-                        _logger.Information("Database connection opened successfully");
+                        _logger.LogInfo("Database connection opened successfully");
                         
                         // Check if we can query something simple
                         using (var cmd = new NpgsqlCommand("SELECT 1", conn))
                         {
                             cmd.ExecuteScalar();
-                            _logger.Information("Successfully executed test query");
+                            _logger.LogInfo("Successfully executed test query");
                         }
                     }
                     
                     IsDatabaseAvailable = true;
                     LastError = null;
-                    _logger.Information("Database successfully initialized");
+                    _logger.LogInfo("Database successfully initialized");
                 }
                 catch (Exception initEx)
                 {
@@ -140,21 +140,21 @@ namespace ParkingOut.Utils
                     throw new Exception("PostgreSQL tidak terdeteksi pada sistem ini. Pastikan PostgreSQL terinstal dan service sedang berjalan.");
                 }
 
-                _logger.Information("Mencoba inisialisasi koneksi database parkirdb...");
+                _logger.LogInfo("Mencoba inisialisasi koneksi database parkirdb...");
                 // Try primary database (parkirdb)
                 _connectionString = "Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;";
-                _logger.Information($"String koneksi: {_connectionString.Replace("root@rsi", "****")}");
+                _logger.LogInfo($"String koneksi: {_connectionString.Replace("root@rsi", "****")}");
                 
                 if (TestConnection(out string errorMsg))
                 {
-                    _logger.Information("Koneksi ke parkirdb berhasil");
+                    _logger.LogInfo("Koneksi ke parkirdb berhasil");
                     return;
                 }
                 
                 _logger.Warning($"Gagal terhubung ke parkirdb: {errorMsg}");
                 
                 // Tampilkan pesan detil tentang error
-                _logger.Information("Mencoba deteksi masalah koneksi secara detil...");
+                _logger.LogInfo("Mencoba deteksi masalah koneksi secara detil...");
                 
                 // Cek apakah PostgreSQL berjalan di port yang benar
                 try
@@ -162,7 +162,7 @@ namespace ParkingOut.Utils
                     using (var connection = new NpgsqlConnection("Host=localhost;Port=5432;Username=postgres;Password=root@rsi;Database=postgres;"))
                     {
                         connection.Open();
-                        _logger.Information("Koneksi ke database default postgres berhasil, berarti server PostgreSQL berjalan dengan baik");
+                        _logger.LogInfo("Koneksi ke database default postgres berhasil, berarti server PostgreSQL berjalan dengan baik");
                         connection.Close();
                     }
                 }
@@ -174,7 +174,7 @@ namespace ParkingOut.Utils
                         _logger.Error("PostgreSQL server tidak berjalan di port 5432. Periksa apakah service aktif.");
                         throw new Exception("PostgreSQL server tidak berjalan di port 5432. Pastikan service PostgreSQL aktif.");
                     }
-                    else if (npgEx.Message.Contains("password authentication failed"))
+                    else if (npgEx.Message.Contains("password authentication"))
                     {
                         _logger.Error("Password untuk user postgres salah. Gunakan password yang benar.");
                         throw new Exception("Password untuk user postgres salah. Silakan reset password PostgreSQL atau gunakan password yang benar.");
@@ -189,19 +189,19 @@ namespace ParkingOut.Utils
                     using (var connection = new NpgsqlConnection(defaultConn))
                     {
                         connection.Open();
-                        _logger.Information("Koneksi ke database postgres berhasil");
+                        _logger.LogInfo("Koneksi ke database postgres berhasil");
                         
                         using (var command = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname = 'parkirdb'", connection))
                         {
                             var result = command.ExecuteScalar();
                             if (result == null || result == DBNull.Value)
                             {
-                                _logger.Information("Membuat database parkirdb...");
+                                _logger.LogInfo("Membuat database parkirdb...");
                                 using (var createCmd = new NpgsqlCommand("CREATE DATABASE parkirdb", connection))
                                 {
                                     try {
                                         createCmd.ExecuteNonQuery();
-                                        _logger.Information("Database parkirdb berhasil dibuat");
+                                        _logger.LogInfo("Database parkirdb berhasil dibuat");
                                     }
                                     catch (Exception createEx) {
                                         _logger.Error($"Gagal membuat database parkirdb: {createEx.Message}");
@@ -211,7 +211,7 @@ namespace ParkingOut.Utils
                             }
                             else
                             {
-                                _logger.Information("Database parkirdb sudah ada");
+                                _logger.LogInfo("Database parkirdb sudah ada");
                             }
                         }
                     }
@@ -224,14 +224,14 @@ namespace ParkingOut.Utils
                 
                 // Set final connection string and verify
                 _connectionString = "Host=localhost;Port=5432;Database=parkirdb;Username=postgres;Password=root@rsi;";
-                _logger.Information("Mencoba koneksi akhir ke parkirdb...");
+                _logger.LogInfo("Mencoba koneksi akhir ke parkirdb...");
                 if (!TestConnection(out errorMsg))
                 {
                     throw new Exception($"Gagal terhubung ke parkirdb setelah pembuatan: {errorMsg}");
                 }
                 
                 // Ensure schema is applied
-                _logger.Information("Memastikan struktur database untuk parkirdb...");
+                _logger.LogInfo("Memastikan struktur database untuk parkirdb...");
                 if (!EnsureDatabaseStructure())
                 {
                     throw new Exception("Gagal menginisialisasi struktur database untuk parkirdb");
@@ -289,7 +289,7 @@ namespace ParkingOut.Utils
                 
                 if (_isConnected)
                 {
-                    _logger.Information("WebSocket connection established");
+                    _logger.LogInfo("WebSocket connection established");
                     
                     // Start receiving messages in background
                     _ = ReceiveWebSocketMessagesAsync();
@@ -320,7 +320,7 @@ namespace ParkingOut.Utils
                     {
                         await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                         _isConnected = false;
-                        _logger.Information("WebSocket connection closed");
+                        _logger.LogInfo("WebSocket connection closed");
                         break;
                     }
                     
@@ -471,14 +471,14 @@ namespace ParkingOut.Utils
                     return false;
                 }
 
-                _logger.Information($"Menguji koneksi dengan string: {_connectionString.Replace(GetPasswordFromConnectionString(), "****")}");
+                _logger.LogInfo($"Menguji koneksi dengan string: {_connectionString.Replace(GetPasswordFromConnectionString(), "****")}");
                 
                 try
                 {
                     using (var connection = new NpgsqlConnection(_connectionString))
                     {
                         connection.Open();
-                        _logger.Information("Berhasil terhubung ke database");
+                        _logger.LogInfo("Berhasil terhubung ke database");
                         
                         // Check if 'settings' table exists using information_schema
                         using (var command = new NpgsqlCommand(
@@ -518,14 +518,14 @@ namespace ParkingOut.Utils
                                 }
                                 
                                 _logger.Warning(errorMessage);
-                                _logger.Information("Mencoba apply schema secara otomatis");
+                                _logger.LogInfo("Mencoba apply schema secara otomatis");
                                 
                                 // Mencoba import schema
                                 return false;
                             }
                         }
                         
-                        _logger.Information("Tes koneksi database berhasil");
+                        _logger.LogInfo("Tes koneksi database berhasil");
                         errorMessage = string.Empty;
                         return true;
                     }
@@ -567,9 +567,6 @@ namespace ParkingOut.Utils
         /// <summary>
         /// Tests a connection with a specific connection string
         /// </summary>
-        /// <param name="connectionString">The connection string to test</param>
-        /// <param name="errorMessage">Error message if connection fails</param>
-        /// <returns>True if connection succeeds, otherwise false</returns>
         public static bool TestConnectionWithString(string connectionString, out string errorMessage)
         {
             try
@@ -698,17 +695,8 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
         {
             try
             {
-                string dbName = "";
-                string[] parts = _connectionString.Split(';');
-                foreach (string part in parts)
-                {
-                    if (part.Trim().StartsWith("Database=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        dbName = part.Substring(9);
-                        break;
-                    }
-                }
-                return dbName;
+                var builder = new NpgsqlConnectionStringBuilder(_connectionString);
+                return builder.Database;
             }
             catch
             {
@@ -850,7 +838,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                 
                 // Convert MySQL query to PostgreSQL query
                 sql = ConvertMySqlQueryToPgSql(sql);
-                logger.Debug($"Executing query: {sql}");
+                logger.LogInfo($"Executing query: {sql}");
 
                 using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
                 {
@@ -867,7 +855,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                logger.Error($"Database error executing query: {ex.Message}", ex);
+                logger.LogError($"Database error executing query: {ex.Message}", ex);
                 throw;
             }
 
@@ -942,11 +930,11 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                             command.Parameters.Add(npgParam);
                             
                             // Log for debugging
-                            _logger.Debug($"Added parameter {npgParam.ParameterName}: {(param.Value ?? "NULL")}");
+                            _logger.LogInfo($"Added parameter {npgParam.ParameterName}: {(param.Value ?? "NULL")}");
                         }
                         
                         // Log the final SQL and parameter count for debugging
-                        _logger.Debug($"Executing SQL: {sql} with {command.Parameters.Count} parameters");
+                        _logger.LogInfo($"Executing SQL: {sql} with {command.Parameters.Count} parameters");
 
                         DataTable result = new DataTable();
                         using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
@@ -959,7 +947,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error executing query with parameters: {ex.Message} | SQL: {sql}", ex);
+                _logger.LogError($"Error executing query with parameters: {sql}", ex);
                 throw;
             }
         }
@@ -991,7 +979,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"Error executing scalar query via WebSocket: {sql}", ex);
+                    _logger.LogError($"Error executing scalar query via WebSocket: {sql}", ex);
                     throw;
                 }
             }
@@ -1016,7 +1004,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error executing scalar query: {sql}", ex);
+                _logger.LogError($"Error executing scalar query: {sql}", ex);
                 throw;
             }
         }
@@ -1039,7 +1027,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Failed to check if table {tableName} exists", ex);
+                _logger.LogError($"Failed to check if table {tableName} exists", ex);
                 return false;
             }
         }
@@ -1048,32 +1036,32 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
         {
             try
             {
-                _logger.Information("Memulai inisialisasi struktur database...");
+                _logger.LogInfo("Memulai inisialisasi struktur database...");
                 
                 // Try to use PostgreSQL schema first
                 string postgresSchemaPath = Path.Combine(Application.StartupPath, "Database", "schema_postgresql.sql");
-                _logger.Information($"Mencari file schema di: {postgresSchemaPath}");
+                _logger.LogInfo($"Mencari file schema di: {postgresSchemaPath}");
                 
                 // Fall back to generic schema if PostgreSQL-specific doesn't exist
                 if (!File.Exists(postgresSchemaPath))
                 {
                     _logger.Warning($"File schema PostgreSQL tidak ditemukan di {postgresSchemaPath}");
                     postgresSchemaPath = Path.Combine(Application.StartupPath, "Database", "schema.sql");
-                    _logger.Information($"Mencoba file schema generic di: {postgresSchemaPath}");
+                    _logger.LogInfo($"Mencoba file schema generic di: {postgresSchemaPath}");
                 }
                 
                 if (File.Exists(postgresSchemaPath))
                 {
-                    _logger.Information($"File schema ditemukan: {postgresSchemaPath}");
+                    _logger.LogInfo($"File schema ditemukan: {postgresSchemaPath}");
                     string schemaSql = File.ReadAllText(postgresSchemaPath);
                     
                     if (string.IsNullOrWhiteSpace(schemaSql))
                     {
-                        _logger.Error("File schema kosong");
+                        _logger.LogError("File schema kosong");
                         return false;
                     }
                     
-                    _logger.Information($"Memulai eksekusi script schema ({schemaSql.Length} karakter)...");
+                    _logger.LogInfo($"Memulai eksekusi script schema ({schemaSql.Length} karakter)...");
                     
                     // Execute the entire script as a single command
                     using (var connection = new NpgsqlConnection(_connectionString))
@@ -1106,18 +1094,18 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                         bool tablesExist = VerifyRequiredTablesExist(connection);
                         if (!tablesExist)
                         {
-                            _logger.Error("Schema berhasil dieksekusi tetapi tabel yang dibutuhkan tidak ditemukan");
+                            _logger.LogError("Schema berhasil dieksekusi tetapi tabel yang dibutuhkan tidak ditemukan");
                             return false;
                         }
                         
-                        _logger.Information("Database structure initialized successfully");
+                        _logger.LogInfo("Database structure initialized successfully");
                     }
                     
                     return true;
                 }
                 else
                 {
-                    _logger.Error($"File schema tidak ditemukan di {postgresSchemaPath}");
+                    _logger.LogError($"File schema tidak ditemukan di {postgresSchemaPath}");
                     
                     // Coba buat schema minimal untuk tabel settings jika tidak ada
                     _logger.Warning("Mencoba membuat tabel settings minimal...");
@@ -1143,21 +1131,21 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                             ", connection))
                             {
                                 command.ExecuteNonQuery();
-                                _logger.Information("Tabel settings minimal berhasil dibuat");
+                                _logger.LogInfo("Tabel settings minimal berhasil dibuat");
                                 return true;
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error($"Gagal membuat tabel settings minimal: {ex.Message}", ex);
+                        _logger.LogError($"Gagal membuat tabel settings minimal: {ex.Message}", ex);
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error saat menginisialisasi struktur database: {ex.Message}", ex);
+                _logger.LogError($"Error saat menginisialisasi struktur database: {ex.Message}", ex);
                 return false;
             }
         }
@@ -1219,7 +1207,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                     var result = command.ExecuteScalar();
                     if (result == null || result == DBNull.Value)
                     {
-                        _logger.Error($"Table {table} doesn't exist after schema application");
+                        _logger.LogError($"Table {table} doesn't exist after schema application");
                         return false;
                     }
                 }
@@ -1268,7 +1256,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting data from table {tableName}", ex);
+                _logger.LogError($"Error getting data from table {tableName}", ex);
                 throw;
             }
         }
@@ -1305,7 +1293,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error executing query with parameters: {sqlQuery}", ex);
+                _logger.LogError($"Error executing query with parameters: {sqlQuery}", ex);
                 throw;
             }
         }
@@ -1319,7 +1307,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error loading network settings: {ex.Message}", ex);
+                _logger.LogError($"Error loading network settings: {ex.Message}", ex);
                 // Return empty DataTable instead of throwing
                 return new DataTable();
             }
@@ -1337,7 +1325,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error converting network settings to object: {ex.Message}", ex);
+                _logger.LogError($"Error converting network settings to object: {ex.Message}", ex);
                 // Return default settings
                 return new ParkingOut.Models.NetworkSettings();
             }
@@ -1355,7 +1343,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error saving setting {key}: {ex.Message}", ex);
+                _logger.LogError($"Error saving setting {key}: {ex.Message}", ex);
                 return false;
             }
         }
@@ -1370,7 +1358,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error getting setting {key}: {ex.Message}", ex);
+                _logger.LogError($"Error getting setting {key}: {ex.Message}", ex);
                 return defaultValue;
             }
         }
@@ -1399,7 +1387,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                     // Column doesn't exist, add it
                     string sql = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnDefinition}";
                     ExecuteNonQuery(sql);
-                    _logger.Information($"Added column {columnName} to table {tableName}");
+                    _logger.LogInfo($"Added column {columnName} to table {tableName}");
                     return true;
                 }
                 
@@ -1407,7 +1395,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error adding column {columnName} to table {tableName}", ex);
+                _logger.LogError($"Error adding column {columnName} to table {tableName}", ex);
                 return false;
             }
         }
@@ -1433,7 +1421,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
         public static void SetConnectionString(string connectionString)
         {
             _connectionString = connectionString;
-            _logger.Information($"Connection string updated");
+            _logger.LogInfo($"Connection string updated");
         }
 
         public static DataTable ExecuteQuery(string query, params NpgsqlParameter[] parameters)
@@ -1455,29 +1443,16 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                         adapter.Fill(dataTable);
                     }
                 }
-                _logger.Debug($"Query executed successfully: {query}");
+                _logger.LogInfo($"Query executed successfully: {query}");
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error executing query: {query}", ex);
+                _logger.LogError($"Error executing query: {query}", ex);
                 throw;
             }
             return dataTable;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the database is available
-        /// </summary>
-        public static bool IsDatabaseAvailable { get; private set; } = false;
-
-        /// <summary>
-        /// Gets the last error message encountered during database initialization
-        /// </summary>
-        public static string LastError { get; private set; } = null;
-
-        /// <summary>
-        /// Returns whether the database has been successfully initialized (backward compatibility)
-        /// </summary>
         public static bool IsDatabaseInitialized => IsDatabaseAvailable;
 
         // Helper method to get database name from connection string
@@ -1524,7 +1499,7 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
             
             try
             {
-                localLogger.Debug($"Original SQL: {sql}");
+                localLogger.LogInfo($"Original SQL: {sql}");
                 
                 // PostgreSQL uses double quotes for identifiers while MySQL uses backticks
                 // Replace backticks with double quotes
@@ -1631,13 +1606,13 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                 sql = sql.Replace("t_member", "m_member");
                 
                 // Add debug logging for the adapted query
-                localLogger.Debug($"Adapted SQL for PostgreSQL: {sql}");
+                localLogger.LogInfo($"Adapted SQL for PostgreSQL: {sql}");
                 
                 return sql;
             }
             catch (Exception ex)
             {
-                localLogger.Error($"Error adapting query for PostgreSQL: {ex.Message}");
+                localLogger.LogError($"Error adapting query for PostgreSQL: {ex.Message}");
                 return sql;
             }
         }
@@ -1677,13 +1652,13 @@ VALUES ('admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720
                 query = query.Replace("IFNULL(", "COALESCE(");
 
                 // Log the converted query
-                logger.Debug($"Converted query: {query}");
+                logger.LogInfo($"Converted query: {query}");
 
                 return query;
             }
             catch (Exception ex)
             {
-                logger.Error($"Error converting MySQL query to PostgreSQL: {ex.Message}", ex);
+                logger.LogError($"Error converting MySQL query to PostgreSQL: {ex.Message}", ex);
                 return query; // Return original query if conversion fails
             }
         }
