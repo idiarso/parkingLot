@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ParkingLotApp.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ParkingLotApp.Views.VehicleExitView"
+             x:DataType="vm:VehicleExitViewModel">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Vehicle Exit" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <!-- Main Content -->
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Search Section -->
+                <StackPanel Grid.Row="0" Spacing="15">
+                    <StackPanel>
+                        <TextBlock Text="Vehicle Number *" FontWeight="SemiBold"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" 
+                                    Text="{Binding SearchVehicleNumber}"
+                                    Watermark="Enter vehicle number"
+                                    IsEnabled="{Binding !IsProcessing}"/>
+                            <Button Grid.Column="1" 
+                                    Content="Search"
+                                    Command="{Binding SearchCommand}"
+                                    IsEnabled="{Binding !IsProcessing}"
+                                    Classes="accent"
+                                    Margin="10,0,0,0"/>
+                            <Button Grid.Column="2" 
+                                    Content="Clear"
+                                    Command="{Binding ClearCommand}"
+                                    IsEnabled="{Binding !IsProcessing}"
+                                    Margin="10,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Status Message -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                            IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                            Foreground="{Binding StatusMessage, Converter={StaticResource MessageColorConverter}}"
+                            TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <!-- Vehicle Details -->
+                <Border Grid.Row="1" 
+                        IsVisible="{Binding HasVehicleFound}"
+                        BorderBrush="LightGray"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Margin="0,20,0,0"
+                        Padding="20">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="Vehicle Details" FontSize="18" FontWeight="Bold"/>
+
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="0,10">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Entry Time:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentParking.Time, StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}" Margin="10,0,0,0"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Vehicle Type:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentParking.VehicleType}" Margin="10,0,0,0"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Duration:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Duration}" Margin="10,0,0,0"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Parking Fee:" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CalculatedFee, StringFormat={}Rp {0:N0}}" Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <Button Content="Process Exit"
+                                Command="{Binding ProcessExitCommand}"
+                                IsEnabled="{Binding !IsProcessing}"
+                                Classes="accent"
+                                HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Margin="0,20,0,0">
+            <TextBlock Text="* Required fields" FontStyle="Italic"/>
+        </StackPanel>
+    </Grid>
+</UserControl> 

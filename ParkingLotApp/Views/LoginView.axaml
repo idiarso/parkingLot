@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ParkingLotApp.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ParkingLotApp.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+
+    <Grid Background="#1E2A31">
+        <Border Width="400" 
+                Height="450"
+                Background="#263238"
+                CornerRadius="8"
+                BoxShadow="0 4 8 0 #0F1518">
+            <Grid RowDefinitions="Auto,*,Auto" Margin="40">
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,40">
+                    <TextBlock Text="Welcome Back"
+                             FontSize="28"
+                             FontWeight="Bold"
+                             Foreground="#ECEFF1"
+                             HorizontalAlignment="Center"/>
+                    <TextBlock Text="Please sign in to continue"
+                             FontSize="14"
+                             Foreground="#78909C"
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Login Form -->
+                <StackPanel Grid.Row="1" Spacing="20">
+                    <!-- Username -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Username"
+                                 Foreground="#ECEFF1"/>
+                        <TextBox Text="{Binding Username}"
+                                Watermark="Enter your username"
+                                IsEnabled="{Binding !IsProcessing}"/>
+                    </StackPanel>
+
+                    <!-- Password -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Password"
+                                 Foreground="#ECEFF1"/>
+                        <TextBox Text="{Binding Password}"
+                                PasswordChar="•"
+                                Watermark="Enter your password"
+                                IsEnabled="{Binding !IsProcessing}"/>
+                    </StackPanel>
+
+                    <!-- Error Message -->
+                    <TextBlock Text="{Binding ErrorMessage}"
+                             Foreground="#FF5252"
+                             TextWrapping="Wrap"
+                             IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+                    <!-- Login Button -->
+                    <Button Content="Sign In"
+                            Command="{Binding LoginCommand}"
+                            IsEnabled="{Binding !IsProcessing}"
+                            HorizontalAlignment="Stretch"
+                            Height="40"
+                            Classes="accent"/>
+
+                    <!-- Loading Indicator -->
+                    <ProgressBar IsIndeterminate="True"
+                               IsVisible="{Binding IsProcessing}"
+                               Height="2"
+                               Margin="0,10"/>
+                </StackPanel>
+
+                <!-- Footer -->
+                <TextBlock Grid.Row="2"
+                         Text="Parking Lot Management System"
+                         Foreground="#78909C"
+                         FontSize="12"
+                         HorizontalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl> 

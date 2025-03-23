@@ -1,0 +1,103 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ParkingLotApp.ViewModels"
+        xmlns:views="using:ParkingLotApp.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="ParkingLotApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Parking Lot Management System"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="#151515"
+                    TintOpacity="1"
+                    MaterialOpacity="0.65" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+        <Grid ColumnDefinitions="Auto,*">
+            <!-- Only display navigation menu if not on login screen -->
+            <Border Grid.Column="0" 
+                    Width="250"
+                    Background="#263238"
+                    IsVisible="{Binding CurrentViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="20">
+                        <TextBlock Text="Parking Lot"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 Foreground="#ECEFF1"
+                                 Margin="0,0,0,20"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="5" Margin="10">
+                        <Button Content="Dashboard"
+                                Command="{Binding ShowDashboardCommand}"
+                                HorizontalAlignment="Stretch"/>
+                        <Button Content="Vehicle Entry"
+                                Command="{Binding ShowVehicleEntryCommand}"
+                                HorizontalAlignment="Stretch"/>
+                        <Button Content="Vehicle Exit"
+                                Command="{Binding ShowVehicleExitCommand}"
+                                HorizontalAlignment="Stretch"/>
+                        <Button Content="Reports"
+                                Command="{Binding ShowReportsCommand}"
+                                HorizontalAlignment="Stretch"/>
+                        <Button Content="User Management"
+                                Command="{Binding ShowUserManagementCommand}"
+                                HorizontalAlignment="Stretch"/>
+                        <Button Content="Settings"
+                                Command="{Binding ShowSettingsCommand}"
+                                HorizontalAlignment="Stretch"/>
+                        <Button Content="Logout"
+                                Command="{Binding LogoutCommand}"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Main Content Area -->
+            <ContentControl Grid.Column="1" 
+                          Content="{Binding CurrentViewModel}">
+                <ContentControl.DataTemplates>
+                    <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+                        <views:LoginView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                        <views:DashboardView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:VehicleEntryViewModel}">
+                        <views:VehicleEntryView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:VehicleExitViewModel}">
+                        <views:VehicleExitView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:ReportsViewModel}">
+                        <views:ReportsView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                        <views:SettingsView />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:UserManagementViewModel}">
+                        <views:UserManagementView />
+                    </DataTemplate>
+                </ContentControl.DataTemplates>
+            </ContentControl>
+        </Grid>
+    </Panel>
+</Window>

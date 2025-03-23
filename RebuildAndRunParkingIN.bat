@@ -15,7 +15,17 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo Step 2: Cleaning previous build...
+echo Step 2: Verifying database connection...
+psql -h localhost -p 5432 -U postgres -d parkirdb -c "\q"
+if %ERRORLEVEL% NEQ 0 (
+    echo Error: Could not connect to database
+    echo Please ensure PostgreSQL is running and database exists
+    goto :error
+)
+echo Database connection verified successfully.
+
+echo.
+echo Step 3: Cleaning previous build...
 dotnet clean
 if %ERRORLEVEL% NEQ 0 (
     echo Error: Clean failed
@@ -24,7 +34,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo Previous build files cleaned.
 
 echo.
-echo Step 3: Building ParkingIN project...
+echo Step 4: Building ParkingIN project...
 dotnet build --configuration Release
 if %ERRORLEVEL% NEQ 0 (
     echo Error: Build failed
@@ -33,7 +43,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo Build completed successfully.
 
 echo.
-echo Step 4: Creating/Updating config file...
+echo Step 5: Creating/Updating config file...
 (
     echo ^<?xml version="1.0" encoding="utf-8" ?^>
     echo ^<configuration^>
@@ -45,7 +55,7 @@ echo Step 4: Creating/Updating config file...
 echo Config file updated successfully.
 
 echo.
-echo Step 5: Starting application...
+echo Step 6: Starting application...
 start "" "%PROJECT_DIR%\bin\Release\net6.0-windows\ParkingIN.exe"
 if %ERRORLEVEL% NEQ 0 (
     echo Error: Could not start application

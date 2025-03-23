@@ -1,0 +1,143 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ParkingLotApp.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="ParkingLotApp.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Settings" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <!-- Settings Content -->
+        <TabControl Grid.Row="1">
+            <!-- General Settings -->
+            <TabItem Header="General Settings">
+                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Margin="0,10">
+                    <ScrollViewer>
+                        <StackPanel Margin="20" Spacing="15">
+                            <!-- Parking Spots -->
+                            <StackPanel>
+                                <TextBlock Text="Total Parking Spots" FontWeight="SemiBold"/>
+                                <NumericUpDown Value="{Binding TotalSpots}"
+                                             Minimum="1"
+                                             Maximum="1000"
+                                             IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <!-- Vehicle Rates -->
+                            <StackPanel>
+                                <TextBlock Text="Car Rate (per hour)" FontWeight="SemiBold"/>
+                                <NumericUpDown Value="{Binding CarRate}"
+                                             Minimum="0"
+                                             Increment="1000"
+                                             FormatString="Rp {0:N0}"
+                                             IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Motorcycle Rate (per hour)" FontWeight="SemiBold"/>
+                                <NumericUpDown Value="{Binding MotorcycleRate}"
+                                             Minimum="0"
+                                             Increment="1000"
+                                             FormatString="Rp {0:N0}"
+                                             IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Truck Rate (per hour)" FontWeight="SemiBold"/>
+                                <NumericUpDown Value="{Binding TruckRate}"
+                                             Minimum="0"
+                                             Increment="1000"
+                                             FormatString="Rp {0:N0}"
+                                             IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Bus Rate (per hour)" FontWeight="SemiBold"/>
+                                <NumericUpDown Value="{Binding BusRate}"
+                                             Minimum="0"
+                                             Increment="1000"
+                                             FormatString="Rp {0:N0}"
+                                             IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <!-- Company Info -->
+                            <StackPanel>
+                                <TextBlock Text="Company Name" FontWeight="SemiBold"/>
+                                <TextBox Text="{Binding CompanyName}"
+                                       IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Company Address" FontWeight="SemiBold"/>
+                                <TextBox Text="{Binding CompanyAddress}"
+                                       IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Report Footer" FontWeight="SemiBold"/>
+                                <TextBox Text="{Binding ReportFooter}"
+                                       IsEnabled="{Binding !IsBusy}"/>
+                            </StackPanel>
+
+                            <!-- Save Button -->
+                            <Button Content="Save Settings"
+                                    Command="{Binding SaveSettingsCommand}"
+                                    IsEnabled="{Binding !IsBusy}"
+                                    Classes="accent"
+                                    HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+
+            <!-- Change Password -->
+            <TabItem Header="Change Password">
+                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Margin="0,10">
+                    <StackPanel Margin="20" Spacing="15">
+                        <StackPanel>
+                            <TextBlock Text="Current Password" FontWeight="SemiBold"/>
+                            <TextBox PasswordChar="*"
+                                    Text="{Binding CurrentPassword}"
+                                    IsEnabled="{Binding !IsBusy}"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="New Password" FontWeight="SemiBold"/>
+                            <TextBox PasswordChar="*"
+                                    Text="{Binding NewPassword}"
+                                    IsEnabled="{Binding !IsBusy}"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="Confirm New Password" FontWeight="SemiBold"/>
+                            <TextBox PasswordChar="*"
+                                    Text="{Binding ConfirmPassword}"
+                                    IsEnabled="{Binding !IsBusy}"/>
+                        </StackPanel>
+
+                        <Button Content="Change Password"
+                                Command="{Binding ChangePasswordCommand}"
+                                IsEnabled="{Binding !IsBusy}"
+                                Classes="accent"
+                                HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status -->
+        <TextBlock Grid.Row="2" 
+                   Text="{Binding StatusMessage}"
+                   Margin="0,10,0,0"
+                   Foreground="{Binding StatusMessage, Converter={StaticResource MessageColorConverter}}"/>
+    </Grid>
+</UserControl> 

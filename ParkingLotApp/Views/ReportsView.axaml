@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ParkingLotApp.ViewModels"
+             xmlns:conv="using:ParkingLotApp.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ParkingLotApp.Views.ReportsView"
+             x:DataType="vm:ReportsViewModel">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
+        <!-- Report Controls -->
+        <StackPanel Grid.Row="0" Spacing="10">
+            <ComboBox ItemsSource="{Binding ReportTypes}"
+                      SelectedItem="{Binding SelectedReportType}"
+                      Width="200"
+                      HorizontalAlignment="Left"/>
+
+            <Grid ColumnDefinitions="Auto,*,Auto,*,Auto">
+                <TextBlock Text="Start Date:" VerticalAlignment="Center"/>
+                <DatePicker Grid.Column="1" SelectedDate="{Binding StartDate}" Margin="10,0"/>
+                
+                <TextBlock Grid.Column="2" Text="End Date:" VerticalAlignment="Center"/>
+                <DatePicker Grid.Column="3" SelectedDate="{Binding EndDate}" Margin="10,0"/>
+                
+                <Button Grid.Column="4" 
+                        Command="{Binding GenerateReportCommand}"
+                        Content="Generate Report"
+                        IsEnabled="{Binding !IsGenerating}"/>
+            </Grid>
+        </StackPanel>
+
+        <!-- Status Message -->
+        <TextBlock Grid.Row="1" 
+                   Text="{Binding StatusMessage}" 
+                   Margin="0,10"
+                   Foreground="{Binding StatusMessage, Converter={StaticResource MessageColorConverter}}"/>
+
+        <!-- Report Content -->
+        <ScrollViewer Grid.Row="2" Margin="0,10">
+            <Grid>
+                <!-- Activity Report -->
+                <StackPanel IsVisible="{Binding SelectedReportType, Converter={StaticResource ReportTypeVisibilityConverter}, ConverterParameter='Activity Report'}"
+                          Spacing="20">
+                    <TextBlock Text="Parking Activity" FontWeight="Bold"/>
+                    <DataGrid ItemsSource="{Binding ActivityData}"
+                             AutoGenerateColumns="False"
+                             IsReadOnly="True"
+                             GridLinesVisibility="All">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="150"/>
+                            <DataGridTextColumn Header="Vehicle Number" Binding="{Binding VehicleNumber}" Width="150"/>
+                            <DataGridTextColumn Header="Vehicle Type" Binding="{Binding VehicleType}" Width="150"/>
+                            <DataGridTextColumn Header="Action" Binding="{Binding Action}" Width="150"/>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" Width="150"/>
+                            <DataGridTextColumn Header="Fee" Binding="{Binding Fee, StringFormat='{}Rp {0:N0}'}" Width="150"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+
+                <!-- Revenue Report -->
+                <StackPanel IsVisible="{Binding SelectedReportType, Converter={StaticResource ReportTypeVisibilityConverter}, ConverterParameter='Revenue Report'}"
+                          Spacing="20">
+                    <TextBlock Text="Daily Revenue" FontWeight="Bold"/>
+                    <DataGrid ItemsSource="{Binding RevenueData}"
+                             AutoGenerateColumns="True"
+                             IsReadOnly="True"
+                             GridLinesVisibility="All"/>
+                </StackPanel>
+
+                <!-- Occupancy Report -->
+                <StackPanel IsVisible="{Binding SelectedReportType, Converter={StaticResource ReportTypeVisibilityConverter}, ConverterParameter='Occupancy Report'}"
+                          Spacing="20">
+                    <TextBlock Text="Hourly Occupancy" FontWeight="Bold"/>
+                    <DataGrid ItemsSource="{Binding OccupancyData}"
+                             AutoGenerateColumns="True"
+                             IsReadOnly="True"
+                             GridLinesVisibility="All"/>
+                </StackPanel>
+
+                <!-- Summary Report -->
+                <StackPanel IsVisible="{Binding SelectedReportType, Converter={StaticResource ReportTypeVisibilityConverter}, ConverterParameter='Summary Report'}"
+                          Spacing="20">
+                    <TextBlock Text="Summary Statistics" FontWeight="Bold"/>
+                    <DataGrid ItemsSource="{Binding SummaryData}"
+                             AutoGenerateColumns="True"
+                             IsReadOnly="True"
+                             GridLinesVisibility="All"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Export Button -->
+        <Button Grid.Row="3" 
+                Command="{Binding ExportReportCommand}"
+                Content="Export Report"
+                HorizontalAlignment="Right"
+                Margin="0,10,0,0"/>
+    </Grid>
+</UserControl> 

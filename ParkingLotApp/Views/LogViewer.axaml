@@ -1,0 +1,23 @@
+<StackPanel xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ParkingLotApp.ViewModels"
+             x:Class="ParkingLotApp.Views.LogViewer"
+             x:DataType="vm:LogViewerViewModel">
+    <Border Background="#1E1E1E" 
+            CornerRadius="4" 
+            Padding="10"
+            Margin="5">
+        <ScrollViewer MaxHeight="300">
+            <ItemsControl ItemsSource="{Binding LogEntries}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}"
+                                 Foreground="{Binding Converter={StaticResource LogLevelColorConverter}}"
+                                 FontFamily="Consolas"
+                                 Margin="0,2"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Border>
+</StackPanel> 

@@ -1,0 +1,150 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ParkingLotApp.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="ParkingLotApp.Views.UserManagementView"
+             x:DataType="vm:UserManagementViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <TabControl Grid.Row="0" SelectedItem="{Binding SelectedTab}">
+            <TabItem Header="Users">
+                <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*" Margin="10">
+                    <!-- User List -->
+                    <DataGrid Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+                              ItemsSource="{Binding Users}"
+                              SelectedItem="{Binding SelectedUser}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              Margin="0,0,10,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Username" Binding="{Binding Username}" />
+                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" />
+                            <DataGridTextColumn Header="Role" Binding="{Binding Role}" />
+                            <DataGridTextColumn Header="Last Login" Binding="{Binding LastLoginAt}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Add User Form -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="10">
+                        <TextBlock Text="Add New User" FontWeight="Bold" />
+                        <TextBox Text="{Binding Username}" Watermark="Username" />
+                        <TextBox Text="{Binding Email}" Watermark="Email" />
+                        <TextBox Text="{Binding FirstName}" Watermark="First Name" />
+                        <TextBox Text="{Binding LastName}" Watermark="Last Name" />
+                        <TextBox Text="{Binding Password}" PasswordChar="*" Watermark="Password" />
+                        <ComboBox ItemsSource="{Binding Roles}"
+                                 SelectedItem="{Binding Role}"
+                                 HorizontalAlignment="Stretch" />
+                        <Button Content="Add User"
+                                Command="{Binding CreateUserCommand}"
+                                HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <!-- User Actions -->
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="10">
+                        <TextBlock Text="Selected User Actions" FontWeight="Bold" />
+                        <Button Content="Update User"
+                                Command="{Binding UpdateUserCommand}"
+                                HorizontalAlignment="Stretch" />
+                        <Button Content="Delete User"
+                                Command="{Binding DeleteUserCommand}"
+                                HorizontalAlignment="Stretch"
+                                Classes="danger" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Shifts">
+                <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*" Margin="10">
+                    <!-- Shift List -->
+                    <DataGrid Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+                              ItemsSource="{Binding Shifts}"
+                              SelectedItem="{Binding SelectedShift}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              Margin="0,0,10,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                            <DataGridTextColumn Header="Start Time" Binding="{Binding StartTime}" />
+                            <DataGridTextColumn Header="End Time" Binding="{Binding EndTime}" />
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Add Shift Form -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="10">
+                        <TextBlock Text="Add New Shift" FontWeight="Bold" />
+                        <TextBox Text="{Binding NewShiftName}" Watermark="Shift Name" />
+                        <TimePicker SelectedTime="{Binding NewShiftStartTime}" />
+                        <TimePicker SelectedTime="{Binding NewShiftEndTime}" />
+                        <TextBox Text="{Binding NewShiftDescription}" Watermark="Description" />
+                        <Button Content="Add Shift"
+                                Command="{Binding AddShiftCommand}"
+                                HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <!-- Shift Actions -->
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="10">
+                        <TextBlock Text="Selected Shift Actions" FontWeight="Bold" />
+                        <Button Content="Update Shift"
+                                Command="{Binding UpdateShiftCommand}"
+                                HorizontalAlignment="Stretch" />
+                        <Button Content="Delete Shift"
+                                Command="{Binding DeleteShiftCommand}"
+                                HorizontalAlignment="Stretch"
+                                Classes="danger" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Shift Assignments">
+                <Grid RowDefinitions="Auto,*" Margin="10">
+                    <!-- Assignment Controls -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                        <DatePicker SelectedDate="{Binding SelectedDate}" />
+                        <ComboBox ItemsSource="{Binding Users}"
+                                 SelectedItem="{Binding SelectedOperator}"
+                                 DisplayMemberBinding="{Binding DisplayName}"
+                                 Width="200"
+                                 PlaceholderText="Select Operator" />
+                        <ComboBox ItemsSource="{Binding Shifts}"
+                                 SelectedItem="{Binding SelectedAssignShift}"
+                                 DisplayMemberBinding="{Binding Name}"
+                                 Width="200"
+                                 PlaceholderText="Select Shift" />
+                        <Button Content="Assign Shift"
+                                Command="{Binding AssignShiftCommand}" />
+                        <Button Content="Remove Assignment"
+                                Command="{Binding RemoveShiftAssignmentCommand}"
+                                Classes="danger" />
+                    </StackPanel>
+
+                    <!-- Assignment List -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding UserShifts}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Operator" Binding="{Binding User.DisplayName}" />
+                            <DataGridTextColumn Header="Shift" Binding="{Binding Shift.Name}" />
+                            <DataGridTextColumn Header="Start Time" Binding="{Binding Shift.StartTime}" />
+                            <DataGridTextColumn Header="End Time" Binding="{Binding Shift.EndTime}" />
+                            <DataGridTextColumn Header="Date" Binding="{Binding AssignedDate, StringFormat=\{0:d\}}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto" Margin="10,5">
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" />
+                <ProgressBar Grid.Column="1" IsIndeterminate="True" Width="100" Height="2"
+                            IsVisible="{Binding IsProcessing}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl> 
